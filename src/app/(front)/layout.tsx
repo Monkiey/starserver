@@ -1,12 +1,10 @@
-import SiteFooter from '@/components/main/site-footer';
 import SiteHeader from '@/components/main/site-header';
 
 const FrontLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="min-h-screen">
+    <div className="relative min-h-screen overflow-hidden bg-background">
       <SiteHeader />
-      <main>{children}</main>
-      <SiteFooter />
+      <main className="relative z-10 pb-16">{children}</main>
     </div>
   );
 };
