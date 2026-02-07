@@ -10,7 +10,7 @@ import { MediaType, type Show } from '@/types';
 export const revalidate = 3600;
 
 export default async function MoviePage() {
-  const h1 = `${siteConfig.name} Movie`;
+  const h1 = `${siteConfig.name} Movies`;
   const requests: ShowRequest[] = [
     {
       title: 'Trending Now',
