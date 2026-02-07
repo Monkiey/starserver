@@ -12,7 +12,6 @@ import { getMobileDetect, getYear } from '@/lib/utils';
 import MovieService from '@/services/MovieService';
 import { useModalStore } from '@/stores/modal';
 import {
-  type KeyWord,
   MediaType,
   type Genre,
   type ShowWithGenreAndVideo,
@@ -62,9 +61,7 @@ const ShowModal = () => {
   const IS_MOBILE: boolean = isMobile();
 
   const [trailer, setTrailer] = React.useState('');
-  const [isPlaying, setPlaying] = React.useState(true);
   const [genres, setGenres] = React.useState<Genre[]>([]);
-  const [isAnime, setIsAnime] = React.useState<boolean>(false);
   const [isMuted, setIsMuted] = React.useState<boolean>(
     modalStore.firstLoad || IS_MOBILE,
   );
@@ -74,22 +71,7 @@ const ShowModal = () => {
   const youtubeRef = React.useRef(null);
   const imageRef = React.useRef<HTMLImageElement>(null);
 
-  // get trailer and genres of show
-  React.useEffect(() => {
-    if (modalStore.firstLoad || IS_MOBILE) {
-      setOptions((state: Record<string, object>) => ({
-        ...state,
-        playerVars: { ...state.playerVars, mute: 1 },
-      }));
-    }
-    void handleGetData();
-  }, []);
-
-  React.useEffect(() => {
-    setIsAnime(false);
-  }, [modalStore]);
-
-  const handleGetData = async () => {
+  const handleGetData = React.useCallback(async () => {
     const id: number | undefined = modalStore.show?.id;
     const type: string =
       modalStore.show?.media_type === MediaType.TV ? 'tv' : 'movie';
@@ -101,15 +83,6 @@ const ShowModal = () => {
       type,
     );
 
-    const keywords: KeyWord[] =
-      data?.keywords?.results || data?.keywords?.keywords;
-
-    if (keywords?.length) {
-      setIsAnime(
-        !!keywords.find((keyword: KeyWord) => keyword.name === 'anime'),
-      );
-    }
-
     if (data?.genres) {
       setGenres(data.genres);
     }
@@ -120,12 +93,23 @@ const ShowModal = () => {
       );
       if (result?.key) setTrailer(result.key);
     }
-  };
+  }, [modalStore.show]);
+
+  // get trailer and genres of show
+  React.useEffect(() => {
+    if (modalStore.firstLoad || IS_MOBILE) {
+      setOptions((state: Record<string, object>) => ({
+        ...state,
+        playerVars: { ...state.playerVars, mute: 1 },
+      }));
+    }
+    void handleGetData();
+  }, [IS_MOBILE, handleGetData, modalStore.firstLoad]);
 
   const handleCloseModal = () => {
     modalStore.reset();
     if (!modalStore.show || modalStore.firstLoad) {
-      window.history.pushState(null, '', '/home');
+      window.history.pushState(null, '', '/');
     } else {
       window.history.back();
     }
@@ -162,18 +146,9 @@ const ShowModal = () => {
   };
 
   const handleHref = (): string => {
-    const type = isAnime
-      ? 'anime'
-      : modalStore.show?.media_type === MediaType.MOVIE
-      ? 'movie'
-      : 'tv';
-    let id = `${modalStore.show?.id}`;
-    if (isAnime) {
-      const prefix: string =
-        modalStore.show?.media_type === MediaType.MOVIE ? 'm' : 't';
-      id = `${prefix}-${id}`;
-    }
-    return `/watch/${type}/${id}`;
+    const type =
+      modalStore.show?.media_type === MediaType.MOVIE ? 'movie' : 'tv';
+    return `/watch/${type}/${modalStore.show?.id}`;
   };
 
   return (
@@ -181,7 +156,7 @@ const ShowModal = () => {
       open={modalStore.open}
       onOpenChange={handleCloseModal}
       aria-label="Modal containing show's details">
-      <DialogContent className="w-full overflow-hidden rounded-md bg-zinc-900 p-0 text-left align-middle shadow-xl dark:bg-zinc-900 sm:max-w-3xl lg:max-w-4xl">
+      <DialogContent className="w-full overflow-hidden rounded-xl border border-border/60 bg-card p-0 text-left align-middle shadow-2xl sm:max-w-3xl lg:max-w-4xl">
         <div className="video-wrapper relative aspect-video">
           <CustomImage
             fill
@@ -217,7 +192,7 @@ const ShowModal = () => {
             <div className="flex items-center gap-2.5">
               <Link href={handleHref()}>
                 <Button
-                  aria-label={`${isPlaying ? 'Pause' : 'Play'} show`}
+                  aria-label="Play show"
                   className="group h-auto rounded py-1.5">
                   <>
                     <Icons.play
@@ -232,7 +207,7 @@ const ShowModal = () => {
             <Button
               aria-label={`${isMuted ? 'Unmute' : 'Mute'} video`}
               variant="ghost"
-              className="h-auto rounded-full bg-neutral-800 p-1.5 opacity-50 ring-1 ring-slate-400 hover:bg-neutral-800 hover:opacity-100 hover:ring-white focus:ring-offset-0 dark:bg-neutral-800 dark:hover:bg-neutral-800"
+              className="h-auto rounded-full bg-secondary/60 p-1.5 opacity-70 ring-1 ring-border hover:bg-secondary/80 hover:opacity-100 hover:ring-ring focus:ring-offset-0"
               onClick={handleChangeMute}>
               {isMuted ? (
                 <Icons.volumeMute className="h-6 w-6" aria-hidden="true" />
@@ -243,7 +218,7 @@ const ShowModal = () => {
           </div>
         </div>
         <div className="grid gap-2.5 px-10 pb-10">
-          <DialogTitle className="text-lg font-medium leading-6 text-slate-50 sm:text-xl">
+          <DialogTitle className="text-lg font-medium leading-6 text-foreground sm:text-xl">
             {modalStore.show?.title ?? modalStore.show?.name}
           </DialogTitle>
           <div className="flex items-center space-x-2 text-sm sm:text-base">

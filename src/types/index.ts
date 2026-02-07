@@ -4,7 +4,6 @@ export enum MediaType {
   ALL = 'all',
   TV = 'tv',
   MOVIE = 'movie',
-  ANIME = 'anime',
 }
 
 export type CategorizedShows = {
@@ -54,6 +53,15 @@ export type Show = {
   original_name?: string;
   keywords: KeyWordResponse;
   seasons: ISeason[];
+};
+
+export type ContinueWatchingEntry = Pick<
+  Show,
+  'id' | 'media_type' | 'title' | 'name' | 'poster_path' | 'backdrop_path'
+> & {
+  watchUrl: string;
+  lastWatchedAt: number;
+  playbackPosition?: number;
 };
 
 export type KeyWord = {

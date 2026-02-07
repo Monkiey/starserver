@@ -83,6 +83,16 @@ export function getNameFromShow(show: Show | null): string {
   return show?.name ?? show?.title ?? '';
 }
 
+export function filterSearchableShows(shows: Show[]): Show[] {
+  if (!Array.isArray(shows)) return [];
+
+  return shows.filter((show) => {
+    return (
+      show?.media_type === MediaType.MOVIE || show?.media_type === MediaType.TV
+    );
+  });
+}
+
 let timer: NodeJS.Timeout;
 export function debounce(
   func: (...args: (string | object)[]) => void,

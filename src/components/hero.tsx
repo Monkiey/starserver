@@ -1,7 +1,7 @@
 'use client';
 import { Icons } from '@/components/icons';
 import { Button } from '@/components/ui/button';
-import { getIdFromSlug, getNameFromShow, getSlug } from '@/lib/utils';
+import { getIdFromSlug } from '@/lib/utils';
 import MovieService from '@/services/MovieService';
 import { useModalStore } from '@/stores/modal';
 import { useSearchStore } from '@/stores/search';
@@ -10,49 +10,49 @@ import { type AxiosResponse } from 'axios';
 import Link from 'next/link';
 import React from 'react';
 import CustomImage from './custom-image';
-import { usePathname } from 'next/navigation';
 
 interface HeroProps {
   randomShow: Show | null;
 }
 
 const Hero = ({ randomShow }: HeroProps) => {
-  const path = usePathname();
+  const modalStore = useModalStore();
+  const searchStore = useSearchStore();
+
+  const handlePopstateEvent = React.useCallback(() => {
+    const pathname = window.location.pathname;
+    if (!/\d/.test(pathname)) {
+      modalStore.reset();
+      return;
+    }
+
+    const movieId: number = getIdFromSlug(pathname);
+    if (!movieId) {
+      return;
+    }
+
+    const findMovie: Promise<AxiosResponse<Show>> = pathname.includes(
+      '/tv-shows',
+    )
+      ? MovieService.findTvSeries(movieId)
+      : MovieService.findMovie(movieId);
+
+    findMovie
+      .then((response: AxiosResponse<Show>) => {
+        const { data } = response;
+        useModalStore.setState({ show: data, open: true, play: true });
+      })
+      .catch((error) => {
+        console.error(`findMovie: `, error);
+      });
+  }, [modalStore]);
+
   React.useEffect(() => {
     window.addEventListener('popstate', handlePopstateEvent, false);
     return () => {
       window.removeEventListener('popstate', handlePopstateEvent, false);
     };
-  }, []);
-
-  const handlePopstateEvent = () => {
-    const pathname = window.location.pathname;
-    if (!/\d/.test(pathname)) {
-      modalStore.reset();
-    } else if (/\d/.test(pathname)) {
-      const movieId: number = getIdFromSlug(pathname);
-      if (!movieId) {
-        return;
-      }
-      const findMovie: Promise<AxiosResponse<Show>> = pathname.includes(
-        '/tv-shows',
-      )
-        ? MovieService.findTvSeries(movieId)
-        : MovieService.findMovie(movieId);
-      findMovie
-        .then((response: AxiosResponse<Show>) => {
-          const { data } = response;
-          useModalStore.setState({ show: data, open: true, play: true });
-        })
-        .catch((error) => {
-          console.error(`findMovie: `, error);
-        });
-    }
-  };
-
-  // stores
-  const modalStore = useModalStore();
-  const searchStore = useSearchStore();
+  }, [handlePopstateEvent]);
 
   if (searchStore.query.length > 0) {
     return null;
@@ -62,87 +62,91 @@ const Hero = ({ randomShow }: HeroProps) => {
     if (!randomShow) {
       return '#';
     }
-    if (!path.includes('/anime')) {
-      const type = randomShow.media_type === MediaType.MOVIE ? 'movie' : 'tv';
-      return `/watch/${type}/${randomShow.id}`;
-    }
-    const prefix: string =
-      randomShow?.media_type === MediaType.MOVIE ? 'm' : 't';
-    const id = `${prefix}-${randomShow.id}`;
-    return `/watch/anime/${id}`;
+    const type = randomShow.media_type === MediaType.MOVIE ? 'movie' : 'tv';
+    return `/watch/${type}/${randomShow.id}`;
   };
 
+  const airDate = randomShow?.release_date ?? randomShow?.first_air_date;
+
   return (
-    <section aria-label="Hero" className="w-full">
+    <section
+      aria-label="Hero"
+      className="relative isolate -mt-16 flex min-h-screen items-end overflow-hidden px-[4%] pb-10 pt-28 sm:-mt-20 sm:pt-32 md:pt-36">
       {randomShow && (
         <>
-          <div className="absolute inset-0 z-0 h-[100vw] w-full sm:h-[56.25vw]">
+          <div className="absolute inset-0 -z-20">
             <CustomImage
               src={`https://image.tmdb.org/t/p/original${
                 randomShow?.backdrop_path ?? randomShow?.poster_path ?? ''
               }`}
-              alt={randomShow?.title ?? 'poster'}
-              className="-z-40 h-auto w-full object-cover"
-              sizes="(max-width: 768px) 50vw, (max-width: 1200px) 100vw, 33vw"
+              alt={randomShow?.title ?? randomShow?.name ?? 'poster'}
+              className="-z-40 h-auto w-full object-cover opacity-80"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 100vw"
               fill
               priority
             />
-            <div className="absolute bottom-0 left-0 right-0 top-0">
-              <div className="absolute bottom-[35%] left-[4%] top-0 z-10 flex w-[36%] flex-col justify-end space-y-2">
-                <h1 className="text-[3vw] font-bold">
-                  {randomShow?.title ?? randomShow?.name}
-                </h1>
-                <div className="flex space-x-2 text-[2vw] font-semibold md:text-[1.2vw]">
-                  <p className="text-green-600">
-                    {Math.round(randomShow?.vote_average * 10) ?? '-'}% Match
+            <div className="bg-black/35 absolute inset-x-[-22%] top-[-240px] h-[520px] blur-3xl" />
+            <div className="absolute inset-0 bg-black/25" />
+          </div>
+          <div className="dark:border-white/15 border-white/15 relative mx-auto flex w-full max-w-6xl flex-col gap-6 overflow-hidden rounded-[32px] border bg-black/60 p-6 text-white shadow-[0_30px_120px_-70px_rgba(0,0,0,0.9)] backdrop-blur-3xl transition sm:p-10">
+            <div
+              className="bg-white/8 pointer-events-none absolute inset-0"
+              aria-hidden="true"
+            />
+            <div
+              className="pointer-events-none absolute inset-0 bg-black/50"
+              aria-hidden="true"
+            />
+            <div className="relative z-10">
+              <div className="grid gap-6 lg:items-center">
+                <div className="space-y-4">
+                  <p className="text-xs uppercase tracking-[0.26em] text-white/60">
+                    Featured
                   </p>
-                  {/* <p className="text-gray-300">{randomShow?.release_date ?? "-"}</p> */}
-                  <p>{randomShow?.release_date ?? '-'}</p>
-                </div>
-                {/* <p className="line-clamp-4 text-sm text-gray-300 md:text-base"> */}
-                <p className="hidden text-[1.2vw] sm:line-clamp-3">
-                  {randomShow?.overview ?? '-'}
-                </p>
-                <div className="mt-[1.5vw] flex items-center space-x-2">
-                  <Link prefetch={false} href={handleHref()}>
-                    <Button
-                      aria-label="Play video"
-                      className="h-auto flex-shrink-0 gap-2 rounded-xl">
-                      <Icons.play className="fill-current" aria-hidden="true" />
-                      Play
-                    </Button>
-                  </Link>
-                  <Button
-                    aria-label="Open show's details modal"
-                    variant="outline"
-                    className="h-auto flex-shrink-0 gap-2 rounded-xl"
-                    onClick={() => {
-                      const name = getNameFromShow(randomShow);
-                      const path: string =
-                        randomShow.media_type === MediaType.TV
-                          ? 'tv-shows'
-                          : 'movies';
-                      window.history.pushState(
-                        null,
-                        '',
-                        `${path}/${getSlug(randomShow.id, name)}`,
-                      );
-                      useModalStore.setState({
-                        show: randomShow,
-                        open: true,
-                        play: true,
-                      });
-                    }}>
-                    <Icons.info aria-hidden="true" />
-                    More Info
-                  </Button>
+                  <div className="space-y-3">
+                    <h1 className="text-3xl font-semibold leading-tight text-white sm:text-4xl lg:text-5xl">
+                      {randomShow?.title ?? randomShow?.name}
+                    </h1>
+                    <p className="max-w-2xl text-base text-white/80 sm:text-lg">
+                      {randomShow?.overview ??
+                        'Lean back, press play, and let the glassy stage frame your next watch.'}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-3">
+                    <Link prefetch={false} href={handleHref()}>
+                      <Button
+                        aria-label="Play video"
+                        className="h-auto gap-2 rounded-2xl bg-white text-black shadow-[0_20px_70px_-45px_rgba(0,0,0,0.65)] transition hover:-translate-y-0.5 hover:shadow-[0_28px_90px_-50px_rgba(0,0,0,0.65)]">
+                        <Icons.play
+                          className="fill-current"
+                          aria-hidden="true"
+                        />
+                        Play
+                      </Button>
+                    </Link>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3 text-sm text-white/70">
+                    <span className="bg-white/12 inline-flex items-center gap-2 rounded-full border border-white/20 px-3 py-1 shadow-sm backdrop-blur">
+                      <span className="h-2 w-2 rounded-full bg-green-400 shadow-[0_0_0_6px_rgba(74,222,128,0.25)]" />
+                      {`${Math.round(
+                        (randomShow?.vote_average ?? 0) * 10,
+                      )}% Match`}
+                    </span>
+                    {airDate && (
+                      <span className="bg-white/12 rounded-full border border-white/20 px-3 py-1 shadow-sm backdrop-blur">
+                        {airDate}
+                      </span>
+                    )}
+                    <span className="bg-white/12 rounded-full border border-white/20 px-3 py-1 shadow-sm backdrop-blur">
+                      {randomShow?.media_type === MediaType.TV
+                        ? 'Series'
+                        : 'Film'}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>{' '}
-            <div className="opacity-71 absolute inset-0 right-[26.09%] z-[8] bg-gradient-to-r from-secondary to-85%"></div>
-            <div className="absolute bottom-[-1px] left-0 right-0 z-[8] h-[14.7vw] bg-gradient-to-b from-background/0 from-30% via-background/30 via-50% to-background to-80%"></div>
+            </div>
           </div>
-          <div className="relative inset-0 -z-50 mb-5 pb-[60%] sm:pb-[40%]"></div>
         </>
       )}
     </section>

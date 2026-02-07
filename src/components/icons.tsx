@@ -24,6 +24,7 @@ export const Icons = {
   search: Search,
   logo: PlayIcon,
   play: PlayIcon,
+  x: X,
   pause: Pause,
   volume: Volume2,
   volumeMute: VolumeX,

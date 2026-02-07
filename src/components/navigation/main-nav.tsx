@@ -5,6 +5,7 @@ import { type Show, type NavItem } from '@/types';
 import Link from 'next/link';
 import {
   cn,
+  filterSearchableShows,
   getSearchValue,
   handleDefaultSearchBtn,
   handleDefaultSearchInp,
@@ -22,7 +23,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { usePathname, useRouter } from 'next/navigation';
 import { useSearchStore } from '@/stores/search';
-import { ModeToggle as ThemeToggle } from '@/components/theme-toggle';
 import { DebouncedInput } from '@/components/debounced-input';
 import MovieService from '@/services/MovieService';
 
@@ -41,14 +41,7 @@ export function MainNav({ items }: MainNavProps) {
   const searchStore = useSearchStore();
   const [isScrolled, setIsScrolled] = React.useState(false);
 
-  React.useEffect(() => {
-    window.addEventListener('popstate', handlePopstateEvent, false);
-    return () => {
-      window.removeEventListener('popstate', handlePopstateEvent, false);
-    };
-  }, []);
-
-  const handlePopstateEvent = () => {
+  const handlePopstateEvent = React.useCallback(() => {
     const pathname = window.location.pathname;
     const search: string = getSearchValue('q');
 
@@ -67,19 +60,28 @@ export function MainNav({ items }: MainNavProps) {
       }, 20);
       MovieService.searchMovies(search)
         .then((response: SearchResult) => {
-          void searchStore.setShows(response.results);
+          const results = filterSearchableShows(response.results);
+
+          void searchStore.setShows(results);
         })
         .catch((e) => {
           console.error(e);
         })
         .finally(() => searchStore.setLoading(false));
     }
-  };
+  }, [searchStore]);
+
+  React.useEffect(() => {
+    window.addEventListener('popstate', handlePopstateEvent, false);
+    return () => {
+      window.removeEventListener('popstate', handlePopstateEvent, false);
+    };
+  }, [handlePopstateEvent]);
 
   async function searchShowsByQuery(value: string) {
     if (!value?.trim()?.length) {
       if (path === '/search') {
-        router.push('/home');
+        router.push('/');
       } else {
         window.history.pushState(null, '', path);
       }
@@ -96,7 +98,9 @@ export function MainNav({ items }: MainNavProps) {
     searchStore.setLoading(true);
     const shows = await MovieService.searchMovies(value);
     searchStore.setLoading(false);
-    void searchStore.setShows(shows.results);
+    const filteredShows = filterSearchableShows(shows.results);
+
+    void searchStore.setShows(filteredShows);
 
     if (typeof window !== 'undefined') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -106,124 +110,117 @@ export function MainNav({ items }: MainNavProps) {
   // change background color on scroll
   React.useEffect(() => {
     const changeBgColor = () => {
-      window.scrollY > 0 ? setIsScrolled(true) : setIsScrolled(false);
+      const y = window.scrollY;
+      setIsScrolled(y > 0);
     };
     window.addEventListener('scroll', changeBgColor);
+    changeBgColor();
     return () => window.removeEventListener('scroll', changeBgColor);
-  }, [isScrolled]);
+  }, []);
 
   const handleChangeStatusOpen = (value: boolean): void => {
-    searchStore.setOpen(value);
     if (!value) searchStore.reset();
+    searchStore.setOpen(true);
   };
 
   return (
     <nav
       className={cn(
-        'relative z-50 w-full transition-colors duration-300 md:sticky',
-        isScrolled ? 'bg-background/80 backdrop-blur' : 'bg-transparent',
+        'pointer-events-auto relative mx-auto w-full max-w-5xl text-white transition-all duration-500',
+        isScrolled && 'shadow-none',
       )}>
-      <div className="mx-auto flex w-full items-center justify-between px-[4vw] py-4">
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-4 rounded-full border border-border/60 bg-background/80 px-4 py-2 shadow-sm backdrop-blur">
-            <Link
-              href="/"
-              className="hidden items-center space-x-2 md:flex"
-              onClick={() => handleChangeStatusOpen(false)}>
-              <Icons.logo className="h-6 w-6" aria-hidden="true" />
-              <span className="inline-block font-semibold">
+      <div className="relative z-10 flex w-full items-center justify-between gap-3">
+        <div className="border-white/15 flex items-center gap-4 rounded-full border bg-white/10 px-4 py-2 shadow-[0_22px_90px_-60px_rgba(0,0,0,0.65)] backdrop-blur md:gap-8 md:px-6 md:py-2.5">
+          <Link
+            href="/"
+            className="hidden md:block"
+            onClick={() => handleChangeStatusOpen(false)}>
+            <div className="flex items-center gap-3 text-sm font-semibold text-white">
+              <Icons.logo className="h-5 w-5" aria-hidden="true" />
+              <span className="inline-block text-white/90">
                 {siteConfig.name}
               </span>
               <span className="sr-only">Home</span>
-            </Link>
-            {items?.length ? (
-              <nav className="hidden items-center gap-5 md:flex">
-                {items?.map(
-                  (item, index) =>
-                    item.href && (
-                      <Link
-                        key={index}
-                        href={item.href}
-                        className={cn(
-                          'flex items-center text-sm font-medium text-foreground/60 transition hover:text-foreground/90',
-                          path === item.href && 'font-semibold text-foreground',
-                          item.disabled && 'cursor-not-allowed opacity-80',
-                        )}
-                        onClick={() => handleChangeStatusOpen(false)}>
-                        {item.title}
-                      </Link>
-                    ),
-                )}
-              </nav>
-            ) : null}
-            <div className="block md:hidden">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="flex items-center space-x-2 px-0 hover:bg-transparent focus:ring-0">
-                    <Icons.logo className="h-6 w-6" />
-                    <span className="text-base font-semibold">Menu</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="start"
-                  sideOffset={20}
-                  className="w-52 overflow-y-auto overflow-x-hidden rounded-xl">
-                  <DropdownMenuLabel>
-                    <Link
-                      href="/"
-                      className="flex items-center justify-center"
-                      onClick={() => handleChangeStatusOpen(false)}>
-                      <span className="">{siteConfig.name}</span>
-                    </Link>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  {items?.map((item, index) => (
-                    <DropdownMenuItem
-                      key={index}
-                      asChild
-                      className="items-center justify-center">
-                      {item.href && (
-                        <Link
-                          href={item.href}
-                          onClick={() => handleChangeStatusOpen(false)}>
-                          <span
-                            className={cn(
-                              'line-clamp-1 text-foreground/60 hover:text-foreground/80',
-                              path === item.href &&
-                                'font-semibold text-foreground',
-                            )}>
-                            {item.title}
-                          </span>
-                        </Link>
-                      )}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
             </div>
+          </Link>
+          {items?.length ? (
+            <nav className="hidden items-center gap-2 md:flex">
+              {items?.map(
+                (item, index) =>
+                  item.href && (
+                    <Link
+                      key={index}
+                      href={item.href}
+                      className={cn(
+                        'hover:bg-white/15 rounded-full border px-3 py-1 text-sm font-semibold text-white/90 transition hover:-translate-y-[1px] hover:border-white/30 hover:text-white',
+                        'border-white/15 bg-white/10 shadow-[0_14px_60px_-45px_rgba(0,0,0,0.55)] backdrop-blur',
+                        path === item.href &&
+                          'border-white/25 bg-white/20 text-white shadow-[0_14px_50px_-38px_rgba(0,0,0,0.7)]',
+                        item.disabled && 'cursor-not-allowed opacity-80',
+                      )}
+                      onClick={() => handleChangeStatusOpen(false)}>
+                      {item.title}
+                    </Link>
+                  ),
+              )}
+            </nav>
+          ) : null}
+          <div className="block md:hidden">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="border-white/15 flex items-center gap-2 rounded-full border bg-white/10 px-3 py-1.5 text-base font-semibold text-white shadow-[0_16px_60px_-45px_rgba(0,0,0,0.7)] transition hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-primary/30">
+                  <Icons.logo className="h-5 w-5" />
+                  <span>Menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="start"
+                sideOffset={12}
+                className="w-60 overflow-hidden rounded-2xl border border-white/10 bg-white/10 p-2 text-white shadow-[0_18px_80px_-60px_rgba(0,0,0,0.8)] backdrop-blur-xl">
+                <DropdownMenuLabel>
+                  <Link
+                    href="/"
+                    className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm font-semibold text-white"
+                    onClick={() => handleChangeStatusOpen(false)}>
+                    <Icons.logo className="h-4 w-4" aria-hidden="true" />
+                    <span>{siteConfig.name}</span>
+                  </Link>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator className="bg-white/10" />
+                {items?.map((item, index) => (
+                  <DropdownMenuItem
+                    key={index}
+                    asChild
+                    className="rounded-xl px-2 py-2 text-center hover:bg-white/10">
+                    {item.href && (
+                      <Link
+                        href={item.href}
+                        onClick={() => handleChangeStatusOpen(false)}>
+                        <span
+                          className={cn(
+                            'line-clamp-1 text-white/80 transition hover:text-white',
+                            path === item.href && 'font-semibold text-white',
+                          )}>
+                          {item.title}
+                        </span>
+                      </Link>
+                    )}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
-        <div className="flex items-center gap-2 rounded-full border border-border/60 bg-background/80 px-3 py-2 shadow-sm backdrop-blur">
+        <div className="flex items-center gap-2 rounded-full bg-white/10 px-3 py-2 shadow-[0_22px_90px_-60px_rgba(0,0,0,0.65)] backdrop-blur md:px-4 md:py-2.5">
           <DebouncedInput
             id="search-input"
-            open={searchStore.isOpen}
+            open
             value={searchStore.query}
             onChange={searchShowsByQuery}
             onChangeStatusOpen={handleChangeStatusOpen}
-            containerClassName={cn(path === '/' ? 'hidden' : 'flex')}
           />
-          <Link
-            rel="noreferrer"
-            target="_blank"
-            href={siteConfig.links.github}
-            className={cn(path === '/' ? 'flex' : 'hidden')}>
-            <Icons.gitHub className="h-5 w-5 hover:bg-transparent" />
-          </Link>
-          <div className="rounded-full border border-border/60 bg-background/70 p-1">
-            <ThemeToggle />
-          </div>
         </div>
       </div>
     </nav>

@@ -32,11 +32,7 @@ const ShowsContainer = ({ shows }: ShowsContainerProps) => {
   const modalStore = useModalStore();
   const searchStore = useSearchStore();
 
-  React.useEffect(() => {
-    void handleOpenModal();
-  }, []);
-
-  const handleOpenModal = async (): Promise<void> => {
+  const handleOpenModal = React.useCallback(async (): Promise<void> => {
     if (!/\d/.test(pathname) || modalStore.open) {
       return;
     }
@@ -58,7 +54,11 @@ const ShowsContainer = ({ shows }: ShowsContainerProps) => {
           firstLoad: true,
         });
     } catch (error) {}
-  };
+  }, [modalStore.open, pathname]);
+
+  React.useEffect(() => {
+    void handleOpenModal();
+  }, [handleOpenModal]);
 
   // if (!mounted) {
   //   return (
@@ -69,23 +69,33 @@ const ShowsContainer = ({ shows }: ShowsContainerProps) => {
   // }
 
   if (searchStore.query.length > 0) {
-    return <ShowsGrid shows={searchStore.shows} query={searchStore.query} />;
+    return (
+      <div className="relative px-[4%] pb-16 pt-6">
+        <div className="pointer-events-none absolute inset-0 bg-black/25" />
+        <div className="relative">
+          <ShowsGrid shows={searchStore.shows} query={searchStore.query} />
+        </div>
+      </div>
+    );
   }
 
   return (
-    <>
-      {modalStore.open && <ShowModal />}
-      {shows.map(
-        (item) =>
-          item.visible && (
-            <ShowsCarousel
-              key={item.title}
-              title={item.title}
-              shows={item.shows ?? []}
-            />
-          ),
-      )}
-    </>
+    <div className="relative space-y-8 px-[4%] pb-14 pt-8">
+      <div className="pointer-events-none absolute inset-0 bg-black/20" />
+      <div className="relative space-y-7">
+        {modalStore.open && <ShowModal />}
+        {shows.map(
+          (item) =>
+            item.visible && (
+              <ShowsCarousel
+                key={item.title}
+                title={item.title}
+                shows={item.shows ?? []}
+              />
+            ),
+        )}
+      </div>
+    </div>
   );
 };
 
