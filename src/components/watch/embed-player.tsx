@@ -135,7 +135,9 @@ function EmbedPlayer(props: EmbedPlayerProps) {
         width="100%"
         height="100%"
         allowFullScreen
+        allow="autoplay; fullscreen; picture-in-picture"
         ref={iframeRef}
+        sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
         style={{ opacity: 0 }}
         referrerPolicy="no-referrer-when-downgrade"
       />
