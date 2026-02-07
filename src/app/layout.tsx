@@ -1,3 +1,4 @@
+import React from 'react';
 import { TailwindIndicator } from '@/components/tailwind-indicator';
 import { ThemeProvider } from '@/components/theme-provider';
 import { cn } from '@/lib/utils';
@@ -10,7 +11,6 @@ import { Analytics } from '@/components/analytics';
 import { siteConfig } from '@/configs/site';
 import { env } from '@/env.mjs';
 import { SpeedInsights } from '@vercel/speed-insights/next';
-import { GoogleAnalytics } from '@next/third-parties/google';
 import Script from 'next/script';
 
 export const runtime = 'edge';
@@ -28,10 +28,7 @@ const fontHeading = localFont({
 });
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: 'white' },
-    { media: '(prefers-color-scheme: dark)', color: 'black' },
-  ],
+  themeColor: 'black',
 };
 
 export const metadata: Metadata = {
@@ -84,11 +81,7 @@ export default function RootLayout({
           fontSans.variable,
           fontHeading.variable,
         )}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange>
+        <ThemeProvider>
           {/* <TrpcProvider> */}
           {children}
           <TailwindIndicator />
@@ -101,11 +94,11 @@ export default function RootLayout({
                 id="_next-ga-init"
                 dangerouslySetInnerHTML={{
                   __html: `
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){window.dataLayer.push(arguments);}
-          gtag('js', new Date());
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){window.dataLayer.push(arguments);}
+            gtag('js', new Date());
 
-          gtag('config', '${env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID}', { cookie_flags: 'max-age=86400;secure;samesite=none' });`,
+            gtag('config', '${env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID}', { cookie_flags: 'max-age=86400;secure;samesite=none' });`,
                 }}
               />
               <Script
