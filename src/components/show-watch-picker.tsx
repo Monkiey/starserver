@@ -10,7 +10,7 @@ import { MediaType, type IEpisode, type ISeason, type Show } from '@/types';
 interface ShowWatchPickerProps {
   show: Show;
   seasons: ISeason[];
-  onPlay: (show: Show) => void;
+  onPlay?: (show: Show) => void;
 }
 
 const ShowWatchPicker = ({ show, seasons, onPlay }: ShowWatchPickerProps) => {
@@ -34,7 +34,7 @@ const ShowWatchPicker = ({ show, seasons, onPlay }: ShowWatchPickerProps) => {
           <Link href={`/watch/movie/${show.id}`} prefetch={false}>
             <Button
               className="h-auto gap-2 rounded-full px-4 py-2"
-              onClick={() => onPlay(show)}>
+              onClick={() => onPlay?.(show)}>
               <Icons.play className="h-4 w-4 fill-current" aria-hidden="true" />
               Watch
             </Button>
@@ -80,10 +80,10 @@ const ShowWatchPicker = ({ show, seasons, onPlay }: ShowWatchPickerProps) => {
         {activeSeason.episodes?.map((episode: IEpisode) => (
           <Link
             key={episode.id}
-            href={`/watch/tv/${show.id}?season=${episode.season_number}&episode=${episode.episode_number}`}
+            href={`/watch/tv/${show.id}/player?season=${episode.season_number}&episode=${episode.episode_number}`}
             prefetch={false}
             className="group flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-background/60 px-3 py-2 transition hover:border-primary/40"
-            onClick={() => onPlay(show)}>
+            onClick={() => onPlay?.(show)}>
             <div>
               <p className="text-sm font-medium text-foreground">
                 {`Episode ${episode.episode_number}: ${episode.name}`}
