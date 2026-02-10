@@ -219,13 +219,6 @@ export function MainNav({ items }: MainNavProps) {
             onChangeStatusOpen={handleChangeStatusOpen}
             containerClassName="flex"
           />
-          <Link
-            rel="noreferrer"
-            target="_blank"
-            href={siteConfig.links.github}
-            className={cn(path === '/' ? 'flex' : 'hidden')}>
-            <Icons.gitHub className="h-5 w-5 hover:bg-transparent" />
-          </Link>
           <div className="rounded-full border border-border/60 bg-background/70 p-1">
             <ThemeToggle />
           </div>
