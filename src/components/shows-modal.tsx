@@ -205,7 +205,13 @@ const ShowModal = () => {
       open={modalStore.open}
       onOpenChange={handleCloseModal}
       aria-label="Modal containing show's details">
-      <DialogContent className="w-full overflow-hidden rounded-md bg-zinc-900 p-0 text-left align-middle shadow-xl dark:bg-zinc-900 sm:max-w-3xl lg:max-w-4xl">
+      <DialogContent
+        aria-describedby="show-details-description"
+        className="w-full overflow-hidden rounded-md bg-zinc-900 p-0 text-left align-middle shadow-xl dark:bg-zinc-900 sm:max-w-3xl lg:max-w-4xl">
+        <DialogTitle className="sr-only">Show details</DialogTitle>
+        <DialogDescription id="show-details-description" className="sr-only">
+          Details and playback options for the selected title.
+        </DialogDescription>
         <div className="video-wrapper relative aspect-video">
           <CustomImage
             fill
@@ -292,7 +298,9 @@ const ShowModal = () => {
               </span>
             )}
           </div>
-          <DialogDescription className="line-clamp-3 text-xs text-slate-50 dark:text-slate-50 sm:text-sm">
+          <DialogDescription
+            className="line-clamp-3 text-xs text-slate-50 dark:text-slate-50 sm:text-sm"
+            id={undefined}>
             {modalStore.show?.overview ?? '-'}
           </DialogDescription>
           <div className="flex items-center gap-2 text-xs sm:text-sm">
