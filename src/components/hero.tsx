@@ -5,27 +5,24 @@ import { getIdFromSlug, getNameFromShow, getSlug } from '@/lib/utils';
 import MovieService from '@/services/MovieService';
 import { useModalStore } from '@/stores/modal';
 import { useSearchStore } from '@/stores/search';
+import { useContinueWatchingStore } from '@/stores/continue-watching';
 import { MediaType, type Show } from '@/types';
 import { type AxiosResponse } from 'axios';
 import Link from 'next/link';
 import React from 'react';
 import CustomImage from './custom-image';
-import { usePathname } from 'next/navigation';
 
 interface HeroProps {
   randomShow: Show | null;
 }
 
 const Hero = ({ randomShow }: HeroProps) => {
-  const path = usePathname();
-  React.useEffect(() => {
-    window.addEventListener('popstate', handlePopstateEvent, false);
-    return () => {
-      window.removeEventListener('popstate', handlePopstateEvent, false);
-    };
-  }, []);
+  // stores
+  const modalStore = useModalStore();
+  const searchStore = useSearchStore();
+  const continueWatchingStore = useContinueWatchingStore();
 
-  const handlePopstateEvent = () => {
+  const handlePopstateEvent = React.useCallback(() => {
     const pathname = window.location.pathname;
     if (!/\d/.test(pathname)) {
       modalStore.reset();
@@ -48,11 +45,14 @@ const Hero = ({ randomShow }: HeroProps) => {
           console.error(`findMovie: `, error);
         });
     }
-  };
+  }, [modalStore]);
 
-  // stores
-  const modalStore = useModalStore();
-  const searchStore = useSearchStore();
+  React.useEffect(() => {
+    window.addEventListener('popstate', handlePopstateEvent, false);
+    return () => {
+      window.removeEventListener('popstate', handlePopstateEvent, false);
+    };
+  }, [handlePopstateEvent]);
 
   if (searchStore.query.length > 0) {
     return null;
@@ -62,14 +62,8 @@ const Hero = ({ randomShow }: HeroProps) => {
     if (!randomShow) {
       return '#';
     }
-    if (!path.includes('/anime')) {
-      const type = randomShow.media_type === MediaType.MOVIE ? 'movie' : 'tv';
-      return `/watch/${type}/${randomShow.id}`;
-    }
-    const prefix: string =
-      randomShow?.media_type === MediaType.MOVIE ? 'm' : 't';
-    const id = `${prefix}-${randomShow.id}`;
-    return `/watch/anime/${id}`;
+    const type = randomShow.media_type === MediaType.MOVIE ? 'movie' : 'tv';
+    return `/watch/${type}/${randomShow.id}`;
   };
 
   return (
@@ -107,7 +101,12 @@ const Hero = ({ randomShow }: HeroProps) => {
                   <Link prefetch={false} href={handleHref()}>
                     <Button
                       aria-label="Play video"
-                      className="h-auto flex-shrink-0 gap-2 rounded-xl">
+                      className="h-auto flex-shrink-0 gap-2 rounded-xl"
+                      onClick={() => {
+                        if (randomShow) {
+                          continueWatchingStore.addItem(randomShow);
+                        }
+                      }}>
                       <Icons.play className="fill-current" aria-hidden="true" />
                       Play
                     </Button>

@@ -1,9 +1,10 @@
 import { getNameFromShow, getSlug } from '@/lib/utils';
+import {
+  MediaType} from '@/types';
 import type {
   CategorizedShows,
   ISeason,
   KeyWordResponse,
-  MediaType,
   Show,
   ShowWithGenreAndVideo,
 } from '@/types';
@@ -180,15 +181,33 @@ class MovieService extends BaseService {
   });
 
   static searchMovies = cache(async (query: string, page?: number) => {
+    const normalizedQuery = query.trim().toLowerCase();
     const { data } = await this.axios(baseUrl).get<TmdbPagingResponse>(
-      `/search/multi?query=${encodeURIComponent(query)}&language=en-US&page=${
-        page ?? 1
-      }`,
+      `/search/multi?query=${encodeURIComponent(
+        normalizedQuery,
+      )}&language=en-US&include_adult=false&page=${page ?? 1}`,
     );
 
-    data.results.sort((a, b) => {
-      return b.popularity - a.popularity;
-    });
+    const queryWords = normalizedQuery.split(/\s+/).filter(Boolean);
+    data.results = data.results
+      .filter(
+        (result) =>
+          result.media_type === MediaType.MOVIE ||
+          result.media_type === MediaType.TV,
+      )
+      .sort((a, b) => {
+        const getScore = (item: Show) => {
+          const title = `${item.title ?? ''}${item.name ?? ''}`.toLowerCase();
+          let score = item.popularity ?? 0;
+          if (title === normalizedQuery) score += 5000;
+          if (title.startsWith(normalizedQuery)) score += 2500;
+          if (queryWords.every((word) => title.includes(word))) {
+            score += 1500;
+          }
+          return score;
+        };
+        return getScore(b) - getScore(a);
+      });
     return data;
   });
 }

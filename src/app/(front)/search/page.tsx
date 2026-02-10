@@ -11,10 +11,11 @@ interface SearchProps {
 export const revalidate = 3600;
 
 export default async function SearchPage({ searchParams }: SearchProps) {
-  if (!searchParams?.q?.trim()?.length) {
-    redirect('/home');
+  const query = searchParams?.q?.trim() ?? '';
+  if (!query.length) {
+    redirect('/');
   }
 
-  const shows = await MovieService.searchMovies(searchParams.q);
-  return <SearchContainer query={searchParams.q} shows={shows.results} />;
+  const shows = await MovieService.searchMovies(query);
+  return <SearchContainer query={query} shows={shows.results} />;
 }

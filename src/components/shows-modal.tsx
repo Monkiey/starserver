@@ -13,15 +13,19 @@ import MovieService from '@/services/MovieService';
 import { useModalStore } from '@/stores/modal';
 import {
   type KeyWord,
+  type ISeason,
   MediaType,
   type Genre,
   type ShowWithGenreAndVideo,
+  type Show,
   type VideoResult,
 } from '@/types';
 import Link from 'next/link';
 import * as React from 'react';
 import Youtube from 'react-youtube';
 import CustomImage from './custom-image';
+import ShowWatchPicker from './show-watch-picker';
+import { useContinueWatchingStore } from '@/stores/continue-watching';
 
 type YouTubePlayer = {
   mute: () => void;
@@ -62,9 +66,10 @@ const ShowModal = () => {
   const IS_MOBILE: boolean = isMobile();
 
   const [trailer, setTrailer] = React.useState('');
-  const [isPlaying, setPlaying] = React.useState(true);
+  const isPlaying = true;
   const [genres, setGenres] = React.useState<Genre[]>([]);
   const [isAnime, setIsAnime] = React.useState<boolean>(false);
+  const [seasons, setSeasons] = React.useState<ISeason[]>([]);
   const [isMuted, setIsMuted] = React.useState<boolean>(
     modalStore.firstLoad || IS_MOBILE,
   );
@@ -73,23 +78,10 @@ const ShowModal = () => {
 
   const youtubeRef = React.useRef(null);
   const imageRef = React.useRef<HTMLImageElement>(null);
+  const continueWatchingStore = useContinueWatchingStore();
 
   // get trailer and genres of show
-  React.useEffect(() => {
-    if (modalStore.firstLoad || IS_MOBILE) {
-      setOptions((state: Record<string, object>) => ({
-        ...state,
-        playerVars: { ...state.playerVars, mute: 1 },
-      }));
-    }
-    void handleGetData();
-  }, []);
-
-  React.useEffect(() => {
-    setIsAnime(false);
-  }, [modalStore]);
-
-  const handleGetData = async () => {
+  const handleGetData = React.useCallback(async () => {
     const id: number | undefined = modalStore.show?.id;
     const type: string =
       modalStore.show?.media_type === MediaType.TV ? 'tv' : 'movie';
@@ -120,12 +112,40 @@ const ShowModal = () => {
       );
       if (result?.key) setTrailer(result.key);
     }
-  };
+
+    if (type === 'tv' && data?.seasons?.length) {
+      const filteredSeasons = data.seasons.filter(
+        (season: ISeason) => season.season_number,
+      );
+      const seasonRequests = await Promise.all(
+        filteredSeasons.map((season: ISeason) =>
+          MovieService.getSeasons(id, season.season_number),
+        ),
+      );
+      setSeasons(seasonRequests.map((res) => res.data));
+    } else {
+      setSeasons([]);
+    }
+  }, [modalStore.show]);
+
+  React.useEffect(() => {
+    if (modalStore.firstLoad || IS_MOBILE) {
+      setOptions((state: Record<string, object>) => ({
+        ...state,
+        playerVars: { ...state.playerVars, mute: 1 },
+      }));
+    }
+    void handleGetData();
+  }, [IS_MOBILE, handleGetData, modalStore.firstLoad]);
+
+  React.useEffect(() => {
+    setIsAnime(false);
+  }, [modalStore]);
 
   const handleCloseModal = () => {
     modalStore.reset();
     if (!modalStore.show || modalStore.firstLoad) {
-      window.history.pushState(null, '', '/home');
+      window.history.pushState(null, '', '/');
     } else {
       window.history.back();
     }
@@ -176,12 +196,22 @@ const ShowModal = () => {
     return `/watch/${type}/${id}`;
   };
 
+  const handleContinueWatching = (show: Show) => {
+    continueWatchingStore.addItem(show);
+  };
+
   return (
     <Dialog
       open={modalStore.open}
       onOpenChange={handleCloseModal}
       aria-label="Modal containing show's details">
-      <DialogContent className="w-full overflow-hidden rounded-md bg-zinc-900 p-0 text-left align-middle shadow-xl dark:bg-zinc-900 sm:max-w-3xl lg:max-w-4xl">
+      <DialogContent
+        aria-describedby="show-details-description"
+        className="w-full overflow-hidden rounded-md bg-zinc-900 p-0 text-left align-middle shadow-xl dark:bg-zinc-900 sm:max-w-3xl lg:max-w-4xl">
+        <DialogTitle className="sr-only">Show details</DialogTitle>
+        <DialogDescription id="show-details-description" className="sr-only">
+          Details and playback options for the selected title.
+        </DialogDescription>
         <div className="video-wrapper relative aspect-video">
           <CustomImage
             fill
@@ -218,7 +248,12 @@ const ShowModal = () => {
               <Link href={handleHref()}>
                 <Button
                   aria-label={`${isPlaying ? 'Pause' : 'Play'} show`}
-                  className="group h-auto rounded py-1.5">
+                  className="group h-auto rounded py-1.5"
+                  onClick={() => {
+                    if (modalStore.show) {
+                      handleContinueWatching(modalStore.show);
+                    }
+                  }}>
                   <>
                     <Icons.play
                       className="mr-1.5 h-6 w-6 fill-current"
@@ -263,13 +298,22 @@ const ShowModal = () => {
               </span>
             )}
           </div>
-          <DialogDescription className="line-clamp-3 text-xs text-slate-50 dark:text-slate-50 sm:text-sm">
+          <DialogDescription
+            className="line-clamp-3 text-xs text-slate-50 dark:text-slate-50 sm:text-sm"
+            id={undefined}>
             {modalStore.show?.overview ?? '-'}
           </DialogDescription>
           <div className="flex items-center gap-2 text-xs sm:text-sm">
             <span className="text-slate-400">Genres:</span>
             {genres.map((genre) => genre.name).join(', ')}
           </div>
+          {modalStore.show && (
+            <ShowWatchPicker
+              show={modalStore.show}
+              seasons={seasons}
+              onPlay={handleContinueWatching}
+            />
+          )}
         </div>
       </DialogContent>
     </Dialog>
