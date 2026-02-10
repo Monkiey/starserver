@@ -17,6 +17,11 @@ interface HeroProps {
 }
 
 const Hero = ({ randomShow }: HeroProps) => {
+  // stores
+  const modalStore = useModalStore();
+  const searchStore = useSearchStore();
+  const continueWatchingStore = useContinueWatchingStore();
+
   const handlePopstateEvent = React.useCallback(() => {
     const pathname = window.location.pathname;
     if (!/\d/.test(pathname)) {
@@ -48,11 +53,6 @@ const Hero = ({ randomShow }: HeroProps) => {
       window.removeEventListener('popstate', handlePopstateEvent, false);
     };
   }, [handlePopstateEvent]);
-
-  // stores
-  const modalStore = useModalStore();
-  const searchStore = useSearchStore();
-  const continueWatchingStore = useContinueWatchingStore();
 
   if (searchStore.query.length > 0) {
     return null;
