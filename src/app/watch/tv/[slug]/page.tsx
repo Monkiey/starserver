@@ -1,21 +1,41 @@
 import React from 'react';
-import EmbedPlayer from '@/components/watch/embed-player';
+import { redirect } from 'next/navigation';
+import MovieService from '@/services/MovieService';
+import { type ISeason } from '@/types';
+import TvDetailContent from '@/components/watch/tv-detail-content';
 
 export const revalidate = 3600;
 
-export default function Page({
+export default async function Page({
   params,
   searchParams,
 }: {
   params: { slug: string };
   searchParams: { season?: string; episode?: string };
 }) {
-  const id = params.slug.split('-').pop();
-  const season = searchParams?.season;
-  const episode = searchParams?.episode;
-  const url =
-    season && episode
-      ? `https://vidsrc.cc/v2/embed/tv/${id}/${season}/${episode}`
-      : `https://vidsrc.cc/v2/embed/tv/${id}`;
-  return <EmbedPlayer url={url} />;
+  const id = Number(params.slug.split('-').pop());
+
+  if (!id) {
+    redirect('/');
+  }
+
+  if (searchParams?.season && searchParams?.episode) {
+    redirect(
+      `/watch/tv/${id}/player?season=${searchParams.season}&episode=${searchParams.episode}`,
+    );
+  }
+
+  const show = await MovieService.findMovieByIdAndType(id, 'tv');
+  const filteredSeasons =
+    show.seasons?.filter((season: ISeason) => season.season_number) ?? [];
+
+  const seasonRequests = await Promise.all(
+    filteredSeasons.map((season: ISeason) =>
+      MovieService.getSeasons(id, season.season_number),
+    ),
+  );
+
+  const seasons = seasonRequests.map((res) => res.data);
+
+  return <TvDetailContent show={show} seasons={seasons} />;
 }
