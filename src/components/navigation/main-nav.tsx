@@ -41,14 +41,7 @@ export function MainNav({ items }: MainNavProps) {
   const searchStore = useSearchStore();
   const [isScrolled, setIsScrolled] = React.useState(false);
 
-  React.useEffect(() => {
-    window.addEventListener('popstate', handlePopstateEvent, false);
-    return () => {
-      window.removeEventListener('popstate', handlePopstateEvent, false);
-    };
-  }, []);
-
-  const handlePopstateEvent = () => {
+  const handlePopstateEvent = React.useCallback(() => {
     const pathname = window.location.pathname;
     const search: string = getSearchValue('q');
 
@@ -74,12 +67,20 @@ export function MainNav({ items }: MainNavProps) {
         })
         .finally(() => searchStore.setLoading(false));
     }
-  };
+  }, [searchStore]);
+
+  React.useEffect(() => {
+    window.addEventListener('popstate', handlePopstateEvent, false);
+    return () => {
+      window.removeEventListener('popstate', handlePopstateEvent, false);
+    };
+  }, [handlePopstateEvent]);
 
   async function searchShowsByQuery(value: string) {
-    if (!value?.trim()?.length) {
+    const normalizedValue = value?.trim() ?? '';
+    if (!normalizedValue.length) {
       if (path === '/search') {
-        router.push('/home');
+        router.push('/');
       } else {
         window.history.pushState(null, '', path);
       }
@@ -87,14 +88,18 @@ export function MainNav({ items }: MainNavProps) {
     }
 
     if (getSearchValue('q')?.trim()?.length) {
-      window.history.replaceState(null, '', `search?q=${value}`);
+      window.history.replaceState(null, '', `/search?q=${normalizedValue}`);
     } else {
-      window.history.pushState(null, '', `search?q=${value}`);
+      window.history.pushState(null, '', `/search?q=${normalizedValue}`);
     }
 
-    searchStore.setQuery(value);
+    if (normalizedValue === searchStore.query) {
+      return;
+    }
+
+    searchStore.setQuery(normalizedValue);
     searchStore.setLoading(true);
-    const shows = await MovieService.searchMovies(value);
+    const shows = await MovieService.searchMovies(normalizedValue);
     searchStore.setLoading(false);
     void searchStore.setShows(shows.results);
 
@@ -212,7 +217,7 @@ export function MainNav({ items }: MainNavProps) {
             value={searchStore.query}
             onChange={searchShowsByQuery}
             onChangeStatusOpen={handleChangeStatusOpen}
-            containerClassName={cn(path === '/' ? 'hidden' : 'flex')}
+            containerClassName="flex"
           />
           <Link
             rel="noreferrer"

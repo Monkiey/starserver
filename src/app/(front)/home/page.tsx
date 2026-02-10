@@ -1,3 +1,4 @@
+import ContinueWatching from '@/components/continue-watching';
 import Hero from '@/components/hero';
 import ShowsContainer from '@/components/shows-container';
 import { MediaType, type Show } from '@/types';
@@ -32,15 +33,6 @@ export default async function Home() {
       visible: true,
     },
     {
-      title: 'Korean Movies',
-      req: {
-        requestType: RequestType.KOREAN,
-        mediaType: MediaType.MOVIE,
-        genre: Genre.THRILLER,
-      },
-      visible: true,
-    },
-    {
       title: 'Comedy Movies',
       req: {
         requestType: RequestType.GENRE,
@@ -55,6 +47,42 @@ export default async function Home() {
         requestType: RequestType.GENRE,
         mediaType: MediaType.MOVIE,
         genre: Genre.ACTION,
+      },
+      visible: true,
+    },
+    {
+      title: 'Sci-Fi Movies',
+      req: {
+        requestType: RequestType.GENRE,
+        mediaType: MediaType.MOVIE,
+        genre: Genre.SCIENCE_FICTION,
+      },
+      visible: true,
+    },
+    {
+      title: 'Animation Movies',
+      req: {
+        requestType: RequestType.GENRE,
+        mediaType: MediaType.MOVIE,
+        genre: Genre.ANIMATION,
+      },
+      visible: true,
+    },
+    {
+      title: 'Crime Movies',
+      req: {
+        requestType: RequestType.GENRE,
+        mediaType: MediaType.MOVIE,
+        genre: Genre.CRIME,
+      },
+      visible: true,
+    },
+    {
+      title: 'Documentary Movies',
+      req: {
+        requestType: RequestType.GENRE,
+        mediaType: MediaType.MOVIE,
+        genre: Genre.DOCUMENTARY,
       },
       visible: true,
     },
@@ -83,6 +111,7 @@ export default async function Home() {
     <>
       <h1 className="hidden">{h1}</h1>
       <Hero randomShow={randomShow} />
+      <ContinueWatching />
       <ShowsContainer shows={allShows} />
     </>
   );

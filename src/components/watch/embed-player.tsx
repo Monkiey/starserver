@@ -2,27 +2,30 @@
 import React from 'react';
 import Loading from '../ui/loading';
 import { useRouter } from 'next/navigation';
-import { MediaType, type IEpisode, type ISeason, type Show } from '@/types';
-import MovieService from '@/services/MovieService';
-import { type AxiosResponse } from 'axios';
-import Season from '../season';
 
 interface EmbedPlayerProps {
   url: string;
-  movieId?: string;
-  mediaType?: MediaType;
 }
 
 function EmbedPlayer(props: EmbedPlayerProps) {
   const router = useRouter();
 
-  const [seasons, setSeasons] = React.useState<ISeason[] | null>(null);
+  const loadingRef = React.useRef<HTMLDivElement>(null);
+  const iframeRef = React.useRef<HTMLIFrameElement>(null);
 
-  React.useEffect(() => {
-    // if anime type -> handle after fetch season and episode
-    if (props.mediaType === MediaType.ANIME) {
+  const handleIframeLoaded = React.useCallback(() => {
+    if (!iframeRef.current) {
       return;
     }
+    const iframe: HTMLIFrameElement = iframeRef.current;
+    if (iframe) {
+      iframe.style.opacity = '1';
+      iframe.removeEventListener('load', handleIframeLoaded);
+      if (loadingRef.current) loadingRef.current.style.display = 'none';
+    }
+  }, []);
+
+  React.useEffect(() => {
     if (iframeRef.current) {
       iframeRef.current.src = props.url;
     }
@@ -33,69 +36,7 @@ function EmbedPlayer(props: EmbedPlayerProps) {
     return () => {
       iframe?.removeEventListener('load', handleIframeLoaded);
     };
-  }, []);
-
-  React.useEffect(() => {
-    if (!props.movieId || props.mediaType !== MediaType.ANIME) {
-      return;
-    }
-
-    void handleAnime(props.movieId);
-  }, [props.movieId, props.mediaType]);
-
-  const loadingRef = React.useRef<HTMLDivElement>(null);
-  const iframeRef = React.useRef<HTMLIFrameElement>(null);
-
-  const handleChangeEpisode = (episode: IEpisode): void => {
-    const { show_id: id, episode_number: eps } = episode;
-    handleSetIframeUrl(`https://vidsrc.cc/v2/embed/anime/tmdb${id}/${eps}/sub`);
-  };
-
-  const handleAnime = async (movieId: string) => {
-    const id = Number(movieId.replace('t-', ''));
-    const response: AxiosResponse<Show> = await MovieService.findTvSeries(id);
-    const { data } = response;
-    if (!data?.seasons?.length) {
-      return;
-    }
-    const seasons = data.seasons.filter(
-      (season: ISeason) => season.season_number,
-    );
-    const promises = seasons.map(async (season: ISeason) => {
-      return MovieService.getSeasons(id, season.season_number);
-    });
-
-    const seasonWithEpisodes = await Promise.all(promises);
-    setSeasons(
-      seasonWithEpisodes.map((res: AxiosResponse<ISeason>) => res.data),
-    );
-    handleSetIframeUrl(
-      `https://vidsrc.cc/v2/embed/anime/tmdb${id}/1/sub?autoPlay=false`,
-    );
-  };
-
-  const handleSetIframeUrl = (url: string): void => {
-    if (!iframeRef.current) {
-      return;
-    }
-    iframeRef.current.src = url;
-    const { current } = iframeRef;
-    const iframe: HTMLIFrameElement | null = current;
-    iframe.addEventListener('load', handleIframeLoaded);
-    if (loadingRef.current) loadingRef.current.style.display = 'flex';
-  };
-
-  const handleIframeLoaded = () => {
-    if (!iframeRef.current) {
-      return;
-    }
-    const iframe: HTMLIFrameElement = iframeRef.current;
-    if (iframe) {
-      iframe.style.opacity = '1';
-      iframe.removeEventListener('load', handleIframeLoaded);
-      if (loadingRef.current) loadingRef.current.style.display = 'none';
-    }
-  };
+  }, [handleIframeLoaded, props.url]);
 
   return (
     <div
@@ -105,9 +46,6 @@ function EmbedPlayer(props: EmbedPlayerProps) {
         position: 'absolute',
         backgroundColor: '#000',
       }}>
-      {seasons && (
-        <Season seasons={seasons ?? []} onChangeEpisode={handleChangeEpisode} />
-      )}
       <div className="header-top absolute left-0 right-0 top-8 z-[2] flex h-fit w-fit items-center justify-between gap-x-5 px-4 md:h-20 md:gap-x-8 md:px-10 lg:h-24">
         <div className="flex flex-1 items-center gap-x-5 md:gap-x-8">
           <svg

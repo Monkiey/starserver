@@ -77,7 +77,7 @@ export const siteConfig = {
   mainNav: [
     {
       title: 'Home',
-      href: '/home',
+      href: '/',
       // icon: Icons.play,
     },
     {
@@ -89,16 +89,6 @@ export const siteConfig = {
       title: 'Movies',
       href: '/movies',
       // icon: Icons.movie,
-    },
-    {
-      title: 'Anime',
-      href: '/anime',
-      // icon: Icons.list,
-    },
-    {
-      title: 'New & Popular',
-      href: '/new-and-popular',
-      // icon: Icons.trendingUp,
     },
   ],
 };
