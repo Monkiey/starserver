@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import AIService from '@/services/AIService';
 import MovieService from '@/services/MovieService';
+import { MediaType } from '@/types';
 
 export async function POST(request: Request) {
   try {
@@ -12,14 +13,25 @@ export async function POST(request: Request) {
     }
 
     // Use AI to enhance the search query
-    const enhancedQuery = await AIService.enhanceSearchQuery(query);
+    const [enhancedQuery, intent] = await Promise.all([
+      AIService.enhanceSearchQuery(query),
+      AIService.analyzeSearchIntent(query),
+    ]);
 
     // Perform the search with the enhanced query
     const searchResults = await MovieService.searchMovies(enhancedQuery);
+    if (intent.intent !== 'both') {
+      searchResults.results = searchResults.results.filter((item) =>
+        intent.intent === 'movie'
+          ? item.media_type === MediaType.MOVIE
+          : item.media_type === MediaType.TV,
+      );
+    }
 
     return NextResponse.json({
       originalQuery: query,
       enhancedQuery,
+      intent,
       results: searchResults.results,
       totalResults: searchResults.totalResults ?? 0,
     });
