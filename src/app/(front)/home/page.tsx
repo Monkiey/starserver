@@ -11,7 +11,7 @@ import { Genre } from '@/enums/genre';
 import { getRandomShow } from '@/lib/utils';
 import AIService from '@/services/AIService';
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 
 export default async function Home() {
   const h1 = `${siteConfig.name} Home`;
