@@ -141,7 +141,13 @@ class AIService {
       'fairy tale',
       'supernatural',
     ],
-    [Genre.HISTORY]: ['history', 'historical', 'period', 'ancient', 'biopic'],
+    [Genre.HISTORY]: [
+      'history',
+      'historical',
+      'period piece',
+      'ancient',
+      'biopic',
+    ],
     [Genre.HORROR]: [
       'horror',
       'scary',
@@ -367,6 +373,7 @@ class AIService {
   private static readonly SUGGESTION_DIVERSITY_MOD = 7;
   private static readonly SUGGESTION_DIVERSITY_WEIGHT = 0.5;
   private static readonly SEARCH_DIVERSITY_MOD = 5;
+  private static readonly RECENT_YEARS_THRESHOLD = 2;
 
   private static escapeRegex(text: string): string {
     return text.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
@@ -388,13 +395,11 @@ class AIService {
     Object.entries(this.GENRE_KEYWORDS).forEach(([genre, cues]) => {
       if (!cues) return;
       const matchCue = cues.some((cue) => {
+        const pattern = new RegExp(`\\b${this.escapeRegex(cue)}\\b`, 'i');
         if (cue.includes(' ')) {
-          return joined.includes(cue);
+          return pattern.test(joined);
         }
-        return keywords.some((word) => {
-          const pattern = new RegExp(`\\b${this.escapeRegex(cue)}\\b`, 'i');
-          return pattern.test(word);
-        });
+        return keywords.some((word) => pattern.test(word));
       });
       if (matchCue) {
         matches.add(Number(genre) as Genre);
@@ -846,7 +851,8 @@ class AIService {
                 score += ERA_WEIGHT;
               break;
             case 'recent':
-              if (releaseYear >= currentYear - 2) score += ERA_WEIGHT;
+              if (releaseYear >= currentYear - this.RECENT_YEARS_THRESHOLD)
+                score += ERA_WEIGHT;
               break;
           }
         }
