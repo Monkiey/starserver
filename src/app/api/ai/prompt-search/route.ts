@@ -22,15 +22,20 @@ export async function POST(request: Request) {
     // Use AI to analyze the prompt and extract search keywords
     const searchIntent = await AIService.analyzeSearchIntent(prompt);
 
+    // Fallback to original prompt if keywords are empty
+    const searchQuery =
+      searchIntent.keywords.length > 0
+        ? searchIntent.keywords.join(' ')
+        : prompt;
+
     // Search TMDB using the extracted keywords to get relevant shows
-    const searchResults = await MovieService.searchMovies(
-      searchIntent.keywords.join(' '),
-    );
+    const searchResults = await MovieService.searchMovies(searchQuery);
 
     // If we didn't get enough results from search, supplement with popular/top-rated shows
+    const MIN_SEARCH_RESULTS_THRESHOLD = 20;
     let allShows = searchResults.results;
 
-    if (allShows.length < 20) {
+    if (allShows.length < MIN_SEARCH_RESULTS_THRESHOLD) {
       const diverseShows = await MovieService.getShows([
         {
           title: 'Top Rated Movies',
