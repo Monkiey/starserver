@@ -24,6 +24,9 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useSearchStore } from '@/stores/search';
 import { ModeToggle as ThemeToggle } from '@/components/theme-toggle';
 import { DebouncedInput } from '@/components/debounced-input';
+import MovieService from '@/services/MovieService';
+import { StarSearchToggle } from '@/components/star-search-toggle';
+import { useStarSettingsStore } from '@/stores/star-settings';
 
 // API endpoint for AI-powered search
 const AI_SEARCH_ENDPOINT = '/api/ai/search';
@@ -41,6 +44,7 @@ export function MainNav({ items }: MainNavProps) {
   const router = useRouter();
   // search store
   const searchStore = useSearchStore();
+  const { enableStarSearch, toggleStarSearch } = useStarSettingsStore();
   const [isScrolled, setIsScrolled] = React.useState(false);
 
   const handlePopstateEvent = React.useCallback(() => {
@@ -61,26 +65,39 @@ export function MainNav({ items }: MainNavProps) {
         handleDefaultSearchInp();
       }, 20);
 
-      // Use AI-powered search
-      fetch(AI_SEARCH_ENDPOINT, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ query: search }),
-      })
-        .then(async (response) => {
-          if (!response.ok) throw new Error('Search failed');
-          const data = (await response.json()) as SearchResult;
-          void searchStore.setShows(data.results);
+      // Use AI-powered search only if Star Search is enabled
+      if (enableStarSearch) {
+        fetch(AI_SEARCH_ENDPOINT, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ query: search }),
         })
-        .catch((e) => {
-          console.error('Search error:', e);
-          void searchStore.setShows([]);
-        })
-        .finally(() => searchStore.setLoading(false));
+          .then(async (response) => {
+            if (!response.ok) throw new Error('Search failed');
+            const data = (await response.json()) as SearchResult;
+            void searchStore.setShows(data.results);
+          })
+          .catch((e) => {
+            console.error('Search error:', e);
+            void searchStore.setShows([]);
+          })
+          .finally(() => searchStore.setLoading(false));
+      } else {
+        // Use regular search
+        MovieService.searchMovies(search)
+          .then((response) => {
+            void searchStore.setShows(response.results);
+          })
+          .catch((e) => {
+            console.error('Search error:', e);
+            void searchStore.setShows([]);
+          })
+          .finally(() => searchStore.setLoading(false));
+      }
     }
-  }, [searchStore]);
+  }, [searchStore, enableStarSearch]);
 
   React.useEffect(() => {
     window.addEventListener('popstate', handlePopstateEvent, false);
@@ -114,25 +131,32 @@ export function MainNav({ items }: MainNavProps) {
     searchStore.setLoading(true);
 
     try {
-      // Always use AI-powered search
-      const response = await fetch(AI_SEARCH_ENDPOINT, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ query: normalizedValue }),
-      });
+      if (enableStarSearch) {
+        // Use AI-powered search when Star Search is enabled
+        const response = await fetch(AI_SEARCH_ENDPOINT, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ query: normalizedValue }),
+        });
 
-      if (!response.ok) {
-        throw new Error('AI search failed');
+        if (!response.ok) {
+          throw new Error('AI search failed');
+        }
+
+        const data = (await response.json()) as {
+          results: Show[];
+        };
+
+        searchStore.setLoading(false);
+        void searchStore.setShows(data.results);
+      } else {
+        // Use regular search when Star Search is disabled
+        const response = await MovieService.searchMovies(normalizedValue);
+        searchStore.setLoading(false);
+        void searchStore.setShows(response.results);
       }
-
-      const data = (await response.json()) as {
-        results: Show[];
-      };
-
-      searchStore.setLoading(false);
-      void searchStore.setShows(data.results);
     } catch (error) {
       console.error('Search error:', error);
       searchStore.setLoading(false);
@@ -251,6 +275,10 @@ export function MainNav({ items }: MainNavProps) {
           </div>
         </div>
         <div className="flex items-center gap-2 rounded-full border border-border/60 bg-background/80 px-3 py-2 shadow-sm backdrop-blur">
+          <StarSearchToggle
+            enabled={enableStarSearch}
+            onToggle={toggleStarSearch}
+          />
           <DebouncedInput
             id="search-input"
             open={searchStore.isOpen}
