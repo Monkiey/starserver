@@ -78,9 +78,9 @@ export function MainNav({ items }: MainNavProps) {
       return;
     }
 
+    searchStore.setLoading(true);
     router.push(`/search?q=${encodeURIComponent(normalizedValue)}`);
     searchStore.setQuery(normalizedValue);
-    searchStore.setLoading(true);
   }
 
   // change background color on scroll
