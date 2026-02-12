@@ -66,7 +66,10 @@ export function MainNav({ items }: MainNavProps) {
       }, 20);
 
       // Use AI-powered search only if Star Search is enabled
-      if (enableStarSearch) {
+      // Read the current state directly from the store to avoid stale closure
+      const isStarSearchEnabled =
+        useStarSettingsStore.getState().enableStarSearch;
+      if (isStarSearchEnabled) {
         fetch(AI_SEARCH_ENDPOINT, {
           method: 'POST',
           headers: {
@@ -97,7 +100,7 @@ export function MainNav({ items }: MainNavProps) {
           .finally(() => searchStore.setLoading(false));
       }
     }
-  }, [searchStore, enableStarSearch]);
+  }, [searchStore]);
 
   React.useEffect(() => {
     window.addEventListener('popstate', handlePopstateEvent, false);
@@ -131,7 +134,10 @@ export function MainNav({ items }: MainNavProps) {
     searchStore.setLoading(true);
 
     try {
-      if (enableStarSearch) {
+      // Read the current state directly from the store
+      const isStarSearchEnabled =
+        useStarSettingsStore.getState().enableStarSearch;
+      if (isStarSearchEnabled) {
         // Use AI-powered search when Star Search is enabled
         const response = await fetch(AI_SEARCH_ENDPOINT, {
           method: 'POST',
