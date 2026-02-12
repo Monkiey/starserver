@@ -18,46 +18,61 @@ export async function POST(request: Request) {
       );
     }
 
-    // Get diverse shows from multiple categories to search through
-    const diverseShows = await MovieService.getShows([
-      {
-        title: 'Top Rated Movies',
-        req: {
-          requestType: RequestType.TOP_RATED,
-          mediaType: MediaType.MOVIE,
+    // Use AI to analyze the prompt and extract search keywords
+    const searchIntent = await AIService.analyzeSearchIntent(prompt);
+    
+    // Search TMDB using the extracted keywords to get relevant shows
+    const searchResults = await MovieService.searchMovies(
+      searchIntent.keywords.join(' '),
+    );
+    
+    // If we didn't get enough results from search, supplement with popular/top-rated shows
+    let allShows = searchResults.results;
+    
+    if (allShows.length < 20) {
+      const diverseShows = await MovieService.getShows([
+        {
+          title: 'Top Rated Movies',
+          req: {
+            requestType: RequestType.TOP_RATED,
+            mediaType: MediaType.MOVIE,
+          },
+          visible: true,
         },
-        visible: true,
-      },
-      {
-        title: 'Top Rated TV',
-        req: { requestType: RequestType.TOP_RATED, mediaType: MediaType.TV },
-        visible: true,
-      },
-      {
-        title: 'Popular Movies',
-        req: { requestType: RequestType.POPULAR, mediaType: MediaType.MOVIE },
-        visible: true,
-      },
-      {
-        title: 'Popular TV',
-        req: { requestType: RequestType.POPULAR, mediaType: MediaType.TV },
-        visible: true,
-      },
-    ]);
-
-    // Combine shows from all categories
-    const allShows = diverseShows.flatMap((category) => category.shows);
+        {
+          title: 'Top Rated TV',
+          req: { requestType: RequestType.TOP_RATED, mediaType: MediaType.TV },
+          visible: true,
+        },
+        {
+          title: 'Popular Movies',
+          req: { requestType: RequestType.POPULAR, mediaType: MediaType.MOVIE },
+          visible: true,
+        },
+        {
+          title: 'Popular TV',
+          req: { requestType: RequestType.POPULAR, mediaType: MediaType.TV },
+          visible: true,
+        },
+      ]);
+      
+      const supplementalShows = diverseShows.flatMap((category) => category.shows);
+      // Combine search results with supplemental shows, avoiding duplicates
+      const existingIds = new Set(allShows.map(show => show.id));
+      const uniqueSupplemental = supplementalShows.filter(show => !existingIds.has(show.id));
+      allShows = [...allShows, ...uniqueSupplemental];
+    }
 
     // Use AI to find shows matching the user's natural language prompt
-    const searchResults = await AIService.searchByPrompt(allShows, prompt);
+    const aiResults = await AIService.searchByPrompt(allShows, prompt);
 
     // Get the actual show objects that AI recommended
-    const matchedIds = new Set(searchResults.matches.map((m) => m.showId));
+    const matchedIds = new Set(aiResults.matches.map((m) => m.showId));
     const matchedShows = allShows.filter((show) => matchedIds.has(show.id));
 
     return NextResponse.json({
       shows: matchedShows,
-      explanation: searchResults.explanation,
+      explanation: aiResults.explanation,
       query: prompt,
     });
   } catch (error: unknown) {
