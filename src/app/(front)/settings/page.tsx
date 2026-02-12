@@ -9,10 +9,8 @@ export default function SettingsPage() {
   const {
     enableStarRecommendations,
     enableStarPromptSearch,
-    enableStarSearch,
     toggleStarRecommendations,
     toggleStarPromptSearch,
-    toggleStarSearch,
     resetToDefaults,
   } = useStarSettingsStore();
 
@@ -82,7 +80,8 @@ export default function SettingsPage() {
                 <p className="text-sm text-muted-foreground">
                   Search for content using natural language descriptions like
                   &quot;action movies with car chases&quot; or &quot;funny shows
-                  about friends&quot;.
+                  about friends&quot;. The main search bar now uses AI to
+                  understand both keywords and natural descriptions.
                 </p>
               </div>
               <button
@@ -94,36 +93,6 @@ export default function SettingsPage() {
                 <span
                   className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${
                     enableStarPromptSearch ? 'translate-x-5' : 'translate-x-0.5'
-                  }`}
-                />
-              </button>
-            </div>
-
-            {/* Star Search Toggle */}
-            <div className="flex items-start justify-between gap-4 border-b pb-6 last:border-b-0 last:pb-0">
-              <div className="flex-1">
-                <div className="mb-1 flex items-center gap-2">
-                  <h3 className="font-medium">Star-Powered Search</h3>
-                  {enableStarSearch && (
-                    <span className="rounded-full bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-600 dark:text-green-400">
-                      Enabled
-                    </span>
-                  )}
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Enhance search queries with AI to find better matches. Toggle
-                  the Star button in the navigation search to use this feature.
-                </p>
-              </div>
-              <button
-                onClick={toggleStarSearch}
-                className={`relative h-6 w-11 rounded-full transition-colors ${
-                  enableStarSearch ? 'bg-primary' : 'bg-muted'
-                }`}
-                aria-label="Toggle Star Search">
-                <span
-                  className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${
-                    enableStarSearch ? 'translate-x-5' : 'translate-x-0.5'
                   }`}
                 />
               </button>
