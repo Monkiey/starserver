@@ -1,6 +1,6 @@
 import { env } from '@/env.mjs';
 import { buildMovieUrl } from '@/lib/utils';
-import { getTrendingAll } from '@/services/MovieService/tmdbService';
+import MovieService from '@/services/MovieService';
 
 export async function GET(request: Request, ctx: { params: { id: string } }) {
   if (!ctx.params.id) return new Response('Not found', { status: 404 });
@@ -13,7 +13,7 @@ export async function GET(request: Request, ctx: { params: { id: string } }) {
       `${env.NEXT_PUBLIC_APP_URL}/movies`,
     ];
   } else {
-    const data = await getTrendingAll(id);
+    const data = await MovieService.getTrendingAll(id);
     data.results.forEach((show) => urls.push(buildMovieUrl(show)));
   }
   const sitemap = `<urlset xmlns="https://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">

@@ -179,6 +179,13 @@ class MovieService extends BaseService {
     return shows;
   };
 
+  static getTrendingAll = cache(async (page?: number) => {
+    const { data } = await this.axios(baseUrl).get<TmdbPagingResponse>(
+      `/trending/all/week?language=en-US&page=${page ?? 1}`,
+    );
+    return data;
+  });
+
   static searchMovies = cache(async (query: string, page?: number) => {
     const normalizedQuery = query.trim().toLowerCase();
     const { data } = await this.axios(baseUrl).get<TmdbPagingResponse>(
