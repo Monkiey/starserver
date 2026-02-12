@@ -23,8 +23,8 @@ export default function SettingsPage() {
 
           <p className="text-sm text-muted-foreground">
             Star Recommendations now power your For You section automatically.
-            No setup is needed, and the feature stays on to personalize what you
-            see.
+            No setup is needed, and the feature remains enabled to personalize
+            what you see.
           </p>
         </div>
 
