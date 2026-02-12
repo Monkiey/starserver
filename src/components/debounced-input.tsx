@@ -9,7 +9,7 @@ interface DebouncedInputProps extends Omit<InputProps, 'onChange'> {
   containerClassName?: string;
   value: string;
   open: boolean;
-  onChange: (value: string) => Promise<void>;
+  onChange: (value: string) => void | Promise<void>;
   onChangeStatusOpen: (value: boolean) => void;
   debounceTimeout?: number;
   maxLength?: number;

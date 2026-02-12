@@ -63,7 +63,7 @@ export function MainNav({ items }: MainNavProps) {
     };
   }, [handlePopstateEvent]);
 
-  function searchShowsByQuery(value: string): Promise<void> {
+  function searchShowsByQuery(value: string): void {
     const normalizedValue = value?.trim() ?? '';
     if (!normalizedValue.length) {
       if (path === '/search') {
@@ -71,13 +71,12 @@ export function MainNav({ items }: MainNavProps) {
       } else {
         window.history.pushState(null, '', path);
       }
-      return Promise.resolve();
+      return;
     }
 
     router.push(`/search?q=${encodeURIComponent(normalizedValue)}`);
     searchStore.setQuery(normalizedValue);
     searchStore.setLoading(true);
-    return Promise.resolve();
   }
 
   // change background color on scroll
