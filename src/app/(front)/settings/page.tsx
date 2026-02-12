@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { Icons } from '@/components/icons';
 
 export default function SettingsPage() {
   return (
@@ -10,39 +9,14 @@ export default function SettingsPage() {
         <div className="mb-8">
           <h1 className="mb-2 text-3xl font-bold">Settings</h1>
           <p className="text-muted-foreground">
-            Customize your viewing experience and Star AI features
+            Customize your viewing experience.
           </p>
         </div>
 
-        {/* Star Features Section */}
-        <div className="mb-8 rounded-lg border bg-card p-6">
-          <div className="mb-6 flex items-center gap-3">
-            <Icons.sparkles className="h-6 w-6 text-yellow-500" />
-            <h2 className="text-2xl font-semibold">Star AI Features</h2>
-          </div>
-
+        <div className="rounded-lg border bg-card p-6">
           <p className="text-sm text-muted-foreground">
-            Star Recommendations now power your For You section automatically.
-            No setup is needed, and the feature remains enabled to personalize
-            what you see.
+            There are currently no configurable settings.
           </p>
-        </div>
-
-        {/* Info Box */}
-        <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-950/20">
-          <div className="flex gap-3">
-            <Icons.info className="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-600 dark:text-blue-400" />
-            <div>
-              <h4 className="mb-1 font-medium text-blue-900 dark:text-blue-100">
-                About Star AI Features
-              </h4>
-              <p className="text-sm text-blue-800 dark:text-blue-200">
-                Star features use advanced AI to enhance your browsing
-                experience and power the For You row. Personalization happens
-                locally in your browser.
-              </p>
-            </div>
-          </div>
         </div>
       </div>
     </div>
