@@ -18,6 +18,7 @@ function SearchContainer({ shows, query }: SearchContainer) {
     searchStore.setOpen(true);
     searchStore.setQuery(query);
     searchStore.setShows(shows);
+    searchStore.setLoading(false);
     const timer1: NodeJS.Timeout = setTimeout(() => {
       handleDefaultSearchBtn();
     }, 5);

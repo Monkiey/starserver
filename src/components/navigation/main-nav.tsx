@@ -45,6 +45,7 @@ export function MainNav({ items }: MainNavProps) {
       searchStore.setOpen(false);
     } else if (search?.length) {
       searchStore.setOpen(true);
+      searchStore.setLoading(true);
       searchStore.setQuery(search);
       setTimeout(() => {
         handleDefaultSearchBtn();
@@ -62,7 +63,7 @@ export function MainNav({ items }: MainNavProps) {
     };
   }, [handlePopstateEvent]);
 
-  function searchShowsByQuery(value: string) {
+  function searchShowsByQuery(value: string): Promise<void> {
     const normalizedValue = value?.trim() ?? '';
     if (!normalizedValue.length) {
       if (path === '/search') {
@@ -70,12 +71,13 @@ export function MainNav({ items }: MainNavProps) {
       } else {
         window.history.pushState(null, '', path);
       }
-      return;
+      return Promise.resolve();
     }
 
-    router.push(`/search?q=${normalizedValue}`);
+    router.push(`/search?q=${encodeURIComponent(normalizedValue)}`);
     searchStore.setQuery(normalizedValue);
-    searchStore.setLoading(false);
+    searchStore.setLoading(true);
+    return Promise.resolve();
   }
 
   // change background color on scroll
