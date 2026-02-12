@@ -1,293 +1,364 @@
-import { GoogleGenerativeAI, type GenerativeModel } from '@google/generative-ai';
-import { env } from '@/env.mjs';
 import type { Show } from '@/types';
+import { Genre } from '@/enums/genre';
 
 class AIService {
-  private static client: GoogleGenerativeAI | null = null;
-  private static model: GenerativeModel | null = null;
+  private static readonly STOP_WORDS = new Set([
+    'a',
+    'an',
+    'the',
+    'of',
+    'for',
+    'and',
+    'or',
+    'to',
+    'with',
+    'about',
+    'on',
+    'watch',
+    'show',
+    'movie',
+    'series',
+    'tv',
+    'please',
+    'find',
+    'me',
+    'something',
+    'that',
+    'i',
+    'want',
+    'good',
+  ]);
 
-  private static getModel(): GenerativeModel | null {
-    if (!env.GEMINI_API_KEY) {
-      console.warn('Gemini API key not configured');
-      return null;
-    }
+  private static readonly GENRE_KEYWORDS: Record<Genre, string[]> = {
+    [Genre.ACTION]: ['action', 'battle', 'fight', 'explosive'],
+    [Genre.ADVENTURE]: ['adventure', 'quest', 'journey'],
+    [Genre.ANIMATION]: ['animated', 'animation', 'cartoon', 'anime'],
+    [Genre.COMEDY]: ['comedy', 'funny', 'humor', 'laugh'],
+    [Genre.CRIME]: ['crime', 'detective', 'heist', 'mystery'],
+    [Genre.DOCUMENTARY]: ['documentary', 'doc'],
+    [Genre.DRAMA]: ['drama', 'dramatic', 'emotional'],
+    [Genre.FAMILY]: ['family', 'kids', 'children'],
+    [Genre.FANTASY]: ['fantasy', 'magic', 'wizard', 'dragon'],
+    [Genre.HORROR]: ['horror', 'scary', 'thriller', 'ghost'],
+    [Genre.MUSIC]: ['music', 'musical', 'concert'],
+    [Genre.ROMANCE]: ['romance', 'romantic', 'love', 'relationship'],
+    [Genre.SCIENCE_FICTION]: ['sci-fi', 'science fiction', 'space', 'future'],
+    [Genre.THRILLER]: ['thriller', 'suspense', 'tense'],
+  };
+  private static readonly MAX_SUMMARY_KEYWORDS = 3; // Keeps summary concise for UI
+  private static readonly SUGGESTION_DIVERSITY_MOD = 7;
+  private static readonly SUGGESTION_DIVERSITY_WEIGHT = 0.5;
+  private static readonly SEARCH_DIVERSITY_MOD = 5;
 
-    if (!this.client) {
-      this.client = new GoogleGenerativeAI(env.GEMINI_API_KEY);
-    }
-
-    if (!this.model) {
-      this.model = this.client.getGenerativeModel({
-        model: 'gemini-1.5-flash',
-      });
-    }
-
-    return this.model;
+  private static escapeRegex(text: string): string {
+    return text.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
   }
 
-  static async enhanceSearchQuery(query: string): Promise<string> {
-    const model = this.getModel();
-    if (!model) {
-      return query;
-    }
+  private static normalizeText(text: string): string {
+    return text.toLowerCase().replace(/[^a-z0-9\s'-]/g, ' ');
+  }
 
-    try {
-      const completion = await model.generateContent({
-        systemInstruction: {
-          role: 'system',
-          parts: [
-            {
-              text: 'You are a movie and TV show search assistant. Given a user query, extract the main movie or TV show name they are looking for. Return ONLY the title, nothing else. If the query is already clear, return it as is.',
-            },
-          ],
-        },
-        contents: [
-          {
-            role: 'user',
-            parts: [{ text: query }],
-          },
-        ],
-        generationConfig: {
-          maxOutputTokens: 50,
-          temperature: 0.3,
-        },
+  private static tokenize(text: string): string[] {
+    return this.normalizeText(text)
+      .split(/\s+/)
+      .filter((token) => token && !this.STOP_WORDS.has(token));
+  }
+
+  private static deriveGenres(keywords: string[]): Set<Genre> {
+    const matches = new Set<Genre>();
+    keywords.forEach((word) => {
+      Object.entries(this.GENRE_KEYWORDS).forEach(([genre, cues]) => {
+        const matchCue = cues.some((cue) => {
+          const pattern = new RegExp(`\\b${this.escapeRegex(cue)}\\b`, 'i');
+          return pattern.test(word);
+        });
+        if (matchCue) {
+          matches.add(Number(genre) as Genre);
+        }
       });
+    });
+    return matches;
+  }
 
-      const enhancedQuery = completion.response.text().trim();
-      return enhancedQuery ?? query;
-    } catch (error) {
-      console.error('Error enhancing search query with AI:', error);
-      return query;
+  private static genreName(genre: Genre): string {
+    switch (genre) {
+      case Genre.ACTION:
+        return 'Action';
+      case Genre.ADVENTURE:
+        return 'Adventure';
+      case Genre.ANIMATION:
+        return 'Animation';
+      case Genre.COMEDY:
+        return 'Comedy';
+      case Genre.CRIME:
+        return 'Crime';
+      case Genre.DOCUMENTARY:
+        return 'Documentary';
+      case Genre.DRAMA:
+        return 'Drama';
+      case Genre.FAMILY:
+        return 'Family';
+      case Genre.FANTASY:
+        return 'Fantasy';
+      case Genre.HORROR:
+        return 'Horror';
+      case Genre.MUSIC:
+        return 'Music';
+      case Genre.ROMANCE:
+        return 'Romance';
+      case Genre.SCIENCE_FICTION:
+        return 'Sci-Fi';
+      case Genre.THRILLER:
+        return 'Thriller';
+      default:
+        return 'Top Pick';
     }
   }
 
-  static async generatePersonalizedSuggestions(
+  private static buildReason(
+    show: Show,
+    keywords: string[],
+    genreHints: Set<Genre>,
+  ): string {
+    const title = `${show.title ?? ''} ${show.name ?? ''}`.toLowerCase();
+    const overview = (show.overview ?? '').toLowerCase();
+    const matchedKeyword = keywords.find(
+      (kw) => title.includes(kw) || overview.includes(kw),
+    );
+    const matchedGenre = (
+      show as Partial<{ genre_ids: number[] }>
+    ).genre_ids?.find((id) => genreHints.has(id as Genre));
+
+    const reasons: string[] = [];
+    if (matchedKeyword) {
+      reasons.push(`Matches your interest in "${matchedKeyword}"`);
+    }
+    if (matchedGenre) {
+      reasons.push(`${this.genreName(matchedGenre as Genre)} favorite`);
+    }
+    if ((show.vote_average ?? 0) >= 7.5) {
+      const rating = (show.vote_average ?? 0).toFixed(1);
+      reasons.push(`Rated ${rating}`);
+    } else if ((show.popularity ?? 0) > 500) {
+      reasons.push('Trending with viewers');
+    }
+
+    if (!reasons.length) {
+      reasons.push('Popular pick right now');
+    }
+
+    return reasons.slice(0, 2).join(' · ');
+  }
+
+  private static buildSummaryMessage(
+    preferenceKeywords: string[],
+    hasRanked: boolean,
+  ): string {
+    if (!hasRanked) {
+      return 'Here are some popular movies and shows for you.';
+    }
+
+    if (preferenceKeywords.length) {
+      return `Personalized picks tuned to ${preferenceKeywords
+        .slice(0, this.MAX_SUMMARY_KEYWORDS)
+        .join(', ')}.`;
+    }
+
+    return 'Top picks curated locally for you right now.';
+  }
+
+  static enhanceSearchQuery(query: string): Promise<string> {
+    const trimmed = query.trim();
+    if (!trimmed.length) return Promise.resolve(query);
+
+    const quotedMatch = trimmed.match(/"([^"]+)"/);
+    if (quotedMatch?.[1]) {
+      return Promise.resolve(quotedMatch[1].trim());
+    }
+
+    const tokens = this.tokenize(trimmed);
+    if (!tokens.length) {
+      return Promise.resolve(trimmed);
+    }
+
+    const cleaned = tokens.join(' ');
+    return Promise.resolve(cleaned.length ? cleaned : trimmed);
+  }
+
+  static generatePersonalizedSuggestions(
     shows: Show[],
     userPreferences?: string,
   ): Promise<{
     suggestions: Array<{ showId: number; reason: string }>;
     summary: string;
   }> {
-    const model = this.getModel();
-    if (!model || shows.length === 0) {
-      return {
+    if (shows.length === 0) {
+      return Promise.resolve({
         suggestions: shows.slice(0, 5).map((show) => ({
           showId: show.id,
           reason: 'Popular content',
         })),
         summary: 'Here are some popular movies and shows for you.',
-      };
+      });
     }
 
-    try {
-      const showsData = shows.slice(0, 20).map((show) => ({
-        id: show.id,
-        title: show.title ?? show.name,
-        overview: show.overview?.substring(0, 150),
-        rating: show.vote_average,
-        popularity: show.popularity,
-      }));
+    const preferenceKeywords = this.tokenize(userPreferences ?? '');
+    const genreHints = this.deriveGenres(preferenceKeywords);
 
-      const completion = await model.generateContent({
-        systemInstruction: {
-          role: 'system',
-          parts: [
-            {
-              text: `You are a movie and TV show recommendation expert. Given a list of shows, select the top 5 most interesting ones and provide brief, engaging reasons why users should watch them. ${
-                userPreferences ? `User preferences: ${userPreferences}` : ''
-              }
-Return your response as a JSON object with:
-- "suggestions": array of {showId: number, reason: string}
-- "summary": a brief one-sentence summary of the recommendations`,
-            },
-          ],
-        },
-        contents: [
-          {
-            role: 'user',
-            parts: [{ text: JSON.stringify(showsData) }],
-          },
-        ],
-        generationConfig: {
-          maxOutputTokens: 500,
-          temperature: 0.7,
-          responseMimeType: 'application/json',
-        },
+    const scored = new Map<
+      number,
+      { score: number; show: Show; reason: string }
+    >();
+
+    shows.forEach((show) => {
+      const title = `${show.title ?? ''} ${show.name ?? ''}`.toLowerCase();
+      const overview = (show.overview ?? '').toLowerCase();
+      const genreIds =
+        (show as Partial<{ genre_ids: number[] }>).genre_ids ?? [];
+
+      let score =
+        (show.vote_average ?? 0) * 10 +
+        (show.popularity ?? 0) +
+        (show.vote_count ?? 0) * 0.05;
+
+      preferenceKeywords.forEach((keyword) => {
+        if (title.includes(keyword)) {
+          score += 80;
+        } else if (overview.includes(keyword)) {
+          score += 40;
+        }
       });
 
-      const response = completion.response.text();
-      if (response) {
-        const parsed = JSON.parse(response) as {
-          suggestions: Array<{ showId: number; reason: string }>;
-          summary: string;
-        };
-        return parsed;
+      if (genreIds.some((id) => genreHints.has(id as Genre))) {
+        score += 50;
       }
 
-      return {
-        suggestions: shows.slice(0, 5).map((show) => ({
-          showId: show.id,
-          reason: 'Highly recommended',
-        })),
-        summary: 'Here are some great picks for you.',
-      };
-    } catch (error) {
-      console.error('Error generating AI suggestions:', error);
-      return {
-        suggestions: shows.slice(0, 5).map((show) => ({
-          showId: show.id,
-          reason: 'Popular content',
-        })),
-        summary: 'Here are some popular movies and shows for you.',
-      };
-    }
+      // Stable variety based on id
+      score +=
+        (show.id % this.SUGGESTION_DIVERSITY_MOD) *
+        this.SUGGESTION_DIVERSITY_WEIGHT;
+
+      const reason = this.buildReason(show, preferenceKeywords, genreHints);
+      const existing = scored.get(show.id);
+      if (!existing || existing.score < score) {
+        scored.set(show.id, { score, show, reason });
+      }
+    });
+
+    const ranked = Array.from(scored.values())
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 5);
+
+    const summary = this.buildSummaryMessage(
+      preferenceKeywords,
+      ranked.length > 0,
+    );
+
+    return Promise.resolve({
+      suggestions: ranked.map((entry) => ({
+        showId: entry.show.id,
+        reason: entry.reason,
+      })),
+      summary,
+    });
   }
 
-  static async analyzeSearchIntent(query: string): Promise<{
+  static analyzeSearchIntent(query: string): Promise<{
     intent: 'movie' | 'tv' | 'both';
     genre?: string;
     keywords: string[];
   }> {
-    const model = this.getModel();
-    if (!model) {
-      return {
-        intent: 'both',
-        keywords: query.split(' '),
-      };
-    }
+    const lower = query.toLowerCase();
+    const keywords = this.tokenize(query);
+    const genreHints = this.deriveGenres(keywords);
 
-    try {
-      const completion = await model.generateContent({
-        systemInstruction: {
-          role: 'system',
-          parts: [
-            {
-              text: `You are a search intent analyzer for movies and TV shows. Analyze the user's query and determine:
-1. Whether they're looking for movies, TV shows, or both
-2. What genre they might be interested in (if clear from the query)
-3. Key search terms to use
+    const isTv =
+      lower.includes('season') ||
+      lower.includes('episode') ||
+      lower.includes('tv') ||
+      lower.includes('series');
+    const isMovie = lower.includes('movie') || lower.includes('film');
 
-Return a JSON object with: {"intent": "movie"|"tv"|"both", "genre": string|null, "keywords": string[]}`,
-            },
-          ],
-        },
-        contents: [
-          {
-            role: 'user',
-            parts: [{ text: query }],
-          },
-        ],
-        generationConfig: {
-          maxOutputTokens: 150,
-          temperature: 0.3,
-          responseMimeType: 'application/json',
-        },
-      });
+    const intent: 'movie' | 'tv' | 'both' = isTv
+      ? isMovie
+        ? 'both'
+        : 'tv'
+      : isMovie
+      ? 'movie'
+      : 'both';
 
-      const response = completion.response.text();
-      if (response) {
-        const parsed = JSON.parse(response) as {
-          intent: 'movie' | 'tv' | 'both';
-          genre?: string | null;
-          keywords: string[];
-        };
-        return {
-          intent: parsed.intent ?? 'both',
-          genre: parsed.genre ?? undefined,
-          keywords: parsed.keywords ?? query.split(' '),
-        };
-      }
+    const genre =
+      genreHints.size > 0
+        ? this.genreName(Array.from(genreHints)[0])
+        : undefined;
 
-      return {
-        intent: 'both',
-        keywords: query.split(' '),
-      };
-    } catch (error) {
-      console.error('Error analyzing search intent:', error);
-      return {
-        intent: 'both',
-        keywords: query.split(' '),
-      };
-    }
+    return Promise.resolve({
+      intent,
+      genre,
+      keywords: keywords.length ? keywords : query.split(' '),
+    });
   }
 
-  static async searchByPrompt(
+  static searchByPrompt(
     shows: Show[],
     prompt: string,
   ): Promise<{
     matches: Array<{ showId: number }>;
     explanation: string;
   }> {
-    const model = this.getModel();
-    if (!model || shows.length === 0) {
-      return {
+    if (shows.length === 0) {
+      return Promise.resolve({
         matches: shows.slice(0, 10).map((show) => ({ showId: show.id })),
         explanation: 'Here are some popular shows that might interest you.',
-      };
+      });
     }
 
-    try {
-      const showsData = shows.slice(0, 50).map((show) => ({
-        id: show.id,
-        title: show.title ?? show.name,
-        overview: show.overview?.substring(0, 200),
-        genres: show.genre_ids as number[] | undefined,
-        rating: show.vote_average,
-        type: show.media_type,
-      }));
+    const keywords = this.tokenize(prompt);
+    const genreHints = this.deriveGenres(keywords);
 
-      const completion = await model.generateContent({
-        systemInstruction: {
-          role: 'system',
-          parts: [
-            {
-              text: `You are a movie and TV show search assistant. Given a user's natural language description, find up to 10 matching shows from the provided list.
-Analyze the user's intent, genre preferences, themes, and mood they're looking for.
-Return your response as a JSON object with:
-- "matches": array of {showId: number} for shows that best match the description
-- "explanation": a brief explanation of why these shows match the user's request`,
-            },
-          ],
-        },
-        contents: [
-          {
-            role: 'user',
-            parts: [
-              {
-                text: `User wants: "${prompt}"\n\nAvailable shows:\n${JSON.stringify(
-                  showsData,
-                )}`,
-              },
-            ],
-          },
-        ],
-        generationConfig: {
-          maxOutputTokens: 800,
-          temperature: 0.5,
-          responseMimeType: 'application/json',
-        },
+    const VOTE_WEIGHT = 5;
+    const POPULARITY_WEIGHT = 0.4;
+
+    const scored = shows.map((show) => {
+      const title = `${show.title ?? ''} ${show.name ?? ''}`.toLowerCase();
+      const overview = (show.overview ?? '').toLowerCase();
+      const genreIds =
+        (show as Partial<{ genre_ids: number[] }>).genre_ids ?? [];
+
+      let score =
+        (show.vote_average ?? 0) * VOTE_WEIGHT +
+        (show.popularity ?? 0) * POPULARITY_WEIGHT +
+        (show.id % this.SEARCH_DIVERSITY_MOD);
+
+      keywords.forEach((keyword) => {
+        if (title.includes(keyword)) {
+          score += 60;
+        } else if (overview.includes(keyword)) {
+          score += 30;
+        }
       });
 
-      const response = completion.response.text();
-      if (response) {
-        const parsed = JSON.parse(response) as {
-          matches: Array<{ showId: number }>;
-          explanation: string;
-        };
-        return parsed;
+      if (genreIds.some((id) => genreHints.has(id as Genre))) {
+        score += 25;
       }
 
-      return {
-        matches: shows.slice(0, 10).map((show) => ({ showId: show.id })),
-        explanation: 'Here are some shows that might match your description.',
-      };
-    } catch (error) {
-      console.error('Error searching by prompt:', error);
-      return {
-        matches: shows.slice(0, 10).map((show) => ({ showId: show.id })),
-        explanation: 'Here are some popular shows that might interest you.',
-      };
-    }
+      return { showId: show.id, score };
+    });
+
+    const matches = scored
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 10)
+      .map((entry) => ({ showId: entry.showId }));
+
+    const explanation =
+      keywords.length > 0
+        ? `Matched shows to themes like ${keywords.slice(0, 4).join(', ')}.`
+        : 'Showing a curated mix of popular titles.';
+
+    return Promise.resolve({
+      matches,
+      explanation,
+    });
   }
 }
 
