@@ -61,7 +61,7 @@ const ShowsCarousel = ({
       {shows.length !== 0 && (
         <div className="space-y-1 sm:space-y-2.5">
           {title && (
-            <h2 className="m-0 px-[4%] text-lg font-semibold text-foreground/80 transition-colors hover:text-foreground sm:text-xl 2xl:px-[60px]">
+            <h2 className="m-0 px-[4%] font-heading text-lg font-semibold uppercase tracking-wide text-foreground/80 transition-colors hover:text-foreground sm:text-xl 2xl:px-[60px]">
               {title}
             </h2>
           )}

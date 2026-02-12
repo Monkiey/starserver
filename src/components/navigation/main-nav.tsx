@@ -184,7 +184,7 @@ export function MainNav({ items }: MainNavProps) {
               className="hidden items-center space-x-2 md:flex"
               onClick={() => handleChangeStatusOpen(false)}>
               <Icons.logo className="h-6 w-6" aria-hidden="true" />
-              <span className="inline-block font-semibold">
+              <span className="inline-block font-heading text-lg font-semibold uppercase tracking-wide">
                 {siteConfig.name}
               </span>
               <span className="sr-only">Home</span>
@@ -216,7 +216,7 @@ export function MainNav({ items }: MainNavProps) {
                     variant="ghost"
                     className="flex items-center space-x-2 px-0 hover:bg-transparent focus:ring-0">
                     <Icons.logo className="h-6 w-6" />
-                    <span className="text-base font-semibold">Menu</span>
+                    <span className="font-heading text-base font-semibold uppercase tracking-wide">Menu</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
@@ -228,7 +228,7 @@ export function MainNav({ items }: MainNavProps) {
                       href="/"
                       className="flex items-center justify-center"
                       onClick={() => handleChangeStatusOpen(false)}>
-                      <span className="">{siteConfig.name}</span>
+                      <span className="font-heading uppercase tracking-wide">{siteConfig.name}</span>
                     </Link>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
