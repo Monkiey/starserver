@@ -7,23 +7,15 @@ import * as React from 'react';
 import { Icons } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import { cn, getNameFromShow, getSlug } from '@/lib/utils';
-import { usePathname } from 'next/navigation';
 import CustomImage from './custom-image';
 
 interface ShowsCarouselProps {
   /** Optional title for the carousel. When omitted, the carousel renders without a title header (e.g., for AI suggestions). */
   title?: string;
   shows: Show[];
-  getSuggestionReason?: (showId: number) => string | null;
 }
 
-const ShowsCarousel = ({
-  title,
-  shows,
-  getSuggestionReason,
-}: ShowsCarouselProps) => {
-  const pathname = usePathname();
-
+const ShowsCarousel = ({ title, shows }: ShowsCarouselProps) => {
   const showsRef = React.useRef<HTMLDivElement>(null);
   const [isScrollable, setIsScrollable] = React.useState(false);
 
@@ -80,16 +72,7 @@ const ShowsCarousel = ({
               ref={showsRef}
               className="no-scrollbar m-0 grid auto-cols-[calc(100%/3)] grid-flow-col overflow-x-auto overflow-y-hidden px-[4%] py-0 duration-500 ease-in-out sm:auto-cols-[25%] md:touch-pan-y lg:auto-cols-[20%] xl:auto-cols-[calc(100%/6)] 2xl:px-[60px]">
               {shows.map((show) => (
-                <ShowCard
-                  key={show.id}
-                  show={show}
-                  pathname={pathname}
-                  suggestionReason={
-                    getSuggestionReason
-                      ? getSuggestionReason(show.id)
-                      : undefined
-                  }
-                />
+                <ShowCard key={show.id} show={show} />
               ))}
             </div>
             <Button
@@ -108,14 +91,7 @@ const ShowsCarousel = ({
 
 export default ShowsCarousel;
 
-export const ShowCard = ({
-  show,
-  suggestionReason,
-}: {
-  show: Show;
-  pathname: string;
-  suggestionReason?: string | null;
-}) => {
+export const ShowCard = ({ show }: { show: Show }) => {
   const imageOnErrorHandler = (
     event: React.SyntheticEvent<HTMLImageElement, Event>,
   ) => {
@@ -132,12 +108,6 @@ export const ShowCard = ({
         aria-label={getNameFromShow(show)}
         href={`/${show.media_type}/${getSlug(show.id, getNameFromShow(show))}`}
       />
-      {suggestionReason && (
-        <div className="absolute left-2 top-2 z-10 rounded-md bg-yellow-500/90 px-2 py-1 text-xs font-semibold text-black">
-          <Icons.sparkles className="mr-1 inline h-3 w-3" />
-          Star Pick
-        </div>
-      )}
       {/* <source */}
       {/*   // srcSet={`https://image.tmdb.org/t/p/w342/${show.poster_path ?? show.backdrop_path}`} */}
       {/*   srcSet={ */}

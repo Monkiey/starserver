@@ -259,11 +259,6 @@ export function MainNav({ items }: MainNavProps) {
             onChangeStatusOpen={handleChangeStatusOpen}
             containerClassName="flex"
           />
-          <Link href="/settings" aria-label="Settings">
-            <Button variant="ghost" size="icon" className="h-9 w-9">
-              <Icons.settings className="h-[1.2rem] w-[1.2rem]" />
-            </Button>
-          </Link>
           <div className="rounded-full border border-border/60 bg-background/70 p-1">
             <ThemeToggle />
           </div>

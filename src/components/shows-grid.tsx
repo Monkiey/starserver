@@ -4,7 +4,6 @@ import { useModalStore } from '@/stores/modal';
 import type { Show } from '@/types';
 import ShowModal from './shows-modal';
 import { ShowCard } from './shows-carousel';
-import { usePathname } from 'next/navigation';
 import { useSearchStore } from '@/stores/search';
 import ShowsSkeleton from './shows-skeleton';
 import { cn } from '@/lib/utils';
@@ -15,7 +14,6 @@ interface SearchedShowsProps {
 }
 
 const ShowsGrid = ({ shows, query }: SearchedShowsProps) => {
-  const pathname = usePathname();
   // modal store
   const modalStore = useModalStore();
   const searchStore = useSearchStore();
@@ -46,7 +44,7 @@ const ShowsGrid = ({ shows, query }: SearchedShowsProps) => {
               query && 'max-sm:grid-cols-3 max-[375px]:grid-cols-2',
             )}>
             {shows.map((show: Show) => (
-              <ShowCard key={show.id} show={show} pathname={pathname} />
+              <ShowCard key={show.id} show={show} />
             ))}
           </div>
         )}

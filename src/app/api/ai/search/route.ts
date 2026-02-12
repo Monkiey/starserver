@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import AIService from '@/services/AIService';
 import MovieService from '@/services/MovieService';
 
 export async function POST(request: Request) {
@@ -11,15 +10,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Query is required' }, { status: 400 });
     }
 
-    // Use AI to enhance the search query
-    const enhancedQuery = await AIService.enhanceSearchQuery(query);
-
-    // Perform the search with the enhanced query
-    const searchResults = await MovieService.searchMovies(enhancedQuery);
+    const searchResults = await MovieService.searchMovies(query);
 
     return NextResponse.json({
       originalQuery: query,
-      enhancedQuery,
       results: searchResults.results,
       totalResults: searchResults.totalResults ?? 0,
     });
