@@ -135,7 +135,7 @@ export const ShowCard = ({
       {suggestionReason && (
         <div className="absolute left-2 top-2 z-10 rounded-md bg-yellow-500/90 px-2 py-1 text-xs font-semibold text-black">
           <Icons.sparkles className="mr-1 inline h-3 w-3" />
-          AI Pick
+          Star Pick
         </div>
       )}
       {/* <source */}

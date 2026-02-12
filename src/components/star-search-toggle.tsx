@@ -10,12 +10,12 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 
-interface AISearchToggleProps {
+interface StarSearchToggleProps {
   enabled: boolean;
   onToggle: (enabled: boolean) => void;
 }
 
-export function AISearchToggle({ enabled, onToggle }: AISearchToggleProps) {
+export function StarSearchToggle({ enabled, onToggle }: StarSearchToggleProps) {
   return (
     <TooltipProvider>
       <Tooltip>
@@ -28,14 +28,14 @@ export function AISearchToggle({ enabled, onToggle }: AISearchToggleProps) {
             <Icons.sparkles
               className={`h-4 w-4 ${enabled ? 'text-yellow-300' : ''}`}
             />
-            <span className="text-xs">AI</span>
+            <span className="text-xs">Star</span>
           </Button>
         </TooltipTrigger>
         <TooltipContent>
           <p>
             {enabled
-              ? 'AI-powered search is ON'
-              : 'Click to enable AI-powered search'}
+              ? 'Star-powered search is ON'
+              : 'Click to enable Star-powered search'}
           </p>
         </TooltipContent>
       </Tooltip>

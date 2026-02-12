@@ -25,7 +25,7 @@ import { useSearchStore } from '@/stores/search';
 import { ModeToggle as ThemeToggle } from '@/components/theme-toggle';
 import { DebouncedInput } from '@/components/debounced-input';
 import MovieService from '@/services/MovieService';
-import { AISearchToggle } from '@/components/ai-search-toggle';
+import { StarSearchToggle } from '@/components/star-search-toggle';
 
 interface MainNavProps {
   items?: NavItem[];
@@ -41,7 +41,7 @@ export function MainNav({ items }: MainNavProps) {
   // search store
   const searchStore = useSearchStore();
   const [isScrolled, setIsScrolled] = React.useState(false);
-  const [aiSearchEnabled, setAiSearchEnabled] = React.useState(false);
+  const [starSearchEnabled, setStarSearchEnabled] = React.useState(false);
 
   const handlePopstateEvent = React.useCallback(() => {
     const pathname = window.location.pathname;
@@ -104,8 +104,8 @@ export function MainNav({ items }: MainNavProps) {
 
     try {
       let shows;
-      if (aiSearchEnabled) {
-        // Use AI-enhanced search
+      if (starSearchEnabled) {
+        // Use Star-enhanced search
         const response = await fetch('/api/ai/search', {
           method: 'POST',
           headers: {
@@ -115,7 +115,7 @@ export function MainNav({ items }: MainNavProps) {
         });
 
         if (!response.ok) {
-          throw new Error('AI search failed');
+          throw new Error('Star search failed');
         }
 
         const data = (await response.json()) as {
@@ -254,9 +254,9 @@ export function MainNav({ items }: MainNavProps) {
             containerClassName="flex"
           />
           {searchStore.isOpen && (
-            <AISearchToggle
-              enabled={aiSearchEnabled}
-              onToggle={setAiSearchEnabled}
+            <StarSearchToggle
+              enabled={starSearchEnabled}
+              onToggle={setStarSearchEnabled}
             />
           )}
           <div className="rounded-full border border-border/60 bg-background/70 p-1">

@@ -5,30 +5,27 @@ import { Icons } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import type { Show } from '@/types';
 import ShowsCarousel from '@/components/shows-carousel';
+import { useContinueWatchingStore } from '@/stores/continue-watching';
 
-interface AISuggestionsProps {
-  shows: Show[];
-}
-
-interface AISuggestion {
+interface StarSuggestion {
   showId: number;
   reason: string;
 }
 
-interface AISuggestionsResponse {
-  suggestions: AISuggestion[];
+interface StarSuggestionsResponse {
+  suggestions: StarSuggestion[];
   summary: string;
+  shows: Show[];
 }
 
-export default function AISuggestions({ shows }: AISuggestionsProps) {
+export default function StarSuggestions() {
   const [suggestions, setSuggestions] =
-    React.useState<AISuggestionsResponse | null>(null);
+    React.useState<StarSuggestionsResponse | null>(null);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const { items: continueWatching } = useContinueWatchingStore();
 
   const loadSuggestions = React.useCallback(async () => {
-    if (shows.length === 0) return;
-
     setLoading(true);
     setError(null);
 
@@ -40,29 +37,23 @@ export default function AISuggestions({ shows }: AISuggestionsProps) {
         },
         body: JSON.stringify({
           userPreferences: '',
+          continueWatching: continueWatching.slice(0, 10), // Send up to 10 recent items
         }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to load AI suggestions');
+        throw new Error('Failed to load Star suggestions');
       }
 
-      const data = (await response.json()) as AISuggestionsResponse;
+      const data = (await response.json()) as StarSuggestionsResponse;
       setSuggestions(data);
     } catch (err) {
-      console.error('Error loading AI suggestions:', err);
-      setError('Failed to load AI-powered suggestions');
+      console.error('Error loading Star suggestions:', err);
+      setError('Failed to load Star-powered suggestions');
     } finally {
       setLoading(false);
     }
-  }, [shows]);
-
-  const suggestedShows = React.useMemo(() => {
-    if (!suggestions) return shows.slice(0, 10);
-
-    const suggestedIds = new Set(suggestions.suggestions.map((s) => s.showId));
-    return shows.filter((show) => suggestedIds.has(show.id));
-  }, [suggestions, shows]);
+  }, [continueWatching]);
 
   const getSuggestionReason = React.useCallback(
     (showId: number) => {
@@ -75,17 +66,13 @@ export default function AISuggestions({ shows }: AISuggestionsProps) {
     [suggestions],
   );
 
-  if (shows.length === 0) {
-    return null;
-  }
-
   return (
     <section className="relative mb-8 px-4 md:px-8">
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <h2 className="text-xl font-semibold md:text-2xl">
             <Icons.sparkles className="mr-2 inline-block h-5 w-5 text-yellow-500" />
-            AI-Powered Recommendations
+            Star Recommendations
           </h2>
         </div>
         <Button
@@ -102,7 +89,7 @@ export default function AISuggestions({ shows }: AISuggestionsProps) {
           ) : (
             <>
               <Icons.refresh className="h-4 w-4" />
-              Get Suggestions
+              Get Recommendations
             </>
           )}
         </Button>
@@ -115,15 +102,27 @@ export default function AISuggestions({ shows }: AISuggestionsProps) {
       )}
 
       {suggestions && (
-        <p className="mb-4 text-sm text-muted-foreground">
-          {suggestions.summary}
-        </p>
+        <>
+          <p className="mb-4 text-sm text-muted-foreground">
+            {suggestions.summary}
+          </p>
+          <ShowsCarousel
+            shows={suggestions.shows}
+            getSuggestionReason={getSuggestionReason}
+          />
+        </>
       )}
 
-      <ShowsCarousel
-        shows={suggestedShows}
-        getSuggestionReason={suggestions ? getSuggestionReason : undefined}
-      />
+      {!suggestions && !loading && !error && (
+        <div className="rounded-lg border border-dashed border-border p-8 text-center">
+          <Icons.sparkles className="mx-auto mb-3 h-12 w-12 text-muted-foreground/50" />
+          <p className="text-sm text-muted-foreground">
+            {continueWatching.length > 0
+              ? `Click "Get Recommendations" to receive personalized suggestions based on your watching history.`
+              : `Click "Get Recommendations" to discover top-rated and popular content.`}
+          </p>
+        </div>
+      )}
     </section>
   );
 }

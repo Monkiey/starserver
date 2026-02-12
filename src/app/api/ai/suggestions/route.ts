@@ -2,37 +2,78 @@ import { NextResponse } from 'next/server';
 import AIService from '@/services/AIService';
 import MovieService from '@/services/MovieService';
 import { RequestType } from '@/enums/request-type';
-import { MediaType } from '@/types';
+import { MediaType, type Show } from '@/types';
 
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as { userPreferences?: string };
-    const { userPreferences } = body;
+    const body = (await request.json()) as {
+      userPreferences?: string;
+      continueWatching?: Show[];
+    };
+    const { userPreferences, continueWatching } = body;
 
-    // Get trending shows to analyze
-    const trendingShows = await MovieService.getShows([
+    // Get diverse shows from multiple categories for AI to analyze
+    const diverseShows = await MovieService.getShows([
       {
-        title: 'Trending',
-        req: { requestType: RequestType.TRENDING, mediaType: MediaType.ALL },
+        title: 'Top Rated Movies',
+        req: {
+          requestType: RequestType.TOP_RATED,
+          mediaType: MediaType.MOVIE,
+        },
+        visible: true,
+      },
+      {
+        title: 'Top Rated TV',
+        req: { requestType: RequestType.TOP_RATED, mediaType: MediaType.TV },
+        visible: true,
+      },
+      {
+        title: 'Popular Movies',
+        req: { requestType: RequestType.POPULAR, mediaType: MediaType.MOVIE },
+        visible: true,
+      },
+      {
+        title: 'Popular TV',
+        req: { requestType: RequestType.POPULAR, mediaType: MediaType.TV },
         visible: true,
       },
     ]);
 
-    const shows = trendingShows[0]?.shows || [];
+    // Combine shows from all categories for diverse selection
+    const allShows = diverseShows.flatMap((category) => category.shows);
 
-    // Use AI to generate personalized suggestions
+    // Build user context from continue watching history
+    let userContext = userPreferences;
+    if (continueWatching && continueWatching.length > 0) {
+      const watchedTitles = continueWatching
+        .map((show) => show.title ?? show.name)
+        .filter(Boolean)
+        .join(', ');
+      userContext = `User has been watching: ${watchedTitles}. ${
+        userPreferences ?? ''
+      }`;
+    }
+
+    // Use AI to generate personalized suggestions from diverse content
     const suggestions = await AIService.generatePersonalizedSuggestions(
-      shows,
-      userPreferences ?? undefined,
+      allShows,
+      userContext,
+    );
+
+    // Get the actual show objects that AI recommended
+    const suggestedIds = new Set(suggestions.suggestions.map((s) => s.showId));
+    const recommendedShows = allShows.filter((show) =>
+      suggestedIds.has(show.id),
     );
 
     return NextResponse.json({
       suggestions: suggestions.suggestions,
       summary: suggestions.summary,
-      totalShows: shows.length,
+      shows: recommendedShows,
+      totalShows: allShows.length,
     });
-  } catch (error) {
-    console.error('Error generating AI suggestions:', error);
+  } catch (error: unknown) {
+    console.error('Error generating Star suggestions:', error);
     return NextResponse.json(
       { error: 'Failed to generate suggestions' },
       { status: 500 },
