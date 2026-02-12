@@ -54,7 +54,7 @@ export function MainNav({ items }: MainNavProps) {
         void searchShowsByQuery(searchStore.query);
       }
     },
-    [searchStore.query],
+    [searchStore.query, searchShowsByQuery],
   );
 
   const handlePopstateEvent = React.useCallback(() => {

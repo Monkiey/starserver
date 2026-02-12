@@ -3,6 +3,7 @@ import AIService from '@/services/AIService';
 import MovieService from '@/services/MovieService';
 import { RequestType } from '@/enums/request-type';
 import { MediaType } from '@/types';
+import type { Show, CategorizedShows } from '@/types';
 
 export async function POST(request: Request) {
   try {
@@ -20,15 +21,15 @@ export async function POST(request: Request) {
 
     // Use AI to analyze the prompt and extract search keywords
     const searchIntent = await AIService.analyzeSearchIntent(prompt);
-    
+
     // Search TMDB using the extracted keywords to get relevant shows
     const searchResults = await MovieService.searchMovies(
       searchIntent.keywords.join(' '),
     );
-    
+
     // If we didn't get enough results from search, supplement with popular/top-rated shows
     let allShows = searchResults.results;
-    
+
     if (allShows.length < 20) {
       const diverseShows = await MovieService.getShows([
         {
@@ -55,11 +56,15 @@ export async function POST(request: Request) {
           visible: true,
         },
       ]);
-      
-      const supplementalShows = diverseShows.flatMap((category) => category.shows);
+
+      const supplementalShows = diverseShows.flatMap(
+        (category: CategorizedShows) => category.shows,
+      );
       // Combine search results with supplemental shows, avoiding duplicates
-      const existingIds = new Set(allShows.map(show => show.id));
-      const uniqueSupplemental = supplementalShows.filter(show => !existingIds.has(show.id));
+      const existingIds = new Set(allShows.map((show: Show) => show.id));
+      const uniqueSupplemental = supplementalShows.filter(
+        (show: Show) => !existingIds.has(show.id),
+      );
       allShows = [...allShows, ...uniqueSupplemental];
     }
 
@@ -68,7 +73,9 @@ export async function POST(request: Request) {
 
     // Get the actual show objects that AI recommended
     const matchedIds = new Set(aiResults.matches.map((m) => m.showId));
-    const matchedShows = allShows.filter((show) => matchedIds.has(show.id));
+    const matchedShows = allShows.filter((show: Show) =>
+      matchedIds.has(show.id),
+    );
 
     return NextResponse.json({
       shows: matchedShows,
