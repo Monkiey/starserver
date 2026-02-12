@@ -74,6 +74,10 @@ export function MainNav({ items }: MainNavProps) {
       return;
     }
 
+    if (normalizedValue === searchStore.query) {
+      return;
+    }
+
     router.push(`/search?q=${encodeURIComponent(normalizedValue)}`);
     searchStore.setQuery(normalizedValue);
     searchStore.setLoading(true);
