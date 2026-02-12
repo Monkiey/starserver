@@ -1,6 +1,8 @@
 import ContinueWatching from '@/components/continue-watching';
 import Hero from '@/components/hero';
 import ShowsContainer from '@/components/shows-container';
+import StarSuggestions from '@/components/star-suggestions';
+import StarPromptSearch from '@/components/star-prompt-search';
 import { MediaType, type Show } from '@/types';
 import { siteConfig } from '@/configs/site';
 import { RequestType, type ShowRequest } from '@/enums/request-type';
@@ -112,6 +114,8 @@ export default async function Home() {
       <h1 className="hidden">{h1}</h1>
       <Hero randomShow={randomShow} />
       <ContinueWatching />
+      <StarPromptSearch />
+      <StarSuggestions />
       <ShowsContainer shows={allShows} />
     </>
   );

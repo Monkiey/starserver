@@ -8,6 +8,7 @@ export const env = createEnv({
    */
   server: {
     NODE_ENV: z.enum(['development', 'test', 'production']),
+    OPENAI_API_KEY: z.string().optional(),
   },
 
   /**
@@ -34,6 +35,7 @@ export const env = createEnv({
   runtimeEnv: {
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
     NODE_ENV: process.env.NODE_ENV,
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     NEXT_PUBLIC_TMDB_TOKEN: process.env.NEXT_PUBLIC_TMDB_TOKEN,
     NEXT_PUBLIC_GOOGLE_ANALYTICS_ID:
       process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID,

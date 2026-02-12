@@ -25,6 +25,8 @@ import { useSearchStore } from '@/stores/search';
 import { ModeToggle as ThemeToggle } from '@/components/theme-toggle';
 import { DebouncedInput } from '@/components/debounced-input';
 import MovieService from '@/services/MovieService';
+import { StarSearchToggle } from '@/components/star-search-toggle';
+import { useStarSettingsStore } from '@/stores/star-settings';
 
 interface MainNavProps {
   items?: NavItem[];
@@ -40,6 +42,8 @@ export function MainNav({ items }: MainNavProps) {
   // search store
   const searchStore = useSearchStore();
   const [isScrolled, setIsScrolled] = React.useState(false);
+  const [starSearchEnabled, setStarSearchEnabled] = React.useState(false);
+  const { enableStarSearch } = useStarSettingsStore();
 
   const handlePopstateEvent = React.useCallback(() => {
     const pathname = window.location.pathname;
@@ -99,9 +103,41 @@ export function MainNav({ items }: MainNavProps) {
 
     searchStore.setQuery(normalizedValue);
     searchStore.setLoading(true);
-    const shows = await MovieService.searchMovies(normalizedValue);
-    searchStore.setLoading(false);
-    void searchStore.setShows(shows.results);
+
+    try {
+      let shows;
+      if (starSearchEnabled) {
+        // Use Star-enhanced search
+        const response = await fetch('/api/ai/search', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ query: normalizedValue }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Star search failed');
+        }
+
+        const data = (await response.json()) as {
+          results: Show[];
+        };
+        shows = { results: data.results };
+      } else {
+        // Use regular search
+        shows = await MovieService.searchMovies(normalizedValue);
+      }
+
+      searchStore.setLoading(false);
+      void searchStore.setShows(shows.results);
+    } catch (error) {
+      console.error('Search error:', error);
+      // Fallback to regular search on error
+      const shows = await MovieService.searchMovies(normalizedValue);
+      searchStore.setLoading(false);
+      void searchStore.setShows(shows.results);
+    }
 
     if (typeof window !== 'undefined') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -219,6 +255,17 @@ export function MainNav({ items }: MainNavProps) {
             onChangeStatusOpen={handleChangeStatusOpen}
             containerClassName="flex"
           />
+          {searchStore.isOpen && enableStarSearch && (
+            <StarSearchToggle
+              enabled={starSearchEnabled}
+              onToggle={setStarSearchEnabled}
+            />
+          )}
+          <Link href="/settings" aria-label="Settings">
+            <Button variant="ghost" size="icon" className="h-9 w-9">
+              <Icons.settings className="h-[1.2rem] w-[1.2rem]" />
+            </Button>
+          </Link>
           <div className="rounded-full border border-border/60 bg-background/70 p-1">
             <ThemeToggle />
           </div>
