@@ -1,9 +1,15 @@
+process.env.SKIP_ENV_VALIDATION = '1';
+
 const path = require('path');
 
-const buildEslintCommand = (filenames) =>
-  `next lint --fix --file ${filenames
+const buildEslintCommand = (filenames) => {
+  const appFiles = filenames
     .map((f) => path.relative(process.cwd(), f))
-    .join(' --file ')}`;
+    .filter((f) => f.startsWith('src/'));
+  return appFiles.length > 0
+    ? `npx next lint --fix --file "${appFiles.join('" --file "')}"`
+    : 'echo "No app files to lint"';
+};
 
 module.exports = {
   '*.{js,jsx,ts,tsx}': [buildEslintCommand],
