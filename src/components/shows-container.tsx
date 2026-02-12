@@ -20,7 +20,6 @@ import { type AxiosResponse } from 'axios';
 import MovieService from '@/services/MovieService';
 
 interface ShowsContainerProps {
-  show?: Show;
   shows: CategorizedShows[];
 }
 
