@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import type { Show } from '@/types';
 import ShowsCarousel from '@/components/shows-carousel';
 import { useContinueWatchingStore } from '@/stores/continue-watching';
+import { useStarSettingsStore } from '@/stores/star-settings';
 
 interface StarSuggestion {
   showId: number;
@@ -23,7 +24,9 @@ export default function StarSuggestions() {
     React.useState<StarSuggestionsResponse | null>(null);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [refreshCount, setRefreshCount] = React.useState(0);
   const { items: continueWatching } = useContinueWatchingStore();
+  const { enableStarRecommendations } = useStarSettingsStore();
 
   const loadSuggestions = React.useCallback(async () => {
     setLoading(true);
@@ -38,6 +41,7 @@ export default function StarSuggestions() {
         body: JSON.stringify({
           userPreferences: '',
           continueWatching: continueWatching.slice(0, 10), // Send up to 10 recent items
+          refreshCount: refreshCount, // Send refresh count to get varied results
         }),
       });
 
@@ -47,13 +51,14 @@ export default function StarSuggestions() {
 
       const data = (await response.json()) as StarSuggestionsResponse;
       setSuggestions(data);
+      setRefreshCount((prev) => prev + 1); // Increment for next refresh
     } catch (err) {
       console.error('Error loading Star suggestions:', err);
       setError('Failed to load Star-powered suggestions');
     } finally {
       setLoading(false);
     }
-  }, [continueWatching]);
+  }, [continueWatching, refreshCount]);
 
   const getSuggestionReason = React.useCallback(
     (showId: number) => {
@@ -65,6 +70,11 @@ export default function StarSuggestions() {
     },
     [suggestions],
   );
+
+  // Don't render if Star Recommendations are disabled
+  if (!enableStarRecommendations) {
+    return null;
+  }
 
   return (
     <section className="relative mb-8 px-4 md:px-8">

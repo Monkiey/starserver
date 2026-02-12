@@ -26,6 +26,7 @@ import { ModeToggle as ThemeToggle } from '@/components/theme-toggle';
 import { DebouncedInput } from '@/components/debounced-input';
 import MovieService from '@/services/MovieService';
 import { StarSearchToggle } from '@/components/star-search-toggle';
+import { useStarSettingsStore } from '@/stores/star-settings';
 
 interface MainNavProps {
   items?: NavItem[];
@@ -42,6 +43,7 @@ export function MainNav({ items }: MainNavProps) {
   const searchStore = useSearchStore();
   const [isScrolled, setIsScrolled] = React.useState(false);
   const [starSearchEnabled, setStarSearchEnabled] = React.useState(false);
+  const { enableStarSearch } = useStarSettingsStore();
 
   const handlePopstateEvent = React.useCallback(() => {
     const pathname = window.location.pathname;
@@ -253,12 +255,17 @@ export function MainNav({ items }: MainNavProps) {
             onChangeStatusOpen={handleChangeStatusOpen}
             containerClassName="flex"
           />
-          {searchStore.isOpen && (
+          {searchStore.isOpen && enableStarSearch && (
             <StarSearchToggle
               enabled={starSearchEnabled}
               onToggle={setStarSearchEnabled}
             />
           )}
+          <Link href="/settings" aria-label="Settings">
+            <Button variant="ghost" size="icon" className="h-9 w-9">
+              <Icons.settings className="h-[1.2rem] w-[1.2rem]" />
+            </Button>
+          </Link>
           <div className="rounded-full border border-border/60 bg-background/70 p-1">
             <ThemeToggle />
           </div>

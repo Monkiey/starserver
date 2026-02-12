@@ -9,8 +9,9 @@ export async function POST(request: Request) {
     const body = (await request.json()) as {
       userPreferences?: string;
       continueWatching?: Show[];
+      refreshCount?: number;
     };
-    const { userPreferences, continueWatching } = body;
+    const { userPreferences, continueWatching, refreshCount = 0 } = body;
 
     // Get diverse shows from multiple categories for AI to analyze
     const diverseShows = await MovieService.getShows([
@@ -42,6 +43,9 @@ export async function POST(request: Request) {
     // Combine shows from all categories for diverse selection
     const allShows = diverseShows.flatMap((category) => category.shows);
 
+    // Shuffle shows to provide variety on refresh
+    const shuffledShows = [...allShows].sort(() => Math.random() - 0.5);
+
     // Build user context from continue watching history
     let userContext = userPreferences;
     if (continueWatching && continueWatching.length > 0) {
@@ -54,15 +58,22 @@ export async function POST(request: Request) {
       }`;
     }
 
+    // Add refresh context to get different results
+    if (refreshCount > 0) {
+      userContext = `${
+        userContext ? userContext + ' ' : ''
+      }This is refresh #${refreshCount}. Please provide DIFFERENT recommendations than previous suggestions.`;
+    }
+
     // Use AI to generate personalized suggestions from diverse content
     const suggestions = await AIService.generatePersonalizedSuggestions(
-      allShows,
+      shuffledShows,
       userContext,
     );
 
     // Get the actual show objects that AI recommended
     const suggestedIds = new Set(suggestions.suggestions.map((s) => s.showId));
-    const recommendedShows = allShows.filter((show) =>
+    const recommendedShows = shuffledShows.filter((show) =>
       suggestedIds.has(show.id),
     );
 

@@ -15,6 +15,7 @@ import {
   Volume2,
   Sparkles,
   RefreshCw,
+  Settings,
 } from 'lucide-react';
 
 type IconProps = LucideProps;
@@ -240,4 +241,5 @@ export const Icons = {
   youtube: Youtube,
   sparkles: Sparkles,
   refresh: RefreshCw,
+  settings: Settings,
 };
