@@ -11,6 +11,7 @@ import { usePathname } from 'next/navigation';
 import CustomImage from './custom-image';
 
 interface ShowsCarouselProps {
+  /** Optional title for the carousel. When omitted, the carousel renders without a title header (e.g., for AI suggestions). */
   title?: string;
   shows: Show[];
   getSuggestionReason?: (showId: number) => string | null;
@@ -61,7 +62,7 @@ const ShowsCarousel = ({
         <div className="space-y-1 sm:space-y-2.5">
           {title && (
             <h2 className="m-0 px-[4%] text-lg font-semibold text-foreground/80 transition-colors hover:text-foreground sm:text-xl 2xl:px-[60px]">
-              {title ?? '-'}
+              {title}
             </h2>
           )}
           <div className="relative w-full items-center justify-center overflow-hidden">
