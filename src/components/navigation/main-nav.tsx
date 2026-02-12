@@ -25,6 +25,9 @@ import { useSearchStore } from '@/stores/search';
 import { ModeToggle as ThemeToggle } from '@/components/theme-toggle';
 import { DebouncedInput } from '@/components/debounced-input';
 
+// API endpoint for AI-powered search
+const AI_SEARCH_ENDPOINT = '/api/ai/search';
+
 interface MainNavProps {
   items?: NavItem[];
 }
@@ -59,7 +62,7 @@ export function MainNav({ items }: MainNavProps) {
       }, 20);
 
       // Use AI-powered search
-      fetch('/api/ai/search', {
+      fetch(AI_SEARCH_ENDPOINT, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -72,7 +75,8 @@ export function MainNav({ items }: MainNavProps) {
           void searchStore.setShows(data.results);
         })
         .catch((e) => {
-          console.error(e);
+          console.error('Search error:', e);
+          void searchStore.setShows([]);
         })
         .finally(() => searchStore.setLoading(false));
     }
@@ -111,7 +115,7 @@ export function MainNav({ items }: MainNavProps) {
 
     try {
       // Always use AI-powered search
-      const response = await fetch('/api/ai/search', {
+      const response = await fetch(AI_SEARCH_ENDPOINT, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
