@@ -82,12 +82,13 @@ export function MainNav({ items }: MainNavProps) {
     searchStore.setQuery(normalizedValue);
     try {
       router.push(`/search?q=${encodeURIComponent(normalizedValue)}`);
+      if (typeof window !== 'undefined') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     } catch (error) {
+      console.error('Navigation to search failed:', error);
       searchStore.setLoading(false);
       throw error;
-    }
-    if (typeof window !== 'undefined') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }
 
