@@ -45,6 +45,18 @@ export function MainNav({ items }: MainNavProps) {
   const [starSearchEnabled, setStarSearchEnabled] = React.useState(false);
   const { enableStarSearch } = useStarSettingsStore();
 
+  // Handle star search toggle - re-run search when toggled
+  const handleStarSearchToggle = React.useCallback(
+    (enabled: boolean) => {
+      setStarSearchEnabled(enabled);
+      // Re-run the search with the current query if we have one
+      if (searchStore.query && searchStore.query.trim().length > 0) {
+        void searchShowsByQuery(searchStore.query);
+      }
+    },
+    [searchStore.query, searchShowsByQuery],
+  );
+
   const handlePopstateEvent = React.useCallback(() => {
     const pathname = window.location.pathname;
     const search: string = getSearchValue('q');
@@ -258,7 +270,7 @@ export function MainNav({ items }: MainNavProps) {
           {searchStore.isOpen && enableStarSearch && (
             <StarSearchToggle
               enabled={starSearchEnabled}
-              onToggle={setStarSearchEnabled}
+              onToggle={handleStarSearchToggle}
             />
           )}
           <Link href="/settings" aria-label="Settings">
