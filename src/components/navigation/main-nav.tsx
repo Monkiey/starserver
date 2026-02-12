@@ -80,16 +80,8 @@ export function MainNav({ items }: MainNavProps) {
 
     searchStore.setLoading(true);
     searchStore.setQuery(normalizedValue);
-    try {
-      router.push(`/search?q=${encodeURIComponent(normalizedValue)}`);
-      if (typeof window !== 'undefined') {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    } catch (error) {
-      console.error('Navigation to search failed:', error);
-      searchStore.setLoading(false);
-      throw error;
-    }
+    router.push(`/search?q=${encodeURIComponent(normalizedValue)}`);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   // change background color on scroll
