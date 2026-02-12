@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import type { Show } from '@/types';
 import ShowsCarousel from '@/components/shows-carousel';
 import { useContinueWatchingStore } from '@/stores/continue-watching';
-import { useStarSettingsStore } from '@/stores/star-settings';
 
 interface StarSuggestion {
   showId: number;
@@ -26,7 +25,6 @@ export default function StarSuggestions() {
   const [error, setError] = React.useState<string | null>(null);
   const [refreshCount, setRefreshCount] = React.useState(0);
   const { items: continueWatching } = useContinueWatchingStore();
-  const { enableStarRecommendations } = useStarSettingsStore();
 
   const loadSuggestions = React.useCallback(async () => {
     setLoading(true);
@@ -70,11 +68,6 @@ export default function StarSuggestions() {
     },
     [suggestions],
   );
-
-  // Don't render if Star Recommendations are disabled
-  if (!enableStarRecommendations) {
-    return null;
-  }
 
   return (
     <section className="relative mb-8 px-4 md:px-8">

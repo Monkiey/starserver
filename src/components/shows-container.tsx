@@ -20,26 +20,16 @@ import { type AxiosResponse } from 'axios';
 import MovieService from '@/services/MovieService';
 
 interface ShowsContainerProps {
-  show?: Show;
   shows: CategorizedShows[];
-  starSuggestionReasons?: Record<number, string>;
 }
 
-const ShowsContainer = ({
-  shows,
-  starSuggestionReasons,
-}: ShowsContainerProps) => {
+const ShowsContainer = ({ shows }: ShowsContainerProps) => {
   // const mounted = useMounted();
   const pathname = usePathname();
 
   // stores
   const modalStore = useModalStore();
   const searchStore = useSearchStore();
-
-  const getSuggestionReason = React.useCallback(
-    (showId: number) => starSuggestionReasons?.[showId] ?? null,
-    [starSuggestionReasons],
-  );
 
   React.useEffect(() => {
     void handleOpenModal();
@@ -91,9 +81,6 @@ const ShowsContainer = ({
               key={item.title}
               title={item.title}
               shows={item.shows ?? []}
-              getSuggestionReason={
-                starSuggestionReasons ? getSuggestionReason : undefined
-              }
             />
           ),
       )}

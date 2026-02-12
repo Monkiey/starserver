@@ -1,6 +1,5 @@
 import { getNameFromShow, getSlug } from '@/lib/utils';
-import {
-  MediaType} from '@/types';
+import { MediaType } from '@/types';
 import type {
   CategorizedShows,
   ISeason,
@@ -146,7 +145,7 @@ class MovieService extends BaseService {
     return this.axios(baseUrl).get<TmdbPagingResponse>(this.urlBuilder(req));
   }
 
-  static getShows = cache(async (requests: ShowRequest[]) => {
+  static getShows = async (requests: ShowRequest[]) => {
     const shows: CategorizedShows[] = [];
     const promises = requests.map((m) => this.executeRequest(m.req));
     const responses = await Promise.allSettled(promises);
@@ -178,7 +177,7 @@ class MovieService extends BaseService {
       }
     }
     return shows;
-  });
+  };
 
   static searchMovies = cache(async (query: string, page?: number) => {
     const normalizedQuery = query.trim().toLowerCase();
