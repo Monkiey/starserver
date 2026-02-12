@@ -1,6 +1,7 @@
 import ContinueWatching from '@/components/continue-watching';
 import Hero from '@/components/hero';
 import ShowsContainer from '@/components/shows-container';
+import AISuggestions from '@/components/ai-suggestions';
 import { MediaType, type Show } from '@/types';
 import { siteConfig } from '@/configs/site';
 import { RequestType, type ShowRequest } from '@/enums/request-type';
@@ -107,11 +108,13 @@ export default async function Home() {
   ];
   const allShows = await MovieService.getShows(requests);
   const randomShow: Show | null = getRandomShow(allShows);
+  const trendingShows = allShows[0]?.shows || [];
   return (
     <>
       <h1 className="hidden">{h1}</h1>
       <Hero randomShow={randomShow} />
       <ContinueWatching />
+      <AISuggestions shows={trendingShows} />
       <ShowsContainer shows={allShows} />
     </>
   );
