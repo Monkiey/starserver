@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { type Show, type NavItem } from '@/types';
+import { type NavItem } from '@/types';
 import Link from 'next/link';
 import {
   cn,
@@ -25,15 +25,8 @@ import { useSearchStore } from '@/stores/search';
 import { ModeToggle as ThemeToggle } from '@/components/theme-toggle';
 import { DebouncedInput } from '@/components/debounced-input';
 
-// API endpoint for AI-powered search
-const AI_SEARCH_ENDPOINT = '/api/ai/search';
-
 interface MainNavProps {
   items?: NavItem[];
-}
-
-interface SearchResult {
-  results: Show[];
 }
 
 export function MainNav({ items }: MainNavProps) {
@@ -52,7 +45,6 @@ export function MainNav({ items }: MainNavProps) {
       searchStore.setOpen(false);
     } else if (search?.length) {
       searchStore.setOpen(true);
-      searchStore.setLoading(true);
       searchStore.setQuery(search);
       setTimeout(() => {
         handleDefaultSearchBtn();
@@ -60,25 +52,6 @@ export function MainNav({ items }: MainNavProps) {
       setTimeout(() => {
         handleDefaultSearchInp();
       }, 20);
-
-      // Use AI-powered search
-      fetch(AI_SEARCH_ENDPOINT, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ query: search }),
-      })
-        .then(async (response) => {
-          if (!response.ok) throw new Error('Search failed');
-          const data = (await response.json()) as SearchResult;
-          void searchStore.setShows(data.results);
-        })
-        .catch((e) => {
-          console.error('Search error:', e);
-          void searchStore.setShows([]);
-        })
-        .finally(() => searchStore.setLoading(false));
     }
   }, [searchStore]);
 
@@ -89,7 +62,7 @@ export function MainNav({ items }: MainNavProps) {
     };
   }, [handlePopstateEvent]);
 
-  async function searchShowsByQuery(value: string) {
+  function searchShowsByQuery(value: string) {
     const normalizedValue = value?.trim() ?? '';
     if (!normalizedValue.length) {
       if (path === '/search') {
@@ -100,48 +73,9 @@ export function MainNav({ items }: MainNavProps) {
       return;
     }
 
-    if (getSearchValue('q')?.trim()?.length) {
-      window.history.replaceState(null, '', `/search?q=${normalizedValue}`);
-    } else {
-      window.history.pushState(null, '', `/search?q=${normalizedValue}`);
-    }
-
-    if (normalizedValue === searchStore.query) {
-      return;
-    }
-
+    router.push(`/search?q=${normalizedValue}`);
     searchStore.setQuery(normalizedValue);
-    searchStore.setLoading(true);
-
-    try {
-      // Always use AI-powered search
-      const response = await fetch(AI_SEARCH_ENDPOINT, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ query: normalizedValue }),
-      });
-
-      if (!response.ok) {
-        throw new Error('AI search failed');
-      }
-
-      const data = (await response.json()) as {
-        results: Show[];
-      };
-
-      searchStore.setLoading(false);
-      void searchStore.setShows(data.results);
-    } catch (error) {
-      console.error('Search error:', error);
-      searchStore.setLoading(false);
-      void searchStore.setShows([]);
-    }
-
-    if (typeof window !== 'undefined') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    searchStore.setLoading(false);
   }
 
   // change background color on scroll
