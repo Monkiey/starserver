@@ -15,22 +15,21 @@ function SearchContainer({ shows, query }: SearchContainer) {
   const searchStore = useSearchStore();
 
   React.useEffect(() => {
-    searchStore.setLoading(true);
     searchStore.setOpen(true);
     searchStore.setQuery(query);
     searchStore.setShows(shows);
     searchStore.setLoading(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    const timer1: NodeJS.Timeout = setTimeout(() => {
+    const searchButtonTimer: NodeJS.Timeout = setTimeout(() => {
       handleDefaultSearchBtn();
     }, 5);
-    const timer2: NodeJS.Timeout = setTimeout(() => {
+    const searchInputTimer: NodeJS.Timeout = setTimeout(() => {
       handleDefaultSearchInp();
     }, 10);
 
     return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
+      clearTimeout(searchButtonTimer);
+      clearTimeout(searchInputTimer);
     };
   }, []);
 
