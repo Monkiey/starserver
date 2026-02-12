@@ -24,9 +24,9 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useSearchStore } from '@/stores/search';
 import { ModeToggle as ThemeToggle } from '@/components/theme-toggle';
 import { DebouncedInput } from '@/components/debounced-input';
-import MovieService from '@/services/MovieService';
-import { StarSearchToggle } from '@/components/star-search-toggle';
-import { useStarSettingsStore } from '@/stores/star-settings';
+
+// API endpoint for AI-powered search
+const AI_SEARCH_ENDPOINT = '/api/ai/search';
 
 interface MainNavProps {
   items?: NavItem[];
@@ -42,20 +42,6 @@ export function MainNav({ items }: MainNavProps) {
   // search store
   const searchStore = useSearchStore();
   const [isScrolled, setIsScrolled] = React.useState(false);
-  const [starSearchEnabled, setStarSearchEnabled] = React.useState(false);
-  const { enableStarSearch } = useStarSettingsStore();
-
-  // Handle star search toggle - re-run search when toggled
-  const handleStarSearchToggle = React.useCallback(
-    (enabled: boolean) => {
-      setStarSearchEnabled(enabled);
-      // Re-run the search with the current query if we have one
-      if (searchStore.query && searchStore.query.trim().length > 0) {
-        void searchShowsByQuery(searchStore.query);
-      }
-    },
-    [searchStore.query, searchShowsByQuery],
-  );
 
   const handlePopstateEvent = React.useCallback(() => {
     const pathname = window.location.pathname;
@@ -74,12 +60,23 @@ export function MainNav({ items }: MainNavProps) {
       setTimeout(() => {
         handleDefaultSearchInp();
       }, 20);
-      MovieService.searchMovies(search)
-        .then((response: SearchResult) => {
-          void searchStore.setShows(response.results);
+
+      // Use AI-powered search
+      fetch(AI_SEARCH_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ query: search }),
+      })
+        .then(async (response) => {
+          if (!response.ok) throw new Error('Search failed');
+          const data = (await response.json()) as SearchResult;
+          void searchStore.setShows(data.results);
         })
         .catch((e) => {
-          console.error(e);
+          console.error('Search error:', e);
+          void searchStore.setShows([]);
         })
         .finally(() => searchStore.setLoading(false));
     }
@@ -117,38 +114,29 @@ export function MainNav({ items }: MainNavProps) {
     searchStore.setLoading(true);
 
     try {
-      let shows;
-      if (starSearchEnabled) {
-        // Use Star-enhanced search
-        const response = await fetch('/api/ai/search', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ query: normalizedValue }),
-        });
+      // Always use AI-powered search
+      const response = await fetch(AI_SEARCH_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ query: normalizedValue }),
+      });
 
-        if (!response.ok) {
-          throw new Error('Star search failed');
-        }
-
-        const data = (await response.json()) as {
-          results: Show[];
-        };
-        shows = { results: data.results };
-      } else {
-        // Use regular search
-        shows = await MovieService.searchMovies(normalizedValue);
+      if (!response.ok) {
+        throw new Error('AI search failed');
       }
 
+      const data = (await response.json()) as {
+        results: Show[];
+      };
+
       searchStore.setLoading(false);
-      void searchStore.setShows(shows.results);
+      void searchStore.setShows(data.results);
     } catch (error) {
       console.error('Search error:', error);
-      // Fallback to regular search on error
-      const shows = await MovieService.searchMovies(normalizedValue);
       searchStore.setLoading(false);
-      void searchStore.setShows(shows.results);
+      void searchStore.setShows([]);
     }
 
     if (typeof window !== 'undefined') {
@@ -216,7 +204,9 @@ export function MainNav({ items }: MainNavProps) {
                     variant="ghost"
                     className="flex items-center space-x-2 px-0 hover:bg-transparent focus:ring-0">
                     <Icons.logo className="h-6 w-6" />
-                    <span className="font-heading text-base font-semibold uppercase tracking-wide">Menu</span>
+                    <span className="font-heading text-base font-semibold uppercase tracking-wide">
+                      Menu
+                    </span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
@@ -228,7 +218,9 @@ export function MainNav({ items }: MainNavProps) {
                       href="/"
                       className="flex items-center justify-center"
                       onClick={() => handleChangeStatusOpen(false)}>
-                      <span className="font-heading uppercase tracking-wide">{siteConfig.name}</span>
+                      <span className="font-heading uppercase tracking-wide">
+                        {siteConfig.name}
+                      </span>
                     </Link>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
@@ -267,12 +259,6 @@ export function MainNav({ items }: MainNavProps) {
             onChangeStatusOpen={handleChangeStatusOpen}
             containerClassName="flex"
           />
-          {searchStore.isOpen && enableStarSearch && (
-            <StarSearchToggle
-              enabled={starSearchEnabled}
-              onToggle={handleStarSearchToggle}
-            />
-          )}
           <Link href="/settings" aria-label="Settings">
             <Button variant="ghost" size="icon" className="h-9 w-9">
               <Icons.settings className="h-[1.2rem] w-[1.2rem]" />
