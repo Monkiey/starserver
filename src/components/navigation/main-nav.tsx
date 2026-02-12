@@ -44,7 +44,12 @@ export function MainNav({ items }: MainNavProps) {
   const router = useRouter();
   // search store
   const searchStore = useSearchStore();
-  const { enableStarSearch, toggleStarSearch } = useStarSettingsStore();
+  const enableStarSearch = useStarSettingsStore(
+    (state) => state.enableStarSearch,
+  );
+  const toggleStarSearch = useStarSettingsStore(
+    (state) => state.toggleStarSearch,
+  );
   const [isScrolled, setIsScrolled] = React.useState(false);
 
   const handlePopstateEvent = React.useCallback(() => {
@@ -66,7 +71,8 @@ export function MainNav({ items }: MainNavProps) {
       }, 20);
 
       // Use AI-powered search only if Star Search is enabled
-      // Read the current state directly from the store to avoid stale closure
+      // Note: We read state directly from the store to avoid stale closure issues
+      // since this callback is memoized and the toggle state may change
       const isStarSearchEnabled =
         useStarSettingsStore.getState().enableStarSearch;
       if (isStarSearchEnabled) {
@@ -281,10 +287,7 @@ export function MainNav({ items }: MainNavProps) {
           </div>
         </div>
         <div className="flex items-center gap-2 rounded-full border border-border/60 bg-background/80 px-3 py-2 shadow-sm backdrop-blur">
-          <StarSearchToggle
-            enabled={enableStarSearch}
-            onToggle={toggleStarSearch}
-          />
+          {/* StarSearchToggle hidden per user request */}
           <DebouncedInput
             id="search-input"
             open={searchStore.isOpen}

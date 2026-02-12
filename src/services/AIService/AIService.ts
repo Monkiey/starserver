@@ -6,8 +6,8 @@ class AIService {
   private static openai: OpenAI | null = null;
 
   private static getClient(): OpenAI | null {
-    if (!env.OPENAI_API_KEY) {
-      console.warn('OpenAI API key not configured');
+    if (!env.OPENAI_API_KEY || env.OPENAI_API_KEY.startsWith('sk-your-')) {
+      console.warn('OpenAI API key not configured or using placeholder value');
       return null;
     }
 
