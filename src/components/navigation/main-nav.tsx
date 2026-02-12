@@ -28,15 +28,17 @@ import MovieService from '@/services/MovieService';
 import { StarSearchToggle } from '@/components/star-search-toggle';
 import { useStarSettingsStore } from '@/stores/star-settings';
 
-// API endpoint for AI-powered search
-const AI_SEARCH_ENDPOINT = '/api/ai/search';
+// API endpoint for AI-powered natural language search
+const AI_SEARCH_ENDPOINT = '/api/ai/prompt-search';
 
 interface MainNavProps {
   items?: NavItem[];
 }
 
 interface SearchResult {
-  results: Show[];
+  shows: Show[];
+  explanation?: string;
+  query?: string;
 }
 
 export function MainNav({ items }: MainNavProps) {
@@ -81,12 +83,12 @@ export function MainNav({ items }: MainNavProps) {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ query: search }),
+          body: JSON.stringify({ prompt: search }),
         })
           .then(async (response) => {
             if (!response.ok) throw new Error('Search failed');
             const data = (await response.json()) as SearchResult;
-            void searchStore.setShows(data.results);
+            void searchStore.setShows(data.shows);
           })
           .catch((e) => {
             console.error('Search error:', e);
@@ -144,25 +146,23 @@ export function MainNav({ items }: MainNavProps) {
       const isStarSearchEnabled =
         useStarSettingsStore.getState().enableStarSearch;
       if (isStarSearchEnabled) {
-        // Use AI-powered search when Star Search is enabled
+        // Use AI-powered natural language search when Star Search is enabled
         const response = await fetch(AI_SEARCH_ENDPOINT, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ query: normalizedValue }),
+          body: JSON.stringify({ prompt: normalizedValue }),
         });
 
         if (!response.ok) {
           throw new Error('AI search failed');
         }
 
-        const data = (await response.json()) as {
-          results: Show[];
-        };
+        const data = (await response.json()) as SearchResult;
 
         searchStore.setLoading(false);
-        void searchStore.setShows(data.results);
+        void searchStore.setShows(data.shows);
       } else {
         // Use regular search when Star Search is disabled
         const response = await MovieService.searchMovies(normalizedValue);
