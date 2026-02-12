@@ -22,5 +22,7 @@ export default async function SearchPage({ searchParams }: SearchProps) {
 
   // Perform the search with the enhanced query
   const shows = await MovieService.searchMovies(enhancedQuery);
+
+  // Pass original query to UI for display, but results are from enhanced query
   return <SearchContainer query={query} shows={shows.results} />;
 }
