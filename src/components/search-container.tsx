@@ -15,10 +15,12 @@ function SearchContainer({ shows, query }: SearchContainer) {
   const searchStore = useSearchStore();
 
   React.useEffect(() => {
+    searchStore.setLoading(true);
     searchStore.setOpen(true);
     searchStore.setQuery(query);
     searchStore.setShows(shows);
     searchStore.setLoading(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     const timer1: NodeJS.Timeout = setTimeout(() => {
       handleDefaultSearchBtn();
     }, 5);

@@ -78,11 +78,8 @@ export function MainNav({ items }: MainNavProps) {
       return;
     }
 
-    searchStore.setLoading(true);
-    // Loading will be cleared in SearchContainer after results are applied.
     searchStore.setQuery(normalizedValue);
     router.push(`/search?q=${encodeURIComponent(normalizedValue)}`);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   // change background color on scroll
