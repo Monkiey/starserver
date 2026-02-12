@@ -80,6 +80,9 @@ export function MainNav({ items }: MainNavProps) {
 
     searchStore.setLoading(true);
     router.push(`/search?q=${encodeURIComponent(normalizedValue)}`);
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
     searchStore.setQuery(normalizedValue);
   }
 
