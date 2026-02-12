@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import '@/styles/globals.css';
 // import { TrpcProvider } from '@/client/trpc-provider';
 import type { Metadata, Viewport } from 'next';
-import localFont from 'next/font/local';
+import { Bebas_Neue, Inter } from 'next/font/google';
 import { Analytics } from '@/components/analytics';
 import { siteConfig } from '@/configs/site';
 import { env } from '@/env.mjs';
@@ -14,10 +14,19 @@ import Script from 'next/script';
 
 export const runtime = 'edge';
 
-// Font files can be colocated inside of `pages`
-const fontHeading = localFont({
-  src: '../assets/fonts/CalSans-SemiBold.woff2',
+// Modern, bold, cinematic font for headings and display text
+const bebasNeue = Bebas_Neue({
+  weight: '400',
+  subsets: ['latin'],
   variable: '--font-heading',
+  display: 'swap',
+});
+
+// Clean, modern font for body text
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-sans',
+  display: 'swap',
 });
 
 export const viewport: Viewport = {
@@ -74,7 +83,8 @@ export default function RootLayout({
       <body
         className={cn(
           'overlflow-y-auto min-h-screen overflow-x-hidden bg-background font-sans antialiased',
-          fontHeading.variable,
+          bebasNeue.variable,
+          inter.variable,
         )}>
         <ThemeProvider
           attribute="class"
