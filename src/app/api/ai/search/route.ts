@@ -12,7 +12,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Query is required' }, { status: 400 });
     }
 
-    // Use AI to enhance the search query
+    // Use AI to enhance the search query and analyze natural language intent
     const [enhancedQuery, intent] = await Promise.all([
       AIService.enhanceSearchQuery(query),
       AIService.analyzeSearchIntent(query),
