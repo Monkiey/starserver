@@ -11,6 +11,7 @@ interface UserSettingsState {
   reset: () => void;
 }
 
+export const DEFAULT_VIDEO_SOURCE = 'vidsrc';
 export const DEFAULT_CAPTIONS_LANGUAGE = 'en';
 export const CAPTION_LANGUAGE_OPTIONS = [
   { label: 'English', value: 'en' },
@@ -22,7 +23,7 @@ export const CAPTION_LANGUAGE_OPTIONS = [
 ];
 
 const defaultSettings = {
-  defaultVideoSource: 'vidsrc',
+  defaultVideoSource: DEFAULT_VIDEO_SOURCE,
   defaultCaptionsLanguage: DEFAULT_CAPTIONS_LANGUAGE,
 };
 

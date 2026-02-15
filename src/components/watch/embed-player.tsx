@@ -3,7 +3,7 @@ import React from 'react';
 import Loading from '../ui/loading';
 import { useRouter } from 'next/navigation';
 import {
-  DEFAULT_CAPTIONS_LANGUAGE,
+  DEFAULT_VIDEO_SOURCE,
   useUserSettingsStore,
 } from '@/stores/user-settings';
 
@@ -14,7 +14,7 @@ interface EmbedPlayerProps {
 // VidSrc embed supports provider selection via `source` query param.
 // Keep all providers pointing to the VidSrc host unless we add bespoke bases.
 const VIDEO_SOURCE_BASE_URLS: Record<string, string> = {
-  vidsrc: 'https://vidsrc.cc',
+  [DEFAULT_VIDEO_SOURCE]: 'https://vidsrc.cc',
   vidplay: 'https://vidsrc.cc', // shares VidSrc host; provider chosen via `source`
   upcloud: 'https://vidsrc.cc', // shares VidSrc host; provider chosen via `source`
 };
@@ -30,7 +30,7 @@ function EmbedPlayer(props: EmbedPlayerProps) {
   const resolvedUrl = React.useMemo(() => {
     const baseUrl =
       VIDEO_SOURCE_BASE_URLS[defaultVideoSource] ??
-      VIDEO_SOURCE_BASE_URLS.vidsrc;
+      VIDEO_SOURCE_BASE_URLS[DEFAULT_VIDEO_SOURCE];
 
     try {
       const normalizedBase = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
@@ -39,10 +39,12 @@ function EmbedPlayer(props: EmbedPlayerProps) {
         ? props.url
         : `/${props.url}`;
       const targetUrl = new URL(normalizedPath, normalizedBase);
-      if (defaultVideoSource !== 'vidsrc') {
+      if (defaultVideoSource !== DEFAULT_VIDEO_SOURCE) {
         targetUrl.searchParams.set('source', defaultVideoSource);
       }
-      targetUrl.searchParams.set('cc_lang', defaultCaptionsLanguage);
+      if (defaultCaptionsLanguage) {
+        targetUrl.searchParams.set('cc_lang', defaultCaptionsLanguage);
+      }
       return targetUrl.toString();
     } catch (error) {
       // eslint-disable-next-line no-console

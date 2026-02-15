@@ -5,15 +5,13 @@ import {
   CAPTION_LANGUAGE_OPTIONS,
   useUserSettingsStore,
 } from '@/stores/user-settings';
+import { SELECT_INPUT_CLASS } from '@/lib/constants';
 
 const videoSourceOptions = [
   { label: 'VidSrc (default)', value: 'vidsrc' },
   { label: 'Vidplay', value: 'vidplay' },
   { label: 'UpCloud', value: 'upcloud' },
 ];
-
-const selectClassName =
-  'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2';
 
 export default function SettingsPage() {
   const {
@@ -56,7 +54,7 @@ export default function SettingsPage() {
                 id="video-source"
                 value={defaultVideoSource}
                 onChange={(event) => setDefaultVideoSource(event.target.value)}
-                className={selectClassName}>
+                className={SELECT_INPUT_CLASS}>
                 {videoSourceOptions.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
@@ -80,7 +78,7 @@ export default function SettingsPage() {
                 onChange={(event) =>
                   setDefaultCaptionsLanguage(event.target.value)
                 }
-                className={selectClassName}>
+                className={SELECT_INPUT_CLASS}>
                 {CAPTION_LANGUAGE_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
