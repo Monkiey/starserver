@@ -11,9 +11,12 @@ interface EmbedPlayerProps {
   url: string;
 }
 
-// Map of supported video sources so we can extend beyond VidSrc later.
+// VidSrc embed supports provider selection via `source` query param.
+// Keep all providers pointing to the VidSrc host unless we add bespoke bases.
 const VIDEO_SOURCE_BASE_URLS: Record<string, string> = {
   vidsrc: 'https://vidsrc.cc',
+  vidplay: 'https://vidsrc.cc',
+  upcloud: 'https://vidsrc.cc',
 };
 
 function EmbedPlayer(props: EmbedPlayerProps) {
