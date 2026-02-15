@@ -15,14 +15,10 @@ function EmbedPlayer(props: EmbedPlayerProps) {
 
   const iframeRef = React.useRef<HTMLIFrameElement>(null);
   const [isLoaded, setIsLoaded] = React.useState(false);
-  const [isPlaying, setIsPlaying] = React.useState(false);
+  const [reloadKey, setReloadKey] = React.useState(0);
 
   const handleIframeLoaded = React.useCallback(() => {
     setIsLoaded(true);
-  }, []);
-
-  const handlePlay = React.useCallback(() => {
-    setIsPlaying(true);
   }, []);
 
   React.useEffect(() => {
@@ -30,21 +26,26 @@ function EmbedPlayer(props: EmbedPlayerProps) {
     if (!iframe) return;
 
     setIsLoaded(false);
-    iframe.src = isPlaying ? props.url : '';
-
+    iframe.removeEventListener('load', handleIframeLoaded);
     iframe.addEventListener('load', handleIframeLoaded);
+    iframe.src = props.url;
+
     return () => {
       iframe.removeEventListener('load', handleIframeLoaded);
     };
-  }, [handleIframeLoaded, isPlaying, props.url]);
+  }, [handleIframeLoaded, props.url, reloadKey]);
+
+  const handleReload = React.useCallback(() => {
+    setReloadKey((prev) => prev + 1);
+  }, []);
 
   return (
-    <section className="relative min-h-screen overflow-hidden bg-gradient-to-b from-background via-background/80 to-black text-foreground">
-      <div className="pointer-events-none absolute inset-0 opacity-80">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(59,130,246,0.14),transparent_35%),radial-gradient(circle_at_80%_0%,rgba(236,72,153,0.12),transparent_30%),linear-gradient(to_bottom,#0b0f1a,transparent_45%)]" />
+    <section className="relative min-h-screen overflow-hidden bg-gradient-to-b from-background via-background/70 to-black text-foreground">
+      <div className="pointer-events-none absolute inset-0 opacity-90">
+        <div className="bg-[radial-gradient(circle_at_25%_15%,rgba(59,130,246,0.16),transparent_36%),radial-gradient(circle_at_80%_10%,rgba(236,72,153,0.12),transparent_34%),radial-gradient(circle_at_10%_70%,rgba(16,185,129,0.12),transparent_32%),linear-gradient(135deg,#0b0f1a 0%,#0b0f1a 40%,#05070c 100%)] absolute inset-0" />
       </div>
       <div className="relative z-[1] mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 md:px-8 lg:px-10">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 shadow-lg backdrop-blur">
           <Button
             type="button"
             variant="secondary"
@@ -54,33 +55,28 @@ function EmbedPlayer(props: EmbedPlayerProps) {
             <Icons.chevronLeft className="h-4 w-4" aria-hidden="true" />
             Back
           </Button>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-foreground/80">
-              Immersive player
+          <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+            <span className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-foreground/80">
+              <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_0_6px_rgba(52,211,153,0.18)]" />
+              Vidsrc secure embed
             </span>
-            <span className="hidden sm:inline">
-              Embedded playback with a cinematic feel
+            <span className="hidden text-foreground/70 sm:inline">
+              Modern chrome with fast reload
             </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="rounded-full border-white/20 bg-white/5 text-foreground hover:border-white/40 hover:bg-white/10"
+              onClick={handleReload}>
+              <Icons.refresh className="mr-2 h-4 w-4" aria-hidden="true" />
+              Reload player
+            </Button>
           </div>
         </div>
         <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-black/70 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.65)] backdrop-blur-md">
-          {!isPlaying && (
-            <div className="absolute inset-0 z-[2] grid place-items-center bg-gradient-to-b from-background/70 via-background/80 to-black/80">
-              <div className="flex flex-col items-center gap-4 text-center">
-                <Button
-                  size="lg"
-                  className="h-12 rounded-full bg-primary px-6 text-base font-semibold text-primary-foreground shadow-lg transition hover:scale-[1.02]"
-                  onClick={handlePlay}>
-                  <Icons.play className="mr-2 h-5 w-5" aria-hidden="true" />
-                  Play
-                </Button>
-                <p className="max-w-md text-sm text-muted-foreground">
-                  Start the embedded player for a seamless, fullscreen-friendly
-                  experience.
-                </p>
-              </div>
-            </div>
-          )}
           <div
             className={cn(
               'absolute inset-0 z-[1] grid place-items-center bg-gradient-to-b from-background/60 via-background/70 to-black/80 transition-opacity duration-500',
@@ -97,7 +93,7 @@ function EmbedPlayer(props: EmbedPlayerProps) {
             allowFullScreen
             allow="autoplay; fullscreen; picture-in-picture"
             ref={iframeRef}
-            sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
+            sandbox="allow-scripts allow-same-origin allow-presentation"
             referrerPolicy="no-referrer-when-downgrade"
             className={cn(
               'h-[65vh] w-full transition-opacity duration-500 md:h-[70vh] lg:h-[75vh]',
