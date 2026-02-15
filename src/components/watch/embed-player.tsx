@@ -2,7 +2,10 @@
 import React from 'react';
 import Loading from '../ui/loading';
 import { useRouter } from 'next/navigation';
-import { useUserSettingsStore } from '@/stores/user-settings';
+import {
+  DEFAULT_CAPTIONS_LANGUAGE,
+  useUserSettingsStore,
+} from '@/stores/user-settings';
 
 interface EmbedPlayerProps {
   url: string;
@@ -28,7 +31,13 @@ function EmbedPlayer(props: EmbedPlayerProps) {
 
     try {
       const targetUrl = new URL(props.url, baseUrl);
-      if (defaultCaptionsLanguage && defaultCaptionsLanguage !== 'en') {
+      if (defaultVideoSource && defaultVideoSource !== 'vidsrc') {
+        targetUrl.searchParams.set('source', defaultVideoSource);
+      }
+      if (
+        defaultCaptionsLanguage &&
+        defaultCaptionsLanguage !== DEFAULT_CAPTIONS_LANGUAGE
+      ) {
         targetUrl.searchParams.set('cc_lang', defaultCaptionsLanguage);
       }
       return targetUrl.toString();

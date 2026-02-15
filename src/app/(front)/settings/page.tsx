@@ -3,7 +3,14 @@
 import React from 'react';
 import { useUserSettingsStore } from '@/stores/user-settings';
 
-const videoSourceOptions = [{ label: 'VidSrc (default)', value: 'vidsrc' }];
+const videoSourceOptions = [
+  { label: 'VidSrc (default)', value: 'vidsrc' },
+  { label: 'Vidplay', value: 'vidplay' },
+  { label: 'UpCloud', value: 'upcloud' },
+];
+
+const selectClassName =
+  'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2';
 
 const captionLanguageOptions = [
   { label: 'English', value: 'en' },
@@ -55,7 +62,7 @@ export default function SettingsPage() {
                 id="video-source"
                 value={defaultVideoSource}
                 onChange={(event) => setDefaultVideoSource(event.target.value)}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                className={selectClassName}>
                 {videoSourceOptions.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
@@ -79,7 +86,7 @@ export default function SettingsPage() {
                 onChange={(event) =>
                   setDefaultCaptionsLanguage(event.target.value)
                 }
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                className={selectClassName}>
                 {captionLanguageOptions.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
