@@ -33,14 +33,15 @@ function EmbedPlayer(props: EmbedPlayerProps) {
       VIDEO_SOURCE_BASE_URLS.vidsrc;
 
     try {
-      const targetUrl = new URL(props.url, baseUrl);
-      if (defaultVideoSource && defaultVideoSource !== 'vidsrc') {
+      const normalizedBase = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
+      const normalizedPath = props.url.startsWith('/')
+        ? props.url
+        : `/${props.url}`;
+      const targetUrl = new URL(normalizedPath, normalizedBase);
+      if (defaultVideoSource !== 'vidsrc') {
         targetUrl.searchParams.set('source', defaultVideoSource);
       }
-      if (
-        defaultCaptionsLanguage &&
-        defaultCaptionsLanguage !== DEFAULT_CAPTIONS_LANGUAGE
-      ) {
+      if (defaultCaptionsLanguage !== DEFAULT_CAPTIONS_LANGUAGE) {
         targetUrl.searchParams.set('cc_lang', defaultCaptionsLanguage);
       }
       return targetUrl.toString();
