@@ -44,7 +44,12 @@ function EmbedPlayer(props: EmbedPlayerProps) {
         targetUrl.searchParams.set('cc_lang', defaultCaptionsLanguage);
       }
       return targetUrl.toString();
-    } catch {
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        'Unable to build embed URL, falling back to raw value.',
+        error,
+      );
       return props.url;
     }
   }, [defaultCaptionsLanguage, defaultVideoSource, props.url]);

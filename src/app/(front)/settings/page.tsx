@@ -1,7 +1,10 @@
 'use client';
 
 import React from 'react';
-import { useUserSettingsStore } from '@/stores/user-settings';
+import {
+  CAPTION_LANGUAGE_OPTIONS,
+  useUserSettingsStore,
+} from '@/stores/user-settings';
 
 const videoSourceOptions = [
   { label: 'VidSrc (default)', value: 'vidsrc' },
@@ -11,15 +14,6 @@ const videoSourceOptions = [
 
 const selectClassName =
   'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2';
-
-const captionLanguageOptions = [
-  { label: 'English', value: 'en' },
-  { label: 'Spanish', value: 'es' },
-  { label: 'French', value: 'fr' },
-  { label: 'German', value: 'de' },
-  { label: 'Portuguese', value: 'pt' },
-  { label: 'Japanese', value: 'ja' },
-];
 
 export default function SettingsPage() {
   const {
@@ -87,7 +81,7 @@ export default function SettingsPage() {
                   setDefaultCaptionsLanguage(event.target.value)
                 }
                 className={selectClassName}>
-                {captionLanguageOptions.map((option) => (
+                {CAPTION_LANGUAGE_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
                   </option>
