@@ -8,6 +8,7 @@ interface EmbedPlayerProps {
   url: string;
 }
 
+// Map of supported video sources so we can extend beyond VidSrc later.
 const VIDEO_SOURCE_BASE_URLS: Record<string, string> = {
   vidsrc: 'https://vidsrc.cc',
 };
@@ -27,7 +28,7 @@ function EmbedPlayer(props: EmbedPlayerProps) {
 
     try {
       const targetUrl = new URL(props.url, baseUrl);
-      if (defaultCaptionsLanguage) {
+      if (defaultCaptionsLanguage && defaultCaptionsLanguage !== 'en') {
         targetUrl.searchParams.set('cc_lang', defaultCaptionsLanguage);
       }
       return targetUrl.toString();
