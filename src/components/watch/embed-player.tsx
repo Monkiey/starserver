@@ -34,6 +34,7 @@ function EmbedPlayer(props: EmbedPlayerProps) {
 
     try {
       const normalizedBase = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
+      // Keep normalization defensive in case callers pass paths without a leading slash.
       const normalizedPath = props.url.startsWith('/')
         ? props.url
         : `/${props.url}`;
@@ -41,9 +42,7 @@ function EmbedPlayer(props: EmbedPlayerProps) {
       if (defaultVideoSource !== 'vidsrc') {
         targetUrl.searchParams.set('source', defaultVideoSource);
       }
-      if (defaultCaptionsLanguage !== DEFAULT_CAPTIONS_LANGUAGE) {
-        targetUrl.searchParams.set('cc_lang', defaultCaptionsLanguage);
-      }
+      targetUrl.searchParams.set('cc_lang', defaultCaptionsLanguage);
       return targetUrl.toString();
     } catch (error) {
       // eslint-disable-next-line no-console
