@@ -2,16 +2,39 @@
 import React from 'react';
 import Loading from '../ui/loading';
 import { useRouter } from 'next/navigation';
+import { useUserSettingsStore } from '@/stores/user-settings';
 
 interface EmbedPlayerProps {
   url: string;
 }
 
+const VIDEO_SOURCE_BASE_URLS: Record<string, string> = {
+  vidsrc: 'https://vidsrc.cc',
+};
+
 function EmbedPlayer(props: EmbedPlayerProps) {
   const router = useRouter();
+  const { defaultVideoSource, defaultCaptionsLanguage } =
+    useUserSettingsStore();
 
   const loadingRef = React.useRef<HTMLDivElement>(null);
   const iframeRef = React.useRef<HTMLIFrameElement>(null);
+
+  const resolvedUrl = React.useMemo(() => {
+    const baseUrl =
+      VIDEO_SOURCE_BASE_URLS[defaultVideoSource] ??
+      VIDEO_SOURCE_BASE_URLS.vidsrc;
+
+    try {
+      const targetUrl = new URL(props.url, baseUrl);
+      if (defaultCaptionsLanguage) {
+        targetUrl.searchParams.set('cc_lang', defaultCaptionsLanguage);
+      }
+      return targetUrl.toString();
+    } catch {
+      return props.url;
+    }
+  }, [defaultCaptionsLanguage, defaultVideoSource, props.url]);
 
   const handleIframeLoaded = React.useCallback(() => {
     if (!iframeRef.current) {
@@ -27,7 +50,7 @@ function EmbedPlayer(props: EmbedPlayerProps) {
 
   React.useEffect(() => {
     if (iframeRef.current) {
-      iframeRef.current.src = props.url;
+      iframeRef.current.src = resolvedUrl;
     }
 
     const { current } = iframeRef;
@@ -36,7 +59,7 @@ function EmbedPlayer(props: EmbedPlayerProps) {
     return () => {
       iframe?.removeEventListener('load', handleIframeLoaded);
     };
-  }, [handleIframeLoaded, props.url]);
+  }, [handleIframeLoaded, resolvedUrl]);
 
   return (
     <div

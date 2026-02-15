@@ -1,8 +1,27 @@
 'use client';
 
 import React from 'react';
+import { useUserSettingsStore } from '@/stores/user-settings';
+
+const videoSourceOptions = [{ label: 'VidSrc (default)', value: 'vidsrc' }];
+
+const captionLanguageOptions = [
+  { label: 'English', value: 'en' },
+  { label: 'Spanish', value: 'es' },
+  { label: 'French', value: 'fr' },
+  { label: 'German', value: 'de' },
+  { label: 'Portuguese', value: 'pt' },
+  { label: 'Japanese', value: 'ja' },
+];
 
 export default function SettingsPage() {
+  const {
+    defaultVideoSource,
+    defaultCaptionsLanguage,
+    setDefaultVideoSource,
+    setDefaultCaptionsLanguage,
+  } = useUserSettingsStore();
+
   return (
     <div className="min-h-screen px-4 py-8 md:px-8">
       <div className="mx-auto max-w-4xl">
@@ -13,10 +32,62 @@ export default function SettingsPage() {
           </p>
         </div>
 
-        <div className="rounded-lg border bg-card p-6">
-          <p className="text-sm text-muted-foreground">
-            There are currently no configurable settings.
-          </p>
+        <div className="space-y-6 rounded-lg border bg-card p-6">
+          <div className="space-y-1">
+            <h2 className="text-xl font-semibold">Playback defaults</h2>
+            <p className="text-sm text-muted-foreground">
+              Choose how videos should load by default.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label
+                htmlFor="video-source"
+                className="text-sm font-medium text-foreground">
+                Default video source
+              </label>
+              <p className="text-sm text-muted-foreground">
+                Pick the streaming source we should try first when starting a
+                video.
+              </p>
+              <select
+                id="video-source"
+                value={defaultVideoSource}
+                onChange={(event) => setDefaultVideoSource(event.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                {videoSourceOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <label
+                htmlFor="captions-language"
+                className="text-sm font-medium text-foreground">
+                Default captions language
+              </label>
+              <p className="text-sm text-muted-foreground">
+                We&apos;ll request captions in this language when available.
+              </p>
+              <select
+                id="captions-language"
+                value={defaultCaptionsLanguage}
+                onChange={(event) =>
+                  setDefaultCaptionsLanguage(event.target.value)
+                }
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                {captionLanguageOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
         </div>
       </div>
     </div>
