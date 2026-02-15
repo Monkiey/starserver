@@ -16,10 +16,23 @@ function EmbedPlayer(props: EmbedPlayerProps) {
   const iframeRef = React.useRef<HTMLIFrameElement>(null);
   const [isLoaded, setIsLoaded] = React.useState(false);
   const [reloadKey, setReloadKey] = React.useState(0);
+  const [isPlaying, setIsPlaying] = React.useState(true);
 
   const handleIframeLoaded = React.useCallback(() => {
     setIsLoaded(true);
   }, []);
+
+  const computedUrl = React.useMemo(() => {
+    try {
+      const url = new URL(props.url);
+      url.searchParams.set('autoplay', '1');
+      url.searchParams.set('controls', '0');
+      url.searchParams.set('mute', '1');
+      return url.toString();
+    } catch {
+      return props.url;
+    }
+  }, [props.url]);
 
   React.useEffect(() => {
     const iframe = iframeRef.current;
@@ -28,15 +41,28 @@ function EmbedPlayer(props: EmbedPlayerProps) {
     setIsLoaded(false);
     iframe.removeEventListener('load', handleIframeLoaded);
     iframe.addEventListener('load', handleIframeLoaded);
-    iframe.src = props.url;
+
+    if (isPlaying) {
+      const srcWithBust = `${computedUrl}${
+        computedUrl.includes('?') ? '&' : '?'
+      }reload=${reloadKey}`;
+      iframe.src = srcWithBust;
+    } else {
+      iframe.src = 'about:blank';
+    }
 
     return () => {
       iframe.removeEventListener('load', handleIframeLoaded);
     };
-  }, [handleIframeLoaded, props.url, reloadKey]);
+  }, [computedUrl, handleIframeLoaded, isPlaying, reloadKey]);
 
   const handleReload = React.useCallback(() => {
     setReloadKey((prev) => prev + 1);
+    setIsPlaying(true);
+  }, []);
+
+  const handlePlayPause = React.useCallback(() => {
+    setIsPlaying((prev) => !prev);
   }, []);
 
   return (
@@ -65,6 +91,24 @@ function EmbedPlayer(props: EmbedPlayerProps) {
             </span>
           </div>
           <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              className="rounded-full bg-white/10 text-foreground hover:bg-white/20"
+              onClick={handlePlayPause}>
+              {isPlaying ? (
+                <>
+                  <Icons.pause className="mr-2 h-4 w-4" aria-hidden="true" />
+                  Pause
+                </>
+              ) : (
+                <>
+                  <Icons.play className="mr-2 h-4 w-4" aria-hidden="true" />
+                  Play
+                </>
+              )}
+            </Button>
             <Button
               type="button"
               variant="outline"
