@@ -85,7 +85,10 @@ function EmbedPlayer(props: EmbedPlayerProps) {
           />
         </div>
         <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground">
-          <div className="flex items-center gap-2 text-foreground/80">
+          <div
+            className="flex items-center gap-2 text-foreground/80"
+            role="status"
+            aria-label="Player tip">
             <Icons.sparkles
               className="h-4 w-4 text-primary"
               aria-hidden="true"
