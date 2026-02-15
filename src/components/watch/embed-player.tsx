@@ -15,24 +15,28 @@ function EmbedPlayer(props: EmbedPlayerProps) {
 
   const iframeRef = React.useRef<HTMLIFrameElement>(null);
   const [isLoaded, setIsLoaded] = React.useState(false);
+  const [isPlaying, setIsPlaying] = React.useState(false);
 
   const handleIframeLoaded = React.useCallback(() => {
     setIsLoaded(true);
   }, []);
 
-  React.useEffect(() => {
-    setIsLoaded(false);
-    if (iframeRef.current) {
-      iframeRef.current.src = props.url;
-    }
+  const handlePlay = React.useCallback(() => {
+    setIsPlaying(true);
+  }, []);
 
-    const { current } = iframeRef;
-    const iframe: HTMLIFrameElement | null = current;
-    iframe?.addEventListener('load', handleIframeLoaded);
+  React.useEffect(() => {
+    const iframe = iframeRef.current;
+    if (!iframe) return;
+
+    setIsLoaded(false);
+    iframe.src = isPlaying ? props.url : '';
+
+    iframe.addEventListener('load', handleIframeLoaded);
     return () => {
-      iframe?.removeEventListener('load', handleIframeLoaded);
+      iframe.removeEventListener('load', handleIframeLoaded);
     };
-  }, [handleIframeLoaded, props.url]);
+  }, [handleIframeLoaded, isPlaying, props.url]);
 
   return (
     <section className="relative min-h-screen overflow-hidden bg-gradient-to-b from-background via-background/80 to-black text-foreground">
@@ -60,6 +64,23 @@ function EmbedPlayer(props: EmbedPlayerProps) {
           </div>
         </div>
         <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-black/70 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.65)] backdrop-blur-md">
+          {!isPlaying && (
+            <div className="absolute inset-0 z-[2] grid place-items-center bg-gradient-to-b from-background/70 via-background/80 to-black/80">
+              <div className="flex flex-col items-center gap-4 text-center">
+                <Button
+                  size="lg"
+                  className="h-12 rounded-full bg-primary px-6 text-base font-semibold text-primary-foreground shadow-lg transition hover:scale-[1.02]"
+                  onClick={handlePlay}>
+                  <Icons.play className="mr-2 h-5 w-5" aria-hidden="true" />
+                  Play
+                </Button>
+                <p className="max-w-md text-sm text-muted-foreground">
+                  Start the embedded player for a seamless, fullscreen-friendly
+                  experience.
+                </p>
+              </div>
+            </div>
+          )}
           <div
             className={cn(
               'absolute inset-0 z-[1] grid place-items-center bg-gradient-to-b from-background/60 via-background/70 to-black/80 transition-opacity duration-500',
@@ -85,26 +106,13 @@ function EmbedPlayer(props: EmbedPlayerProps) {
           />
         </div>
         <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground">
-          <div
-            className="flex items-center gap-2 text-foreground/80"
-            role="status"
-            aria-label="Player tip">
+          <div className="flex items-center gap-2 text-foreground/80">
             <Icons.sparkles
               className="h-4 w-4 text-primary"
               aria-hidden="true"
             />
             <span>Tip: Enable fullscreen for a cinematic view.</span>
           </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="rounded-full border-white/20 bg-white/5 text-foreground hover:border-white/40 hover:bg-white/10"
-            onClick={() =>
-              window.open(props.url, '_blank', 'noopener,noreferrer')
-            }>
-            Open in new tab
-          </Button>
         </div>
       </div>
     </section>
