@@ -11,13 +11,8 @@ interface EmbedPlayerProps {
   url: string;
 }
 
-// VidSrc embed supports provider selection via `source` query param.
-// Keep all providers pointing to the VidSrc host unless we add bespoke bases.
-const VIDEO_SOURCE_BASE_URLS: Record<string, string> = {
-  [DEFAULT_VIDEO_SOURCE]: 'https://vidsrc.cc',
-  vidplay: 'https://vidsrc.cc', // shares VidSrc host; provider chosen via `source`
-  upcloud: 'https://vidsrc.cc', // shares VidSrc host; provider chosen via `source`
-};
+const VID_SRC_BASE_URL = 'https://vidsrc.cc';
+const PROVIDERS = [DEFAULT_VIDEO_SOURCE, 'vidplay', 'upcloud'];
 
 function EmbedPlayer(props: EmbedPlayerProps) {
   const router = useRouter();
@@ -28,9 +23,10 @@ function EmbedPlayer(props: EmbedPlayerProps) {
   const iframeRef = React.useRef<HTMLIFrameElement>(null);
 
   const resolvedUrl = React.useMemo(() => {
-    const baseUrl =
-      VIDEO_SOURCE_BASE_URLS[defaultVideoSource] ??
-      VIDEO_SOURCE_BASE_URLS[DEFAULT_VIDEO_SOURCE];
+    const provider = PROVIDERS.includes(defaultVideoSource)
+      ? defaultVideoSource
+      : DEFAULT_VIDEO_SOURCE;
+    const baseUrl = VID_SRC_BASE_URL;
 
     try {
       const normalizedBase = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
@@ -39,9 +35,7 @@ function EmbedPlayer(props: EmbedPlayerProps) {
         ? props.url
         : `/${props.url}`;
       const targetUrl = new URL(normalizedPath, normalizedBase);
-      if (defaultVideoSource !== DEFAULT_VIDEO_SOURCE) {
-        targetUrl.searchParams.set('source', defaultVideoSource);
-      }
+      targetUrl.searchParams.set('source', provider);
       if (defaultCaptionsLanguage) {
         targetUrl.searchParams.set('cc_lang', defaultCaptionsLanguage);
       }
