@@ -15,8 +15,8 @@ interface EmbedPlayerProps {
 // Keep all providers pointing to the VidSrc host unless we add bespoke bases.
 const VIDEO_SOURCE_BASE_URLS: Record<string, string> = {
   vidsrc: 'https://vidsrc.cc',
-  vidplay: 'https://vidsrc.cc',
-  upcloud: 'https://vidsrc.cc',
+  vidplay: 'https://vidsrc.cc', // shares VidSrc host; provider chosen via `source`
+  upcloud: 'https://vidsrc.cc', // shares VidSrc host; provider chosen via `source`
 };
 
 function EmbedPlayer(props: EmbedPlayerProps) {
