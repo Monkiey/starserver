@@ -10,11 +10,17 @@ import {
 import { Icons } from '@/components/icons';
 import { Input } from '@/components/ui/input';
 import { useSearchStore } from '@/stores/search';
-import { debounce, getNameFromShow, getSlug } from '@/lib/utils';
+import {
+  debounce,
+  getNameFromShow,
+  getSlug,
+  isShowDetailPage,
+} from '@/lib/utils';
 import { MediaType, type Show } from '@/types';
 import CustomImage from '@/components/custom-image';
 import { useModalStore } from '@/stores/modal';
 import { Skeleton } from '@/components/ui/skeleton';
+import { usePathname } from 'next/navigation';
 
 const AI_SEARCH_ENDPOINT = '/api/ai/search';
 
@@ -26,9 +32,14 @@ export function SearchDialog() {
   const searchStore = useSearchStore();
   const modalStore = useModalStore();
   const inputRef = React.useRef<HTMLInputElement>(null);
+  const pathname = usePathname();
+
+  // Disable search on movie/TV show detail pages to avoid modal conflicts
+  const isDetailPage = isShowDetailPage(pathname);
 
   // keyboard shortcut to open
   React.useEffect(() => {
+    if (isDetailPage) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault();
@@ -37,7 +48,7 @@ export function SearchDialog() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [searchStore]);
+  }, [searchStore, isDetailPage]);
 
   // auto-focus input when dialog opens
   React.useEffect(() => {
@@ -110,6 +121,8 @@ export function SearchDialog() {
     modalStore.setPlay(true);
     searchStore.setOpen(false);
   };
+
+  if (isDetailPage) return null;
 
   return (
     <>

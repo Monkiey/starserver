@@ -3,7 +3,7 @@
 import React from 'react';
 import { type NavItem } from '@/types';
 import Link from 'next/link';
-import { cn } from '@/lib/utils';
+import { cn, isShowDetailPage } from '@/lib/utils';
 import { siteConfig } from '@/configs/site';
 import { Icons } from '@/components/icons';
 import {
@@ -27,6 +27,9 @@ export function MainNav({ items }: MainNavProps) {
   const path = usePathname();
   const searchStore = useSearchStore();
   const [isScrolled, setIsScrolled] = React.useState(false);
+
+  // Disable search on movie/TV show detail pages to avoid modal conflicts
+  const isDetailPage = isShowDetailPage(path);
 
   // change background color on scroll
   React.useEffect(() => {
@@ -121,17 +124,19 @@ export function MainNav({ items }: MainNavProps) {
           </div>
         </div>
         <div className="flex items-center gap-2 rounded-full border border-border/60 bg-background/80 px-3 py-2 shadow-sm backdrop-blur">
-          <Button
-            variant="ghost"
-            className="flex h-9 items-center gap-2 rounded-full px-3 text-sm text-muted-foreground hover:text-foreground"
-            onClick={() => searchStore.setOpen(true)}
-            aria-label="Search">
-            <Icons.search className="h-4 w-4" />
-            <span className="hidden sm:inline-flex">Search</span>
-            <kbd className="pointer-events-none hidden select-none rounded border bg-muted px-1.5 py-0.5 font-mono text-[10px] font-medium text-muted-foreground md:inline-flex">
-              ⌘K
-            </kbd>
-          </Button>
+          {!isDetailPage && (
+            <Button
+              variant="ghost"
+              className="flex h-9 items-center gap-2 rounded-full px-3 text-sm text-muted-foreground hover:text-foreground"
+              onClick={() => searchStore.setOpen(true)}
+              aria-label="Search">
+              <Icons.search className="h-4 w-4" />
+              <span className="hidden sm:inline-flex">Search</span>
+              <kbd className="pointer-events-none hidden select-none rounded border bg-muted px-1.5 py-0.5 font-mono text-[10px] font-medium text-muted-foreground md:inline-flex">
+                ⌘K
+              </kbd>
+            </Button>
+          )}
           <Link href="/settings" aria-label="Settings">
             <Button variant="ghost" size="icon" className="h-9 w-9">
               <Icons.settings className="h-[1.2rem] w-[1.2rem]" />

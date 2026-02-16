@@ -17,6 +17,10 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export function isShowDetailPage(pathname: string): boolean {
+  return /^\/movies\/.+/.test(pathname) || /^\/tv-shows\/.+/.test(pathname);
+}
+
 export function formatDate(input: string | number): string {
   const date = new Date(input);
   return date.toLocaleDateString('en-US', {
