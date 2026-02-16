@@ -11,34 +11,60 @@ function VideoPlayer(props: VideoPlayerProps) {
   const router = useRouter();
 
   const containerRef = React.useRef<HTMLDivElement>(null);
-  const embedRef = React.useRef<HTMLEmbedElement>(null);
+  const playerRef = React.useRef<HTMLDivElement>(null);
   const loadingRef = React.useRef<HTMLDivElement>(null);
 
   const [isLoaded, setIsLoaded] = React.useState(false);
   const [isFullscreen, setIsFullscreen] = React.useState(false);
+  const [hasError, setHasError] = React.useState(false);
+  const [retryKey, setRetryKey] = React.useState(0);
 
+  // Fetch the proxied HTML and inject it via srcdoc
   React.useEffect(() => {
-    if (embedRef.current) {
-      const embed = embedRef.current;
-      const handleLoad = () => {
+    setIsLoaded(false);
+    setHasError(false);
+
+    const proxyUrl = `/api/proxy?url=${encodeURIComponent(props.url)}`;
+
+    fetch(proxyUrl)
+      .then((res) => {
+        if (!res.ok) throw new Error(`Proxy returned ${res.status}`);
+        return res.text();
+      })
+      .then((html) => {
+        if (!playerRef.current) return;
+
+        // Clear previous content
+        playerRef.current.innerHTML = '';
+
+        // Create a sandboxed iframe with srcdoc (content loaded via server proxy, not embedded from external URL)
+        const frame = document.createElement('iframe');
+        frame.srcdoc = html;
+        frame.style.cssText =
+          'width:100%;height:100%;border:none;position:absolute;top:0;left:0;';
+        frame.setAttribute('allowfullscreen', '');
+        frame.setAttribute(
+          'allow',
+          'autoplay; fullscreen; picture-in-picture; encrypted-media',
+        );
+        frame.setAttribute(
+          'sandbox',
+          'allow-scripts allow-same-origin allow-forms allow-presentation',
+        );
+
+        frame.addEventListener('load', () => {
+          setIsLoaded(true);
+          if (loadingRef.current) loadingRef.current.style.display = 'none';
+        });
+
+        playerRef.current.appendChild(frame);
+      })
+      .catch(() => {
+        setHasError(true);
         setIsLoaded(true);
         if (loadingRef.current) loadingRef.current.style.display = 'none';
-      };
-      embed.addEventListener('load', handleLoad);
-      return () => {
-        embed.removeEventListener('load', handleLoad);
-      };
-    }
-  }, [props.url]);
-
-  // Auto-hide loading after timeout as fallback
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoaded(true);
-      if (loadingRef.current) loadingRef.current.style.display = 'none';
-    }, 5000);
-    return () => clearTimeout(timer);
-  }, [props.url]);
+      });
+  }, [props.url, retryKey]);
 
   const toggleFullscreen = React.useCallback(() => {
     const container = containerRef.current;
@@ -75,7 +101,7 @@ function VideoPlayer(props: VideoPlayerProps) {
         backgroundColor: '#000',
         overflow: 'hidden',
       }}>
-      {/* Top bar — back button */}
+      {/* Top bar — back button and fullscreen */}
       <div
         className="absolute left-0 right-0 top-0 z-[3]"
         style={{
@@ -134,22 +160,39 @@ function VideoPlayer(props: VideoPlayerProps) {
         <Loading />
       </div>
 
-      {/* Video source — embed element instead of iframe */}
-      <embed
-        ref={embedRef}
-        src={props.url}
-        type="text/html"
-        width="100%"
-        height="100%"
+      {/* Error state */}
+      {hasError && (
+        <div className="absolute z-[2] flex h-full w-full flex-col items-center justify-center gap-4 text-white">
+          <svg
+            className="h-12 w-12 text-white/60"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={1.5}>
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
+            />
+          </svg>
+          <p className="text-lg text-white/80">Failed to load video</p>
+          <button
+            onClick={() => setRetryKey((k) => k + 1)}
+            className="rounded-lg bg-white/10 px-4 py-2 text-sm transition hover:bg-white/20">
+            Try again
+          </button>
+        </div>
+      )}
+
+      {/* Player container — proxied content injected here */}
+      <div
+        ref={playerRef}
         style={{
           position: 'absolute',
           top: 0,
           left: 0,
           width: '100%',
           height: '100%',
-          opacity: isLoaded ? 1 : 0,
-          transition: 'opacity 0.3s ease',
-          border: 'none',
         }}
       />
     </div>
