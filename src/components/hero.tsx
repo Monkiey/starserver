@@ -70,7 +70,7 @@ const Hero = ({ randomShow }: HeroProps) => {
     <section aria-label="Hero" className="w-full">
       {randomShow && (
         <>
-          <div className="absolute inset-0 z-0 h-[100vw] w-full sm:h-[56.25vw]">
+          <div className="absolute inset-0 z-0 h-[110vw] w-full sm:h-[56.25vw]">
             <CustomImage
               src={`https://image.tmdb.org/t/p/original${
                 randomShow?.backdrop_path ?? randomShow?.poster_path ?? ''
@@ -82,11 +82,11 @@ const Hero = ({ randomShow }: HeroProps) => {
               priority
             />
             <div className="absolute bottom-0 left-0 right-0 top-0">
-              <div className="absolute bottom-[35%] left-[4%] top-0 z-10 flex w-[36%] flex-col justify-end space-y-2">
-                <h1 className="font-heading text-[3vw] font-bold uppercase tracking-wide">
+              <div className="absolute bottom-[18%] left-[4%] top-0 z-10 flex w-[90%] flex-col justify-end space-y-1.5 sm:bottom-[35%] sm:w-[36%] sm:space-y-2">
+                <h1 className="font-heading text-[7vw] font-bold uppercase tracking-wide sm:text-[3vw]">
                   {randomShow?.title ?? randomShow?.name}
                 </h1>
-                <div className="flex space-x-2 text-[2vw] font-semibold md:text-[1.2vw]">
+                <div className="flex space-x-2 text-[3.5vw] font-semibold sm:text-[2vw] md:text-[1.2vw]">
                   <p className="text-green-600">
                     {Math.round(randomShow?.vote_average * 10) ?? '-'}% Match
                   </p>
@@ -97,7 +97,7 @@ const Hero = ({ randomShow }: HeroProps) => {
                 <p className="hidden text-[1.2vw] sm:line-clamp-3">
                   {randomShow?.overview ?? '-'}
                 </p>
-                <div className="mt-[1.5vw] flex items-center space-x-2">
+                <div className="mt-2 flex items-center space-x-2 sm:mt-[1.5vw]">
                   <Link prefetch={false} href={handleHref()}>
                     <Button
                       aria-label="Play video"
@@ -141,7 +141,7 @@ const Hero = ({ randomShow }: HeroProps) => {
             <div className="opacity-71 absolute inset-0 right-[26.09%] z-[8] bg-gradient-to-r from-secondary to-85%"></div>
             <div className="absolute bottom-[-1px] left-0 right-0 z-[8] h-[14.7vw] bg-gradient-to-b from-background/0 from-30% via-background/30 via-50% to-background to-80%"></div>
           </div>
-          <div className="relative inset-0 -z-50 mb-5 pb-[60%] sm:pb-[40%]"></div>
+          <div className="relative inset-0 -z-50 mb-5 pb-[72%] sm:pb-[40%]"></div>
         </>
       )}
     </section>
