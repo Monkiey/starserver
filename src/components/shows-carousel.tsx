@@ -57,7 +57,9 @@ const ShowsCarousel = ({
   };
 
   return (
-    <section aria-label="Carousel of shows" className="relative my-[3vw] p-0">
+    <section
+      aria-label="Carousel of shows"
+      className="relative my-[6vw] p-0 sm:my-[3vw]">
       {shows.length !== 0 && (
         <div className="space-y-1 sm:space-y-2.5">
           {title && (
@@ -78,7 +80,7 @@ const ShowsCarousel = ({
             </Button>
             <div
               ref={showsRef}
-              className="no-scrollbar m-0 grid auto-cols-[calc(100%/3)] grid-flow-col overflow-x-auto overflow-y-hidden px-[4%] py-0 duration-500 ease-in-out sm:auto-cols-[25%] md:touch-pan-y lg:auto-cols-[20%] xl:auto-cols-[calc(100%/6)] 2xl:px-[60px]">
+              className="no-scrollbar m-0 grid auto-cols-[calc(100%/2.2)] grid-flow-col overflow-x-auto overflow-y-hidden px-[4%] py-0 duration-500 ease-in-out xs:auto-cols-[calc(100%/2.6)] sm:auto-cols-[25%] md:touch-pan-y lg:auto-cols-[20%] xl:auto-cols-[calc(100%/6)] 2xl:px-[60px]">
               {shows.map((show) => (
                 <ShowCard
                   key={show.id}
