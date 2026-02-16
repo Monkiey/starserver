@@ -80,11 +80,15 @@ export function SearchDialog() {
     [searchStore],
   );
 
-  const debouncedSearch = React.useCallback(
-    debounce((value) => {
-      void performSearch(value as string);
-    }, 300),
-    [performSearch],
+  const performSearchRef = React.useRef(performSearch);
+  performSearchRef.current = performSearch;
+
+  const debouncedSearch = React.useMemo(
+    () =>
+      debounce((value) => {
+        void performSearchRef.current(value as string);
+      }, 300),
+    [],
   );
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -208,13 +212,18 @@ function SearchResultCard({
           <span className="rounded bg-primary/10 px-1 py-0.5 text-[10px] font-medium text-primary">
             {show.media_type === MediaType.TV ? 'TV' : 'Movie'}
           </span>
-          {(show.release_date ?? show.first_air_date) && (
-            <span className="text-[10px] text-muted-foreground">
-              {new Date(
+          {(show.release_date ?? show.first_air_date) &&
+            !isNaN(
+              new Date(
                 show.release_date ?? show.first_air_date ?? '',
-              ).getFullYear()}
-            </span>
-          )}
+              ).getTime(),
+            ) && (
+              <span className="text-[10px] text-muted-foreground">
+                {new Date(
+                  show.release_date ?? show.first_air_date ?? '',
+                ).getFullYear()}
+              </span>
+            )}
         </div>
       </div>
     </button>
