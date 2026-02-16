@@ -13,12 +13,9 @@ function VideoPlayer(props: VideoPlayerProps) {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const iframeRef = React.useRef<HTMLIFrameElement>(null);
   const loadingRef = React.useRef<HTMLDivElement>(null);
-  const controlsRef = React.useRef<HTMLDivElement>(null);
-  const hideTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [isLoaded, setIsLoaded] = React.useState(false);
   const [isFullscreen, setIsFullscreen] = React.useState(false);
-  const [showControls, setShowControls] = React.useState(true);
 
   const handleIframeLoaded = React.useCallback(() => {
     setIsLoaded(true);
@@ -36,25 +33,6 @@ function VideoPlayer(props: VideoPlayerProps) {
       iframe?.removeEventListener('load', handleIframeLoaded);
     };
   }, [handleIframeLoaded, props.url]);
-
-  const resetHideTimer = React.useCallback(() => {
-    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
-    setShowControls(true);
-    hideTimerRef.current = setTimeout(() => {
-      setShowControls(false);
-    }, 3000);
-  }, []);
-
-  React.useEffect(() => {
-    resetHideTimer();
-    return () => {
-      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
-    };
-  }, [resetHideTimer]);
-
-  const handleMouseMove = React.useCallback(() => {
-    resetHideTimer();
-  }, [resetHideTimer]);
 
   const toggleFullscreen = React.useCallback(() => {
     const container = containerRef.current;
@@ -84,7 +62,6 @@ function VideoPlayer(props: VideoPlayerProps) {
   return (
     <div
       ref={containerRef}
-      onMouseMove={handleMouseMove}
       style={{
         width: '100%',
         height: '100%',
@@ -94,10 +71,7 @@ function VideoPlayer(props: VideoPlayerProps) {
       }}>
       {/* Top controls bar */}
       <div
-        ref={controlsRef}
-        className={`absolute left-0 right-0 top-0 z-[3] transition-opacity duration-300 ${
-          showControls ? 'opacity-100' : 'pointer-events-none opacity-0'
-        }`}
+        className="absolute left-0 right-0 top-0 z-[3]"
         style={{
           background:
             'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%)',
@@ -169,7 +143,7 @@ function VideoPlayer(props: VideoPlayerProps) {
         height="100%"
         allowFullScreen
         allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
-        sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-popups"
+        sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
         style={{
           opacity: isLoaded ? 1 : 0,
           transition: 'opacity 0.3s ease',
