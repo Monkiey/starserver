@@ -1,14 +1,9 @@
 'use client';
 
 import React from 'react';
-import { type Show, type NavItem } from '@/types';
+import { type NavItem } from '@/types';
 import Link from 'next/link';
-import {
-  cn,
-  getSearchValue,
-  handleDefaultSearchBtn,
-  handleDefaultSearchInp,
-} from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { siteConfig } from '@/configs/site';
 import { Icons } from '@/components/icons';
 import {
@@ -20,129 +15,18 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useSearchStore } from '@/stores/search';
 import { ModeToggle as ThemeToggle } from '@/components/theme-toggle';
-import { DebouncedInput } from '@/components/debounced-input';
-
-// API endpoint for AI-powered search
-const AI_SEARCH_ENDPOINT = '/api/ai/search';
 
 interface MainNavProps {
   items?: NavItem[];
 }
 
-interface SearchResult {
-  results: Show[];
-}
-
 export function MainNav({ items }: MainNavProps) {
   const path = usePathname();
-  const router = useRouter();
-  // search store
   const searchStore = useSearchStore();
   const [isScrolled, setIsScrolled] = React.useState(false);
-
-  const handlePopstateEvent = React.useCallback(() => {
-    const pathname = window.location.pathname;
-    const search: string = getSearchValue('q');
-
-    if (!search?.length || !pathname.includes('/search')) {
-      searchStore.reset();
-      searchStore.setOpen(false);
-    } else if (search?.length) {
-      searchStore.setOpen(true);
-      searchStore.setLoading(true);
-      searchStore.setQuery(search);
-      setTimeout(() => {
-        handleDefaultSearchBtn();
-      }, 10);
-      setTimeout(() => {
-        handleDefaultSearchInp();
-      }, 20);
-
-      // Use AI-powered search
-      fetch(AI_SEARCH_ENDPOINT, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ query: search }),
-      })
-        .then(async (response) => {
-          if (!response.ok) throw new Error('Search failed');
-          const data = (await response.json()) as SearchResult;
-          void searchStore.setShows(data.results);
-        })
-        .catch((e) => {
-          console.error('Search error:', e);
-          void searchStore.setShows([]);
-        })
-        .finally(() => searchStore.setLoading(false));
-    }
-  }, [searchStore]);
-
-  React.useEffect(() => {
-    window.addEventListener('popstate', handlePopstateEvent, false);
-    return () => {
-      window.removeEventListener('popstate', handlePopstateEvent, false);
-    };
-  }, [handlePopstateEvent]);
-
-  async function searchShowsByQuery(value: string) {
-    const normalizedValue = value?.trim() ?? '';
-    if (!normalizedValue.length) {
-      if (path === '/search') {
-        router.push('/');
-      } else {
-        window.history.pushState(null, '', path);
-      }
-      return;
-    }
-
-    if (getSearchValue('q')?.trim()?.length) {
-      window.history.replaceState(null, '', `/search?q=${normalizedValue}`);
-    } else {
-      window.history.pushState(null, '', `/search?q=${normalizedValue}`);
-    }
-
-    if (normalizedValue === searchStore.query) {
-      return;
-    }
-
-    searchStore.setQuery(normalizedValue);
-    searchStore.setLoading(true);
-
-    try {
-      // Always use AI-powered search
-      const response = await fetch(AI_SEARCH_ENDPOINT, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ query: normalizedValue }),
-      });
-
-      if (!response.ok) {
-        throw new Error('AI search failed');
-      }
-
-      const data = (await response.json()) as {
-        results: Show[];
-      };
-
-      searchStore.setLoading(false);
-      void searchStore.setShows(data.results);
-    } catch (error) {
-      console.error('Search error:', error);
-      searchStore.setLoading(false);
-      void searchStore.setShows([]);
-    }
-
-    if (typeof window !== 'undefined') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  }
 
   // change background color on scroll
   React.useEffect(() => {
@@ -153,11 +37,6 @@ export function MainNav({ items }: MainNavProps) {
     return () => window.removeEventListener('scroll', changeBgColor);
   }, [isScrolled]);
 
-  const handleChangeStatusOpen = (value: boolean): void => {
-    searchStore.setOpen(value);
-    if (!value) searchStore.reset();
-  };
-
   return (
     <nav
       className={cn(
@@ -167,10 +46,7 @@ export function MainNav({ items }: MainNavProps) {
       <div className="mx-auto flex w-full items-center justify-between px-[4vw] py-4">
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-4 rounded-full border border-border/60 bg-background/80 px-4 py-2 shadow-sm backdrop-blur">
-            <Link
-              href="/"
-              className="hidden items-center space-x-2 md:flex"
-              onClick={() => handleChangeStatusOpen(false)}>
+            <Link href="/" className="hidden items-center space-x-2 md:flex">
               <Icons.logo className="h-6 w-6" aria-hidden="true" />
               <span className="inline-block font-heading text-lg font-semibold uppercase tracking-wide">
                 {siteConfig.name}
@@ -189,8 +65,7 @@ export function MainNav({ items }: MainNavProps) {
                           'flex items-center text-sm font-medium text-foreground/60 transition hover:text-foreground/90',
                           path === item.href && 'font-semibold text-foreground',
                           item.disabled && 'cursor-not-allowed opacity-80',
-                        )}
-                        onClick={() => handleChangeStatusOpen(false)}>
+                        )}>
                         {item.title}
                       </Link>
                     ),
@@ -214,10 +89,7 @@ export function MainNav({ items }: MainNavProps) {
                   sideOffset={20}
                   className="w-52 overflow-y-auto overflow-x-hidden rounded-xl">
                   <DropdownMenuLabel>
-                    <Link
-                      href="/"
-                      className="flex items-center justify-center"
-                      onClick={() => handleChangeStatusOpen(false)}>
+                    <Link href="/" className="flex items-center justify-center">
                       <span className="font-heading uppercase tracking-wide">
                         {siteConfig.name}
                       </span>
@@ -230,9 +102,7 @@ export function MainNav({ items }: MainNavProps) {
                       asChild
                       className="items-center justify-center">
                       {item.href && (
-                        <Link
-                          href={item.href}
-                          onClick={() => handleChangeStatusOpen(false)}>
+                        <Link href={item.href}>
                           <span
                             className={cn(
                               'line-clamp-1 text-foreground/60 hover:text-foreground/80',
@@ -251,14 +121,17 @@ export function MainNav({ items }: MainNavProps) {
           </div>
         </div>
         <div className="flex items-center gap-2 rounded-full border border-border/60 bg-background/80 px-3 py-2 shadow-sm backdrop-blur">
-          <DebouncedInput
-            id="search-input"
-            open={searchStore.isOpen}
-            value={searchStore.query}
-            onChange={searchShowsByQuery}
-            onChangeStatusOpen={handleChangeStatusOpen}
-            containerClassName="flex"
-          />
+          <Button
+            variant="ghost"
+            className="flex h-9 items-center gap-2 rounded-full px-3 text-sm text-muted-foreground hover:text-foreground"
+            onClick={() => searchStore.setOpen(true)}
+            aria-label="Search">
+            <Icons.search className="h-4 w-4" />
+            <span className="hidden sm:inline-flex">Search</span>
+            <kbd className="pointer-events-none hidden select-none rounded border bg-muted px-1.5 py-0.5 font-mono text-[10px] font-medium text-muted-foreground md:inline-flex">
+              ⌘K
+            </kbd>
+          </Button>
           <Link href="/settings" aria-label="Settings">
             <Button variant="ghost" size="icon" className="h-9 w-9">
               <Icons.settings className="h-[1.2rem] w-[1.2rem]" />

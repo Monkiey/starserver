@@ -74,9 +74,11 @@ export function clearSearch(): void {
   const searchInput: HTMLInputElement | null = document.getElementById(
     'search-input',
   ) as HTMLInputElement;
-  searchInput.blur();
-  searchInput.value = '';
-  searchInput.defaultValue = '';
+  if (searchInput) {
+    searchInput.blur();
+    searchInput.value = '';
+    searchInput.defaultValue = '';
+  }
 }
 
 export function getNameFromShow(show: Show | null): string {
