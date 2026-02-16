@@ -286,10 +286,11 @@ const ShowModal = () => {
                 </DialogTitle>
                 <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                   <span className="font-medium text-primary">
-                    {Math.round(
-                      (Number(modalStore.show?.vote_average) / 10) * 100,
-                    ) ?? '-'}
-                    % Match
+                    {modalStore.show?.vote_average != null
+                      ? `${Math.round(
+                          (modalStore.show.vote_average / 10) * 100,
+                        )}% Match`
+                      : '-'}
                   </span>
                   {modalStore.show?.release_date ? (
                     <span>{getYear(modalStore.show?.release_date)}</span>
