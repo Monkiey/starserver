@@ -1,5 +1,5 @@
 import React from 'react';
-import EmbedPlayer from '@/components/watch/embed-player';
+import VideoPlayer from '@/components/watch/embed-player';
 
 export const revalidate = 3600;
 
@@ -17,5 +17,5 @@ export default function Page({
     season && episode
       ? `https://vidsrc.cc/v2/embed/tv/${id}/${season}/${episode}`
       : `https://vidsrc.cc/v2/embed/tv/${id}`;
-  return <EmbedPlayer url={url} />;
+  return <VideoPlayer url={url} />;
 }
