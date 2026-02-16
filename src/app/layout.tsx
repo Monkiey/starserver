@@ -11,6 +11,7 @@ import { env } from '@/env.mjs';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { GoogleAnalytics } from '@next/third-parties/google';
 import Script from 'next/script';
+import SearchProvider from '@/components/search-provider';
 
 export const runtime = 'edge';
 
@@ -92,7 +93,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange>
           {/* <TrpcProvider> */}
-          {children}
+          <SearchProvider>{children}</SearchProvider>
           <TailwindIndicator />
           <Analytics />
           <SpeedInsights />

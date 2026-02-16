@@ -17,6 +17,10 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export function isShowDetailPage(pathname: string): boolean {
+  return /^\/movies\/.+/.test(pathname) || /^\/tv-shows\/.+/.test(pathname);
+}
+
 export function formatDate(input: string | number): string {
   const date = new Date(input);
   return date.toLocaleDateString('en-US', {
@@ -74,9 +78,11 @@ export function clearSearch(): void {
   const searchInput: HTMLInputElement | null = document.getElementById(
     'search-input',
   ) as HTMLInputElement;
-  searchInput.blur();
-  searchInput.value = '';
-  searchInput.defaultValue = '';
+  if (searchInput) {
+    searchInput.blur();
+    searchInput.value = '';
+    searchInput.defaultValue = '';
+  }
 }
 
 export function getNameFromShow(show: Show | null): string {
