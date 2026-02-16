@@ -207,7 +207,7 @@ const ShowModal = () => {
       aria-label="Modal containing show's details">
       <DialogContent
         aria-describedby="show-details-description"
-        className="w-full overflow-hidden rounded-md bg-zinc-900 p-0 text-left align-middle shadow-xl dark:bg-zinc-900 sm:max-w-3xl lg:max-w-4xl">
+        className="w-full overflow-hidden rounded-2xl border border-border/60 bg-background p-0 text-left align-middle shadow-xl sm:max-w-3xl lg:max-w-4xl">
         <DialogTitle className="sr-only">Show details</DialogTitle>
         <DialogDescription id="show-details-description" className="sr-only">
           Details and playback options for the selected title.
@@ -277,35 +277,50 @@ const ShowModal = () => {
             </Button>
           </div>
         </div>
-        <div className="grid gap-2.5 px-10 pb-10">
-          <DialogTitle className="text-lg font-medium leading-6 text-slate-50 sm:text-xl">
-            {modalStore.show?.title ?? modalStore.show?.name}
-          </DialogTitle>
-          <div className="flex items-center space-x-2 text-sm sm:text-base">
-            <p className="font-semibold text-green-400">
-              {Math.round((Number(modalStore.show?.vote_average) / 10) * 100) ??
-                '-'}
-              % Match
-            </p>
-            {modalStore.show?.release_date ? (
-              <p>{getYear(modalStore.show?.release_date)}</p>
-            ) : modalStore.show?.first_air_date ? (
-              <p>{getYear(modalStore.show?.first_air_date)}</p>
-            ) : null}
-            {modalStore.show?.original_language && (
-              <span className="grid h-4 w-7 place-items-center text-xs font-bold text-neutral-400 ring-1 ring-neutral-400">
-                {modalStore.show.original_language.toUpperCase()}
-              </span>
-            )}
-          </div>
-          <DialogDescription
-            className="line-clamp-3 text-xs text-slate-50 dark:text-slate-50 sm:text-sm"
-            id={undefined}>
-            {modalStore.show?.overview ?? '-'}
-          </DialogDescription>
-          <div className="flex items-center gap-2 text-xs sm:text-sm">
-            <span className="text-slate-400">Genres:</span>
-            {genres.map((genre) => genre.name).join(', ')}
+        <div className="grid gap-4 px-6 pb-6 pt-2 sm:px-10 sm:pb-10">
+          <div className="rounded-2xl border border-border/60 bg-background/70 p-4 text-sm text-foreground/80">
+            <div className="grid gap-3">
+              <div>
+                <DialogTitle className="text-base font-semibold text-foreground">
+                  {modalStore.show?.title ?? modalStore.show?.name}
+                </DialogTitle>
+                <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                  <span className="font-medium text-primary">
+                    {modalStore.show?.vote_average != null
+                      ? `${Math.round(
+                          (modalStore.show.vote_average / 10) * 100,
+                        )}% Match`
+                      : '-'}
+                  </span>
+                  {modalStore.show?.release_date ? (
+                    <span>{getYear(modalStore.show?.release_date)}</span>
+                  ) : modalStore.show?.first_air_date ? (
+                    <span>{getYear(modalStore.show?.first_air_date)}</span>
+                  ) : null}
+                  {modalStore.show?.original_language && (
+                    <span className="rounded-full border border-border/60 px-2 py-0.5 text-xs font-medium uppercase">
+                      {modalStore.show.original_language}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <DialogDescription
+                className="line-clamp-3 text-xs text-foreground/80 sm:text-sm"
+                id={undefined}>
+                {modalStore.show?.overview ?? '-'}
+              </DialogDescription>
+              {genres.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {genres.map((genre) => (
+                    <span
+                      key={genre.id}
+                      className="rounded-full border border-border/60 px-3 py-1 text-xs font-medium text-muted-foreground">
+                      {genre.name}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
           {modalStore.show && (
             <ShowWatchPicker
