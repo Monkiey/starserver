@@ -24,11 +24,15 @@ function VideoPlayer(props: VideoPlayerProps) {
   const [captionsOn, setCaptionsOn] = React.useState(false);
   const [showSettings, setShowSettings] = React.useState(false);
   const [playbackSpeed, setPlaybackSpeed] = React.useState(1);
+  const [currentTime, setCurrentTime] = React.useState(0);
+  const [duration, setDuration] = React.useState(0);
+  const [isSeeking, setIsSeeking] = React.useState(false);
 
   const volumeTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
   const settingsRef = React.useRef<HTMLDivElement>(null);
+  const progressBarRef = React.useRef<HTMLDivElement>(null);
 
   const handleIframeLoaded = React.useCallback(() => {
     setIsLoaded(true);
@@ -159,6 +163,110 @@ function VideoPlayer(props: VideoPlayerProps) {
 
   const speedOptions = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
 
+  // Listen for time updates from the iframe
+  React.useEffect(() => {
+    const handleMessage = (e: MessageEvent) => {
+      if (!e.data || typeof e.data !== 'object') return;
+      const data = e.data as Record<string, unknown>;
+      if (data.type === 'timeUpdate' && !isSeeking) {
+        if (typeof data.currentTime === 'number')
+          setCurrentTime(data.currentTime);
+        if (typeof data.duration === 'number') setDuration(data.duration);
+      }
+    };
+    window.addEventListener('message', handleMessage);
+    return () => {
+      window.removeEventListener('message', handleMessage);
+    };
+  }, [isSeeking]);
+
+  const formatTime = React.useCallback((seconds: number) => {
+    if (!Number.isFinite(seconds) || seconds < 0) return '0:00';
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = Math.floor(seconds % 60);
+    const paddedS = s.toString().padStart(2, '0');
+    return h > 0
+      ? `${h}:${m.toString().padStart(2, '0')}:${paddedS}`
+      : `${m}:${paddedS}`;
+  }, []);
+
+  const handleProgressSeek = React.useCallback(
+    (clientX: number) => {
+      const bar = progressBarRef.current;
+      if (!bar || duration <= 0) return;
+      const rect = bar.getBoundingClientRect();
+      const ratio = Math.max(
+        0,
+        Math.min(1, (clientX - rect.left) / rect.width),
+      );
+      const seekTime = ratio * duration;
+      setCurrentTime(seekTime);
+      sendMessage({ type: 'seek', value: seekTime });
+    },
+    [duration, sendMessage],
+  );
+
+  const handleProgressMouseDown = React.useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      setIsSeeking(true);
+      handleProgressSeek(e.clientX);
+
+      const handleMouseMove = (ev: MouseEvent) => {
+        handleProgressSeek(ev.clientX);
+      };
+      const handleMouseUp = (ev: MouseEvent) => {
+        handleProgressSeek(ev.clientX);
+        setIsSeeking(false);
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    },
+    [handleProgressSeek],
+  );
+
+  const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
+
+  const handleProgressKeyDown = React.useCallback(
+    (e: React.KeyboardEvent<HTMLDivElement>) => {
+      if (duration <= 0) return;
+      const STEP = 5;
+      const LARGE_STEP = 30;
+      let newTime = currentTime;
+
+      switch (e.key) {
+        case 'ArrowRight':
+          newTime = Math.min(duration, currentTime + STEP);
+          break;
+        case 'ArrowLeft':
+          newTime = Math.max(0, currentTime - STEP);
+          break;
+        case 'ArrowUp':
+        case 'PageUp':
+          newTime = Math.min(duration, currentTime + LARGE_STEP);
+          break;
+        case 'ArrowDown':
+        case 'PageDown':
+          newTime = Math.max(0, currentTime - LARGE_STEP);
+          break;
+        case 'Home':
+          newTime = 0;
+          break;
+        case 'End':
+          newTime = duration;
+          break;
+        default:
+          return;
+      }
+      e.preventDefault();
+      setCurrentTime(newTime);
+      sendMessage({ type: 'seek', value: newTime });
+    },
+    [currentTime, duration, sendMessage],
+  );
+
   return (
     <div
       ref={containerRef}
@@ -206,6 +314,38 @@ function VideoPlayer(props: VideoPlayerProps) {
             'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)',
           padding: '12px 16px',
         }}>
+        {/* Progress bar */}
+        <div className="mb-2 flex items-center gap-x-2">
+          <span className="min-w-[40px] text-xs text-white/80">
+            {formatTime(currentTime)}
+          </span>
+          <div
+            ref={progressBarRef}
+            className="group relative h-1 flex-1 cursor-pointer rounded-full bg-white/20 transition-all hover:h-1.5"
+            onMouseDown={handleProgressMouseDown}
+            onKeyDown={handleProgressKeyDown}
+            role="slider"
+            aria-label="Video progress"
+            aria-valuemin={0}
+            aria-valuemax={duration}
+            aria-valuenow={currentTime}
+            tabIndex={0}>
+            {/* Filled track */}
+            <div
+              className="absolute left-0 top-0 h-full rounded-full bg-white"
+              style={{ width: `${progressPercent}%` }}
+            />
+            {/* Thumb */}
+            <div
+              className="absolute top-1/2 h-3 w-3 -translate-y-1/2 rounded-full bg-white opacity-0 shadow-md transition-opacity group-hover:opacity-100"
+              style={{ left: `${progressPercent}%`, marginLeft: '-6px' }}
+            />
+          </div>
+          <span className="min-w-[40px] text-right text-xs text-white/80">
+            {formatTime(duration)}
+          </span>
+        </div>
+
         <div className="flex items-center justify-end gap-x-2">
           {/* Volume control */}
           <div
