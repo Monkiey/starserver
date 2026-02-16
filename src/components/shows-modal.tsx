@@ -207,6 +207,7 @@ const ShowModal = () => {
       aria-label="Modal containing show's details">
       <DialogContent
         aria-describedby="show-details-description"
+        hideCloseButton
         className="inset-0 h-full max-h-screen w-full max-w-none translate-x-0 translate-y-0 overflow-y-auto border-none bg-background p-0 text-left shadow-none sm:rounded-none">
         <DialogTitle className="sr-only">Show details</DialogTitle>
         <DialogDescription id="show-details-description" className="sr-only">
