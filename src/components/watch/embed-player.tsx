@@ -11,65 +11,14 @@ function VideoPlayer(props: VideoPlayerProps) {
   const router = useRouter();
 
   const containerRef = React.useRef<HTMLDivElement>(null);
-  const playerRef = React.useRef<HTMLDivElement>(null);
-  const loadingRef = React.useRef<HTMLDivElement>(null);
+  const iframeRef = React.useRef<HTMLIFrameElement>(null);
 
   const [isLoaded, setIsLoaded] = React.useState(false);
   const [isFullscreen, setIsFullscreen] = React.useState(false);
-  const [hasError, setHasError] = React.useState(false);
-  const [retryKey, setRetryKey] = React.useState(0);
 
-  // Fetch the proxied HTML and inject it via srcdoc
-  React.useEffect(() => {
-    setIsLoaded(false);
-    setHasError(false);
-
-    const proxyUrl = `/api/proxy?url=${encodeURIComponent(props.url)}`;
-
-    fetch(proxyUrl)
-      .then((res) => {
-        if (!res.ok) throw new Error(`Proxy returned ${res.status}`);
-        return res.text();
-      })
-      .then((html) => {
-        if (!playerRef.current) return;
-
-        // Clear previous content properly
-        while (playerRef.current.firstChild) {
-          playerRef.current.removeChild(playerRef.current.firstChild);
-        }
-
-        // Create a sandboxed iframe with srcdoc (content loaded via server proxy, not embedded from external URL)
-        const frame = document.createElement('iframe');
-        frame.srcdoc = html;
-        frame.style.cssText =
-          'width:100%;height:100%;border:none;position:absolute;top:0;left:0;';
-        frame.setAttribute('allowfullscreen', '');
-        frame.setAttribute(
-          'allow',
-          'autoplay; fullscreen; picture-in-picture; encrypted-media',
-        );
-        // Note: allow-scripts + allow-same-origin is required for the embedded
-        // player's scripts to load external resources. The proxy allowlist
-        // (vidsrc.cc only) limits what content can be loaded.
-        frame.setAttribute(
-          'sandbox',
-          'allow-scripts allow-same-origin allow-forms allow-presentation',
-        );
-
-        frame.addEventListener('load', () => {
-          setIsLoaded(true);
-          if (loadingRef.current) loadingRef.current.style.display = 'none';
-        });
-
-        playerRef.current.appendChild(frame);
-      })
-      .catch(() => {
-        setHasError(true);
-        setIsLoaded(true);
-        if (loadingRef.current) loadingRef.current.style.display = 'none';
-      });
-  }, [props.url, retryKey]);
+  const handleLoad = React.useCallback(() => {
+    setIsLoaded(true);
+  }, []);
 
   const toggleFullscreen = React.useCallback(() => {
     const container = containerRef.current;
@@ -158,47 +107,34 @@ function VideoPlayer(props: VideoPlayerProps) {
       </div>
 
       {/* Loading spinner */}
-      <div
-        ref={loadingRef}
-        className="absolute z-[2] flex h-full w-full items-center justify-center"
-        style={{ display: isLoaded ? 'none' : 'flex' }}>
-        <Loading />
-      </div>
-
-      {/* Error state */}
-      {hasError && (
-        <div className="absolute z-[2] flex h-full w-full flex-col items-center justify-center gap-4 text-white">
-          <svg
-            className="h-12 w-12 text-white/60"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={1.5}>
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
-            />
-          </svg>
-          <p className="text-lg text-white/80">Failed to load video</p>
-          <button
-            onClick={() => setRetryKey((k) => k + 1)}
-            className="rounded-lg bg-white/10 px-4 py-2 text-sm transition hover:bg-white/20">
-            Try again
-          </button>
+      {!isLoaded && (
+        <div className="absolute z-[2] flex h-full w-full items-center justify-center">
+          <Loading />
         </div>
       )}
 
-      {/* Player container — proxied content injected here */}
-      <div
-        ref={playerRef}
+      {/* Video player — direct iframe embed */}
+      {/* sandbox: allow-same-origin is required so the embedded player can
+          access its own cookies and storage. Since the iframe loads
+          cross-origin content (vidsrc.cc), it cannot access our page's DOM. */}
+      <iframe
+        ref={iframeRef}
+        src={props.url}
+        onLoad={handleLoad}
+        allowFullScreen
+        allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
+        sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-popups"
         style={{
           position: 'absolute',
           top: 0,
           left: 0,
           width: '100%',
           height: '100%',
+          border: 'none',
+          opacity: isLoaded ? 1 : 0,
+          transition: 'opacity 0.3s ease',
         }}
+        referrerPolicy="origin"
       />
     </div>
   );
