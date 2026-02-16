@@ -10,6 +10,8 @@ interface VideoPlayerProps {
 function VideoPlayer(props: VideoPlayerProps) {
   const router = useRouter();
 
+  const NATIVE_CONTROLS_HEIGHT = 60;
+
   const containerRef = React.useRef<HTMLDivElement>(null);
   const iframeRef = React.useRef<HTMLIFrameElement>(null);
   const loadingRef = React.useRef<HTMLDivElement>(null);
@@ -69,7 +71,7 @@ function VideoPlayer(props: VideoPlayerProps) {
         backgroundColor: '#000',
         overflow: 'hidden',
       }}>
-      {/* Top controls bar */}
+      {/* Top bar — back button only */}
       <div
         className="absolute left-0 right-0 top-0 z-[3]"
         style={{
@@ -77,54 +79,58 @@ function VideoPlayer(props: VideoPlayerProps) {
             'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%)',
           padding: '16px',
         }}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-x-4">
-            {/* Back button */}
-            <button
-              onClick={() => router.back()}
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20"
-              aria-label="Go back">
+        <div className="flex items-center">
+          <button
+            onClick={() => router.back()}
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20"
+            aria-label="Go back">
+            <svg
+              className="h-5 w-5"
+              stroke="#fff"
+              fill="#fff"
+              strokeWidth="0"
+              viewBox="0 0 16 16"
+              xmlns="http://www.w3.org/2000/svg">
+              <path
+                fillRule="evenodd"
+                d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {/* Bottom bar — fullscreen toggle */}
+      <div
+        className="absolute bottom-0 left-0 right-0 z-[3]"
+        style={{
+          background:
+            'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)',
+          padding: '16px',
+        }}>
+        <div className="flex items-center justify-end">
+          <button
+            onClick={toggleFullscreen}
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20"
+            aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}>
+            {isFullscreen ? (
               <svg
                 className="h-5 w-5"
-                stroke="#fff"
                 fill="#fff"
-                strokeWidth="0"
-                viewBox="0 0 16 16"
+                viewBox="0 0 24 24"
                 xmlns="http://www.w3.org/2000/svg">
-                <path
-                  fillRule="evenodd"
-                  d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"
-                />
+                <path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z" />
               </svg>
-            </button>
-          </div>
-          <div className="flex items-center gap-x-3">
-            {/* Fullscreen toggle */}
-            <button
-              onClick={toggleFullscreen}
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20"
-              aria-label={
-                isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'
-              }>
-              {isFullscreen ? (
-                <svg
-                  className="h-5 w-5"
-                  fill="#fff"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg">
-                  <path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z" />
-                </svg>
-              ) : (
-                <svg
-                  className="h-5 w-5"
-                  fill="#fff"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg">
-                  <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" />
-                </svg>
-              )}
-            </button>
-          </div>
+            ) : (
+              <svg
+                className="h-5 w-5"
+                fill="#fff"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" />
+              </svg>
+            )}
+          </button>
         </div>
       </div>
 
@@ -136,15 +142,18 @@ function VideoPlayer(props: VideoPlayerProps) {
         <Loading />
       </div>
 
-      {/* Video source */}
+      {/* Video source — extra height hides the original bottom controls */}
       <iframe
         ref={iframeRef}
-        width="100%"
-        height="100%"
         allowFullScreen
         allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
         sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
         style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: `calc(100% + ${NATIVE_CONTROLS_HEIGHT}px)`,
           opacity: isLoaded ? 1 : 0,
           transition: 'opacity 0.3s ease',
           border: 'none',
