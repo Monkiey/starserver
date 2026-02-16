@@ -207,105 +207,111 @@ const ShowModal = () => {
       aria-label="Modal containing show's details">
       <DialogContent
         aria-describedby="show-details-description"
-        className="w-full overflow-hidden rounded-2xl border border-border/60 bg-background p-0 text-left align-middle shadow-xl sm:max-w-3xl lg:max-w-4xl">
+        className="inset-0 h-full max-h-screen w-full max-w-none translate-x-0 translate-y-0 overflow-y-auto border-none bg-background p-0 text-left shadow-none sm:rounded-none">
         <DialogTitle className="sr-only">Show details</DialogTitle>
         <DialogDescription id="show-details-description" className="sr-only">
           Details and playback options for the selected title.
         </DialogDescription>
-        <div className="video-wrapper relative aspect-video">
-          <CustomImage
-            fill
-            priority
-            ref={imageRef}
-            alt={modalStore?.show?.title ?? 'poster'}
-            className="-z-40 z-[1] h-auto w-full object-cover"
-            src={`https://image.tmdb.org/t/p/original${
-              modalStore.show?.backdrop_path ?? modalStore.show?.poster_path
-            }`}
-            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 100vw, 33vw"
-          />
-          {trailer && (
-            <Youtube
-              opts={options}
-              onEnd={onEnd}
-              onPlay={onPlay}
-              ref={youtubeRef}
-              onReady={onReady}
-              videoId={trailer}
-              id="video-trailer"
-              title={
-                modalStore.show?.title ??
-                modalStore.show?.name ??
-                'video-trailer'
-              }
-              className="relative aspect-video w-full"
-              style={{ width: '100%', height: '100%' }}
-              iframeClassName={`relative pointer-events-none w-[100%] h-[100%] z-[-10] opacity-0`}
+        <div className="mx-auto grid w-full max-w-5xl gap-4 px-4 py-8 sm:px-6 lg:px-8">
+          <div className="video-wrapper relative aspect-video overflow-hidden rounded-2xl border border-border/60">
+            <CustomImage
+              fill
+              priority
+              ref={imageRef}
+              alt={modalStore?.show?.title ?? 'poster'}
+              className="-z-40 z-[1] h-auto w-full object-cover"
+              src={`https://image.tmdb.org/t/p/original${
+                modalStore.show?.backdrop_path ?? modalStore.show?.poster_path
+              }`}
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 960px"
             />
-          )}
-          <div className="absolute bottom-6 z-20 flex w-full items-center justify-between gap-2 px-10">
-            <div className="flex items-center gap-2.5">
-              <Link href={handleHref()}>
-                <Button
-                  aria-label={`${isPlaying ? 'Pause' : 'Play'} show`}
-                  className="group h-auto rounded py-1.5"
-                  onClick={() => {
-                    if (modalStore.show) {
-                      handleContinueWatching(modalStore.show);
-                    }
-                  }}>
-                  <>
-                    <Icons.play
-                      className="mr-1.5 h-6 w-6 fill-current"
-                      aria-hidden="true"
-                    />
-                    Play
-                  </>
-                </Button>
-              </Link>
+            {trailer && (
+              <Youtube
+                opts={options}
+                onEnd={onEnd}
+                onPlay={onPlay}
+                ref={youtubeRef}
+                onReady={onReady}
+                videoId={trailer}
+                id="video-trailer"
+                title={
+                  modalStore.show?.title ??
+                  modalStore.show?.name ??
+                  'video-trailer'
+                }
+                className="relative aspect-video w-full"
+                style={{ width: '100%', height: '100%' }}
+                iframeClassName={`relative pointer-events-none w-[100%] h-[100%] z-[-10] opacity-0`}
+              />
+            )}
+            <div className="absolute bottom-6 z-20 flex w-full items-center justify-between gap-2 px-10">
+              <div className="flex items-center gap-2.5">
+                <Link href={handleHref()}>
+                  <Button
+                    aria-label={`${isPlaying ? 'Pause' : 'Play'} show`}
+                    className="group h-auto rounded py-1.5"
+                    onClick={() => {
+                      if (modalStore.show) {
+                        handleContinueWatching(modalStore.show);
+                      }
+                    }}>
+                    <>
+                      <Icons.play
+                        className="mr-1.5 h-6 w-6 fill-current"
+                        aria-hidden="true"
+                      />
+                      Play
+                    </>
+                  </Button>
+                </Link>
+              </div>
+              <Button
+                aria-label={`${isMuted ? 'Unmute' : 'Mute'} video`}
+                variant="ghost"
+                className="h-auto rounded-full bg-neutral-800 p-1.5 opacity-50 ring-1 ring-slate-400 hover:bg-neutral-800 hover:opacity-100 hover:ring-white focus:ring-offset-0 dark:bg-neutral-800 dark:hover:bg-neutral-800"
+                onClick={handleChangeMute}>
+                {isMuted ? (
+                  <Icons.volumeMute className="h-6 w-6" aria-hidden="true" />
+                ) : (
+                  <Icons.volume className="h-6 w-6" aria-hidden="true" />
+                )}
+              </Button>
             </div>
-            <Button
-              aria-label={`${isMuted ? 'Unmute' : 'Mute'} video`}
-              variant="ghost"
-              className="h-auto rounded-full bg-neutral-800 p-1.5 opacity-50 ring-1 ring-slate-400 hover:bg-neutral-800 hover:opacity-100 hover:ring-white focus:ring-offset-0 dark:bg-neutral-800 dark:hover:bg-neutral-800"
-              onClick={handleChangeMute}>
-              {isMuted ? (
-                <Icons.volumeMute className="h-6 w-6" aria-hidden="true" />
-              ) : (
-                <Icons.volume className="h-6 w-6" aria-hidden="true" />
-              )}
-            </Button>
           </div>
-        </div>
-        <div className="grid gap-4 px-6 pb-6 pt-2 sm:px-10 sm:pb-10">
           <div className="rounded-2xl border border-border/60 bg-background/70 p-4 text-sm text-foreground/80">
             <div className="grid gap-3">
-              <div>
-                <DialogTitle className="text-base font-semibold text-foreground">
+              <div className="flex items-center justify-between gap-3">
+                <DialogTitle className="text-base font-semibold text-foreground sm:text-lg">
                   {modalStore.show?.title ?? modalStore.show?.name}
                 </DialogTitle>
-                <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                  <span className="font-medium text-primary">
-                    {modalStore.show?.vote_average != null
-                      ? `${Math.round(
-                          (modalStore.show.vote_average / 10) * 100,
-                        )}% Match`
-                      : '-'}
+                <Button
+                  variant="outline"
+                  className="rounded-full text-xs"
+                  onClick={handleCloseModal}>
+                  Back to browse
+                </Button>
+              </div>
+              <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                <span className="font-medium text-primary">
+                  {modalStore.show?.vote_average != null
+                    ? `${Math.round(
+                        (modalStore.show.vote_average / 10) * 100,
+                      )}% Match`
+                    : '-'}
+                </span>
+                {modalStore.show?.release_date ? (
+                  <span>{getYear(modalStore.show?.release_date)}</span>
+                ) : modalStore.show?.first_air_date ? (
+                  <span>{getYear(modalStore.show?.first_air_date)}</span>
+                ) : null}
+                {modalStore.show?.original_language && (
+                  <span className="rounded-full border border-border/60 px-2 py-0.5 text-xs font-medium uppercase">
+                    {modalStore.show.original_language}
                   </span>
-                  {modalStore.show?.release_date ? (
-                    <span>{getYear(modalStore.show?.release_date)}</span>
-                  ) : modalStore.show?.first_air_date ? (
-                    <span>{getYear(modalStore.show?.first_air_date)}</span>
-                  ) : null}
-                  {modalStore.show?.original_language && (
-                    <span className="rounded-full border border-border/60 px-2 py-0.5 text-xs font-medium uppercase">
-                      {modalStore.show.original_language}
-                    </span>
-                  )}
-                </div>
+                )}
               </div>
               <DialogDescription
-                className="line-clamp-3 text-xs text-foreground/80 sm:text-sm"
+                className="max-w-3xl text-xs text-foreground/80 sm:text-sm"
                 id={undefined}>
                 {modalStore.show?.overview ?? '-'}
               </DialogDescription>
