@@ -61,9 +61,13 @@ function VideoPlayer(props: VideoPlayerProps) {
     if (!container) return;
 
     if (!document.fullscreenElement) {
-      void container.requestFullscreen();
+      container.requestFullscreen().catch(() => {
+        // Fullscreen not supported or denied
+      });
     } else {
-      void document.exitFullscreen();
+      document.exitFullscreen().catch(() => {
+        // Exit fullscreen failed
+      });
     }
   }, []);
 
@@ -165,6 +169,7 @@ function VideoPlayer(props: VideoPlayerProps) {
         height="100%"
         allowFullScreen
         allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
+        sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-popups"
         style={{
           opacity: isLoaded ? 1 : 0,
           transition: 'opacity 0.3s ease',
