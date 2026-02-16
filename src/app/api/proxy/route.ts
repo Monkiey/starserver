@@ -48,8 +48,14 @@ export async function GET(request: NextRequest) {
     const origin = parsed.origin;
 
     // Rewrite relative URLs to absolute so assets load from vidsrc
-    // Handle src="/..." and href="/..."
-    html = html.replace(/(src|href|action)=(["'])\/(?!\/)/g, `$1=$2${origin}/`);
+    // Use string replacements instead of regex to avoid backreference issues
+    html = html
+      .replaceAll('src="/', `src="${origin}/`)
+      .replaceAll("src='/", `src='${origin}/`)
+      .replaceAll('href="/', `href="${origin}/`)
+      .replaceAll("href='/", `href='${origin}/`)
+      .replaceAll('action="/', `action="${origin}/`)
+      .replaceAll("action='/", `action='${origin}/`);
 
     // Inject a <base> tag so any remaining relative URLs resolve correctly
     html = html.replace(/<head([^>]*)>/i, `<head$1><base href="${origin}/">`);

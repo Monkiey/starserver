@@ -34,8 +34,10 @@ function VideoPlayer(props: VideoPlayerProps) {
       .then((html) => {
         if (!playerRef.current) return;
 
-        // Clear previous content
-        playerRef.current.innerHTML = '';
+        // Clear previous content properly
+        while (playerRef.current.firstChild) {
+          playerRef.current.removeChild(playerRef.current.firstChild);
+        }
 
         // Create a sandboxed iframe with srcdoc (content loaded via server proxy, not embedded from external URL)
         const frame = document.createElement('iframe');
@@ -47,6 +49,9 @@ function VideoPlayer(props: VideoPlayerProps) {
           'allow',
           'autoplay; fullscreen; picture-in-picture; encrypted-media',
         );
+        // Note: allow-scripts + allow-same-origin is required for the embedded
+        // player's scripts to load external resources. The proxy allowlist
+        // (vidsrc.cc only) limits what content can be loaded.
         frame.setAttribute(
           'sandbox',
           'allow-scripts allow-same-origin allow-forms allow-presentation',
