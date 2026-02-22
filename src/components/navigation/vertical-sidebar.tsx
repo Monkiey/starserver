@@ -33,11 +33,19 @@ export function VerticalSidebar() {
   const isDetailPage = isShowDetailPage(path);
 
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [isScrolled, setIsScrolled] = React.useState(false);
 
   // Close mobile sidebar on route change
   React.useEffect(() => {
     setMobileOpen(false);
   }, [path]);
+
+  // Scroll-aware transparency for the top bar
+  React.useEffect(() => {
+    const onScroll = () => setIsScrolled(window.scrollY > 0);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   // Prevent body scroll while mobile sidebar is open
   React.useEffect(() => {
@@ -151,8 +159,15 @@ export function VerticalSidebar() {
   return (
     <>
       {/* ── Top bar ──────────────────────────────────────────────── */}
-      {/* lg:pl-[276px] = 260px sidebar + 16px content padding to align with sidebar edge */}
-      <header className="fixed left-0 right-0 top-0 z-50 flex h-16 items-center border-b border-border bg-card px-4 lg:pl-[276px]">
+      {/* On desktop the bar starts at left-[260px] so it never covers the sidebar logo */}
+      <header
+        className={cn(
+          'fixed right-0 top-0 z-50 flex h-16 items-center px-4 transition-colors duration-300',
+          'left-0 lg:left-[260px]',
+          isScrolled
+            ? 'border-border/60 bg-background/80 border-b backdrop-blur'
+            : 'bg-transparent',
+        )}>
         {/* Mobile hamburger */}
         <button
           aria-label="Open navigation"
@@ -161,7 +176,7 @@ export function VerticalSidebar() {
           <Menu className="h-5 w-5" />
         </button>
 
-        {/* Mobile logo (hidden on desktop since sidebar shows it) */}
+        {/* Mobile logo */}
         <Link href="/" className="flex items-center gap-2 lg:hidden">
           <PlayCircle className="h-6 w-6 flex-shrink-0 text-primary" />
           <span className="font-heading text-base font-semibold uppercase tracking-wide">
