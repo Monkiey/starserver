@@ -197,7 +197,7 @@ export function VerticalSidebar() {
       <aside
         role="navigation"
         aria-label="Site navigation"
-        className="fixed left-0 top-0 z-40 hidden h-screen w-[260px] flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:flex">
+        className="bg-sidebar/80 fixed left-0 top-0 z-40 hidden h-screen w-[260px] flex-col border-r border-sidebar-border text-sidebar-foreground backdrop-blur-md lg:flex">
         <SidebarContent />
       </aside>
 
