@@ -18,7 +18,6 @@ import { buttonVariants } from '@/components/ui/button';
 import { Button } from '@/components/ui/button';
 import { usePathname } from 'next/navigation';
 import { useSearchStore } from '@/stores/search';
-import { ModeToggle as ThemeToggle } from '@/components/theme-toggle';
 
 interface MainNavProps {
   items?: NavItem[];
@@ -101,9 +100,7 @@ export function MainNav({ items }: MainNavProps) {
                   {items?.map(
                     (item, index) =>
                       item.href && (
-                        <DropdownMenuItem
-                          key={index}
-                          className="p-0">
+                        <DropdownMenuItem key={index} className="p-0">
                           <Link
                             href={item.href}
                             className="flex w-full items-center justify-center px-2 py-1.5">
@@ -143,9 +140,6 @@ export function MainNav({ items }: MainNavProps) {
               <Icons.settings className="h-[1.2rem] w-[1.2rem]" />
             </Button>
           </Link>
-          <div className="border-border/60 bg-background/70 rounded-full border p-1">
-            <ThemeToggle />
-          </div>
         </div>
       </div>
     </nav>
