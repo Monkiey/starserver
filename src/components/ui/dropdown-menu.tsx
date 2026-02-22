@@ -54,7 +54,7 @@ const DropdownMenuContent = React.forwardRef<
     align?: "start" | "end" | "center";
     sideOffset?: number;
   }
->(({ className, align = "end", sideOffset = 4, ...props }, ref) => {
+>(({ className, align = "end", sideOffset = 4, children }, ref) => {
   const anchor = align === "start" ? "bottom start" : align === "end" ? "bottom end" : "bottom";
   return (
     <Transition
@@ -72,8 +72,9 @@ const DropdownMenuContent = React.forwardRef<
           "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md focus:outline-none",
           className,
         )}
-        {...(props as object)}
-      />
+      >
+        {children}
+      </MenuItems>
     </Transition>
   );
 });

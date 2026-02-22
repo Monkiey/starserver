@@ -39,31 +39,15 @@ const Tooltip = ({ children }: { children: React.ReactNode }) => {
 
 const TooltipTrigger = React.forwardRef<
   HTMLElement,
-  React.HTMLAttributes<HTMLElement> & {
-    asChild?: boolean;
-    children: React.ReactElement<React.HTMLAttributes<HTMLElement>>;
-  }
->(({ asChild, children, ...props }, ref) => {
+  { children: React.ReactElement<React.HTMLAttributes<HTMLElement>> }
+>(({ children }, ref) => {
   const { setOpen } = useTooltipContext();
 
-  const handlers = {
+  return React.cloneElement(children, {
     onMouseEnter: () => setOpen(true),
     onMouseLeave: () => setOpen(false),
     onFocus: () => setOpen(true),
     onBlur: () => setOpen(false),
-  };
-
-  if (asChild) {
-    return React.cloneElement(children, {
-      ...handlers,
-      ...props,
-      ref: ref as React.Ref<HTMLElement>,
-    });
-  }
-
-  return React.cloneElement(children, {
-    ...handlers,
-    ...props,
     ref: ref as React.Ref<HTMLElement>,
   });
 });

@@ -127,12 +127,11 @@ const NavigationMenuLink = React.forwardRef<
 ));
 NavigationMenuLink.displayName = "NavigationMenuLink";
 
-// ─── Viewport (kept for API compat — not needed with Popover) ─────────────────
-
-const NavigationMenuViewport = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->((_props, _ref) => null);
+// ─── Viewport (Popover-based navigation does not use a shared viewport) ────────
+// Kept as a no-op for any consumers that still reference the export.
+const NavigationMenuViewport = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  (_props, _ref) => null,
+);
 NavigationMenuViewport.displayName = "NavigationMenuViewport";
 
 // ─── Indicator (kept for API compat) ─────────────────────────────────────────

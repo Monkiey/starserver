@@ -41,7 +41,7 @@ const Dialog = ({ open = false, onOpenChange, children }: DialogRootProps) => {
   );
 };
 
-// ─── Trigger (passthrough, not needed by HL but kept for API compat) ──────────
+// ─── Trigger (passthrough — kept for API compat; consumers control open state) ──
 
 const DialogTrigger = React.forwardRef<
   HTMLButtonElement,
@@ -52,7 +52,7 @@ const DialogTrigger = React.forwardRef<
     <button
       ref={ref}
       onClick={(e) => {
-        ctx && ctx.onClose(); // toggle — consumers should call setOpen directly
+        ctx?.onClose();
         onClick?.(e);
       }}
       {...props}
