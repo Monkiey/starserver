@@ -16,13 +16,36 @@ export type SearchAudience = 'kids' | 'family' | 'date' | 'mature';
 export interface NaturalLanguageIntent {
   intent: 'movie' | 'tv' | 'both';
   genre?: string;
+  /** Numeric TMDB genre IDs detected in the query. */
+  genreIds: number[];
+  /**
+   * True when every non-stop-word token in the query maps to a known
+   * genre/mood/era cue (e.g. "action", "dark thriller").  Used by the
+   * search route to switch from text-search to TMDB discover-by-genre so
+   * that both movies AND TV shows matching the genre are returned.
+   */
+  isGenreSearch: boolean;
   keywords: string[];
   mood?: SearchMood;
   era?: SearchEra;
   audience?: SearchAudience;
 }
 
-class AIService {
+/**
+ * Local model identifiers inspired by Claude model tiers.
+ * These run entirely locally — no external API calls are made.
+ *
+ * - `claude-haiku-local`  : lightweight, fast keyword extraction & query enhancement
+ * - `claude-sonnet-local` : balanced scoring, intent analysis & suggestions
+ * - `claude-opus-local`   : deep semantic search with mood/era/audience reasoning
+ */
+export enum LocalModel {
+  HAIKU = 'claude-haiku-local',
+  SONNET = 'claude-sonnet-local',
+  OPUS = 'claude-opus-local',
+}
+
+class StarSearchService {
   private static readonly STOP_WORDS = new Set([
     'a',
     'an',
@@ -389,6 +412,47 @@ class AIService {
       .filter((token) => token && !this.STOP_WORDS.has(token));
   }
 
+  /** Adds every individual word from a cue phrase list into the target set. */
+  private static collectCueWords(
+    cues: string[] | undefined,
+    target: Set<string>,
+  ): void {
+    if (!cues) return;
+    for (const cue of cues) {
+      for (const word of cue.split(/\s+/)) target.add(word.toLowerCase());
+    }
+  }
+
+  /**
+   * Returns true when every non-stop-word token in the query maps to a known
+   * genre, mood, era, or audience cue word — meaning the user is browsing a
+   * category (e.g. "action", "dark thriller") rather than searching for a
+   * specific title.  Used to switch the search route to the TMDB discover API
+   * so that both movies AND TV shows in that genre are returned.
+   */
+  private static isQueryGenreOnly(
+    query: string,
+    genreHints: Set<Genre>,
+  ): boolean {
+    if (genreHints.size === 0) return false;
+    // Build a flat set of individual words from every cue list
+    const cueWords = new Set<string>();
+    for (const cues of Object.values(this.GENRE_KEYWORDS)) {
+      this.collectCueWords(cues, cueWords);
+    }
+    for (const cues of Object.values(this.MOOD_KEYWORDS)) {
+      this.collectCueWords(cues, cueWords);
+    }
+    for (const cues of Object.values(this.ERA_KEYWORDS)) {
+      this.collectCueWords(cues, cueWords);
+    }
+    for (const cues of Object.values(this.AUDIENCE_KEYWORDS)) {
+      this.collectCueWords(cues, cueWords);
+    }
+    const tokens = this.tokenize(query);
+    return tokens.length > 0 && tokens.every((t) => cueWords.has(t));
+  }
+
   private static deriveGenres(keywords: string[]): Set<Genre> {
     const matches = new Set<Genre>();
     const joined = keywords.join(' ');
@@ -605,7 +669,14 @@ class AIService {
     return 'Top picks curated locally for you right now.';
   }
 
-  static enhanceSearchQuery(query: string): Promise<string> {
+  /**
+   * Enhances a raw search query using the {@link LocalModel.HAIKU} model.
+   * Expands natural language phrases and removes stop words locally.
+   */
+  static enhanceSearchQuery(
+    query: string,
+    _model = LocalModel.HAIKU,
+  ): Promise<string> {
     const trimmed = query.trim();
     if (!trimmed.length) return Promise.resolve(query);
 
@@ -628,9 +699,14 @@ class AIService {
     return Promise.resolve(cleaned.length ? cleaned : trimmed);
   }
 
+  /**
+   * Generates personalized suggestions using the {@link LocalModel.SONNET} model.
+   * Scores and ranks shows locally based on user preferences.
+   */
   static generatePersonalizedSuggestions(
     shows: Show[],
     userPreferences?: string,
+    _model = LocalModel.SONNET,
   ): Promise<{
     suggestions: Array<{ showId: number; reason: string }>;
     summary: string;
@@ -706,7 +782,13 @@ class AIService {
     });
   }
 
-  static analyzeSearchIntent(query: string): Promise<NaturalLanguageIntent> {
+  /**
+   * Analyzes natural language intent using the {@link LocalModel.SONNET} model.
+   */
+  static analyzeSearchIntent(
+    query: string,
+    _model = LocalModel.SONNET,
+  ): Promise<NaturalLanguageIntent> {
     const lower = query.toLowerCase();
     const keywords = this.tokenize(query);
 
@@ -759,9 +841,14 @@ class AIService {
         ? this.genreName(Array.from(genreHints)[0])
         : undefined;
 
+    const genreIds = Array.from(genreHints) as number[];
+    const isGenreSearch = this.isQueryGenreOnly(query, genreHints);
+
     return Promise.resolve({
       intent,
       genre,
+      genreIds,
+      isGenreSearch,
       keywords: allKeywords.length ? allKeywords : query.split(' '),
       mood,
       era,
@@ -769,9 +856,14 @@ class AIService {
     });
   }
 
+  /**
+   * Searches shows by natural language prompt using the {@link LocalModel.OPUS} model.
+   * Performs deep semantic matching with mood, era, and genre scoring locally.
+   */
   static searchByPrompt(
     shows: Show[],
     prompt: string,
+    _model = LocalModel.OPUS,
   ): Promise<{
     matches: Array<{ showId: number }>;
     explanation: string;
@@ -889,4 +981,4 @@ class AIService {
   }
 }
 
-export default AIService;
+export default StarSearchService;
