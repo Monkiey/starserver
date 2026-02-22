@@ -218,7 +218,7 @@ export function SearchDialog() {
           </DialogDescription>
 
           {/* ── Header bar ── */}
-          <div className="flex items-center gap-2 border-b px-4">
+          <div className="flex items-center gap-2 border-b pl-4 pr-12">
             <Icons.search className="h-5 w-5 shrink-0 text-muted-foreground" />
 
             {mode === 'title' ? (
@@ -266,10 +266,6 @@ export function SearchDialog() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-
-            <kbd className="pointer-events-none hidden select-none rounded border bg-muted px-1.5 py-0.5 font-mono text-[10px] font-medium text-muted-foreground sm:inline-flex">
-              ESC
-            </kbd>
           </div>
 
           {/* ── Body ── */}
