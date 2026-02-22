@@ -7,12 +7,7 @@ export default function Page({ params }: { params: { slug: string } }) {
   const id = params.slug.split('-').pop();
   return (
     <EmbedPlayer
-      sources={[
-        {
-          label: 'Server 1',
-          url: `https://vidsrc.cc/v2/embed/anime/tmdb${id}/1/sub?autoPlay=false`,
-        },
-      ]}
+      url={`https://vidsrc.cc/v2/embed/anime/tmdb${id}/1/sub?autoPlay=false`}
     />
   );
 }

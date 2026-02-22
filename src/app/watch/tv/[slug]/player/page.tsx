@@ -13,28 +13,9 @@ export default function Page({
   const id = params.slug.split('-').pop();
   const season = searchParams?.season;
   const episode = searchParams?.episode;
-
-  const sources =
+  const url =
     season && episode
-      ? [
-          {
-            label: 'VidSrc',
-            url: `https://vidsrc.cc/v2/embed/tv/${id}/${season}/${episode}`,
-          },
-          {
-            label: 'VidSrc.to',
-            url: `https://vidsrc.to/embed/tv/${id}/${season}/${episode}`,
-          },
-          {
-            label: 'Embed.su',
-            url: `https://embed.su/embed/tv/${id}/${season}/${episode}`,
-          },
-        ]
-      : [
-          { label: 'VidSrc', url: `https://vidsrc.cc/v2/embed/tv/${id}` },
-          { label: 'VidSrc.to', url: `https://vidsrc.to/embed/tv/${id}` },
-          { label: 'Embed.su', url: `https://embed.su/embed/tv/${id}` },
-        ];
-
-  return <EmbedPlayer sources={sources} />;
+      ? `https://vidsrc.cc/v2/embed/tv/${id}/${season}/${episode}`
+      : `https://vidsrc.cc/v2/embed/tv/${id}`;
+  return <EmbedPlayer url={url} />;
 }
