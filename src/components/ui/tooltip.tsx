@@ -1,30 +1,82 @@
 "use client";
 
 import * as React from "react";
-import * as TooltipPrimitive from "@radix-ui/react-tooltip";
-
 import { cn } from "@/lib/utils";
 
-const TooltipProvider = TooltipPrimitive.Provider;
+// ─── Context ──────────────────────────────────────────────────────────────────
 
-const Tooltip = TooltipPrimitive.Root;
+interface TooltipContextValue {
+  open: boolean;
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}
 
-const TooltipTrigger = TooltipPrimitive.Trigger;
+const TooltipContext = React.createContext<TooltipContextValue | null>(null);
+
+function useTooltipContext() {
+  const ctx = React.useContext(TooltipContext);
+  if (!ctx) throw new Error("Tooltip components must be used within <Tooltip>");
+  return ctx;
+}
+
+// ─── Provider (passthrough — kept for API compatibility) ─────────────────────
+
+const TooltipProvider = ({ children }: { children: React.ReactNode }) => (
+  <>{children}</>
+);
+
+// ─── Root ─────────────────────────────────────────────────────────────────────
+
+const Tooltip = ({ children }: { children: React.ReactNode }) => {
+  const [open, setOpen] = React.useState(false);
+  return (
+    <TooltipContext.Provider value={{ open, setOpen }}>
+      <div className="relative inline-block">{children}</div>
+    </TooltipContext.Provider>
+  );
+};
+
+// ─── Trigger ─────────────────────────────────────────────────────────────────
+
+const TooltipTrigger = React.forwardRef<
+  HTMLElement,
+  { children: React.ReactElement<React.HTMLAttributes<HTMLElement>> }
+>(({ children }, ref) => {
+  const { setOpen } = useTooltipContext();
+
+  return React.cloneElement(children, {
+    onMouseEnter: () => setOpen(true),
+    onMouseLeave: () => setOpen(false),
+    onFocus: () => setOpen(true),
+    onBlur: () => setOpen(false),
+    ref: ref as React.Ref<HTMLElement>,
+  });
+});
+TooltipTrigger.displayName = "TooltipTrigger";
+
+// ─── Content ─────────────────────────────────────────────────────────────────
 
 const TooltipContent = React.forwardRef<
-  React.ElementRef<typeof TooltipPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content>
->(({ className, sideOffset = 4, ...props }, ref) => (
-  <TooltipPrimitive.Content
-    ref={ref}
-    sideOffset={sideOffset}
-    className={cn(
-      "z-50 overflow-hidden rounded-md border bg-popover px-3 py-1.5 text-sm text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
-      className,
-    )}
-    {...props}
-  />
-));
-TooltipContent.displayName = TooltipPrimitive.Content.displayName;
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement> & { sideOffset?: number }
+>(({ className, sideOffset = 4, children, ...props }, ref) => {
+  const { open } = useTooltipContext();
+  if (!open) return null;
+
+  return (
+    <div
+      ref={ref}
+      role="tooltip"
+      className={cn(
+        "absolute bottom-full left-1/2 z-50 -translate-x-1/2 overflow-hidden rounded-md border bg-popover px-3 py-1.5 text-sm text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95",
+        className,
+      )}
+      style={{ marginBottom: sideOffset }}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+});
+TooltipContent.displayName = "TooltipContent";
 
 export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider };

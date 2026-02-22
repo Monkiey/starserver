@@ -6,7 +6,6 @@ import { usePathname } from 'next/navigation';
 import { Home, Tv, Film, Search, Settings, Menu, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { siteConfig } from '@/configs/site';
-import { ModeToggle as ThemeToggle } from '@/components/theme-toggle';
 import { useSearchStore } from '@/stores/search';
 import { isShowDetailPage } from '@/lib/utils';
 
@@ -137,11 +136,6 @@ export function VerticalSidebar() {
           />
           <span>Settings</span>
         </Link>
-
-        <div className="text-sidebar-foreground/70 flex h-11 items-center rounded-lg px-3 transition-colors hover:bg-sidebar-accent">
-          <span className="flex-1 text-sm font-medium">Theme</span>
-          <ThemeToggle />
-        </div>
       </div>
     </>
   );
@@ -189,7 +183,6 @@ export function VerticalSidebar() {
             className="text-foreground/60 hidden h-9 w-9 items-center justify-center rounded-lg transition-colors hover:bg-muted hover:text-foreground lg:flex">
             <Settings className="h-5 w-5" />
           </Link>
-          <ThemeToggle />
         </div>
       </header>
 

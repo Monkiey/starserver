@@ -11,17 +11,12 @@ import { usePathname } from 'next/navigation';
 import CustomImage from './custom-image';
 
 interface ShowsCarouselProps {
-  /** Optional title for the carousel. When omitted, the carousel renders without a title header (e.g., for AI suggestions). */
+  /** Optional title for the carousel. When omitted, the carousel renders without a title header. */
   title?: string;
   shows: Show[];
-  getSuggestionReason?: (showId: number) => string | null;
 }
 
-const ShowsCarousel = ({
-  title,
-  shows,
-  getSuggestionReason,
-}: ShowsCarouselProps) => {
+const ShowsCarousel = ({ title, shows }: ShowsCarouselProps) => {
   const pathname = usePathname();
 
   const showsRef = React.useRef<HTMLDivElement>(null);
@@ -63,7 +58,7 @@ const ShowsCarousel = ({
       {shows.length !== 0 && (
         <div className="space-y-1 sm:space-y-2.5">
           {title && (
-            <h2 className="m-0 px-[4%] font-heading text-lg font-semibold uppercase tracking-wide text-foreground/80 transition-colors hover:text-foreground sm:text-xl 2xl:px-[60px]">
+            <h2 className="text-foreground/80 m-0 px-[4%] font-heading text-lg font-semibold uppercase tracking-wide transition-colors hover:text-foreground sm:text-xl 2xl:px-[60px]">
               {title}
             </h2>
           )}
@@ -72,7 +67,7 @@ const ShowsCarousel = ({
               aria-label="Scroll to left"
               variant="ghost"
               className={cn(
-                'absolute left-0 top-0 z-10 mr-2 hidden h-full w-[4%] items-center justify-center rounded-l-none bg-transparent py-0 text-transparent hover:bg-secondary/90 hover:text-foreground md:block 2xl:w-[60px]',
+                'hover:bg-secondary/90 absolute left-0 top-0 z-10 mr-2 hidden h-full w-[4%] items-center justify-center rounded-l-none bg-transparent py-0 text-transparent hover:text-foreground md:block 2xl:w-[60px]',
                 isScrollable ? 'md:block' : 'md:hidden',
               )}
               onClick={() => scrollToDirection('left')}>
@@ -82,22 +77,13 @@ const ShowsCarousel = ({
               ref={showsRef}
               className="no-scrollbar m-0 grid auto-cols-[calc(100%/2.2)] grid-flow-col overflow-x-auto overflow-y-hidden px-[4%] py-0 duration-500 ease-in-out xs:auto-cols-[calc(100%/2.6)] sm:auto-cols-[25%] md:touch-pan-y lg:auto-cols-[20%] xl:auto-cols-[calc(100%/6)] 2xl:px-[60px]">
               {shows.map((show) => (
-                <ShowCard
-                  key={show.id}
-                  show={show}
-                  pathname={pathname}
-                  suggestionReason={
-                    getSuggestionReason
-                      ? getSuggestionReason(show.id)
-                      : undefined
-                  }
-                />
+                <ShowCard key={show.id} show={show} pathname={pathname} />
               ))}
             </div>
             <Button
               aria-label="Scroll to right"
               variant="ghost"
-              className="absolute right-0 top-0 z-10 m-0 ml-2 hidden h-full w-[4%] items-center justify-center rounded-r-none bg-transparent py-0 text-transparent hover:bg-secondary/70 hover:text-foreground md:block 2xl:w-[60px]"
+              className="hover:bg-secondary/70 absolute right-0 top-0 z-10 m-0 ml-2 hidden h-full w-[4%] items-center justify-center rounded-r-none bg-transparent py-0 text-transparent hover:text-foreground md:block 2xl:w-[60px]"
               onClick={() => scrollToDirection('right')}>
               <Icons.chevronRight className="h-8 w-8" aria-hidden="true" />
             </Button>
@@ -110,14 +96,7 @@ const ShowsCarousel = ({
 
 export default ShowsCarousel;
 
-export const ShowCard = ({
-  show,
-  suggestionReason,
-}: {
-  show: Show;
-  pathname: string;
-  suggestionReason?: string | null;
-}) => {
+export const ShowCard = ({ show }: { show: Show; pathname: string }) => {
   const imageOnErrorHandler = (
     event: React.SyntheticEvent<HTMLImageElement, Event>,
   ) => {
@@ -134,12 +113,6 @@ export const ShowCard = ({
         aria-label={getNameFromShow(show)}
         href={`/${show.media_type}/${getSlug(show.id, getNameFromShow(show))}`}
       />
-      {suggestionReason && (
-        <div className="absolute left-2 top-2 z-10 rounded-md bg-yellow-500/90 px-2 py-1 text-xs font-semibold text-black">
-          <Icons.sparkles className="mr-1 inline h-3 w-3" />
-          Star Pick
-        </div>
-      )}
       {/* <source */}
       {/*   // srcSet={`https://image.tmdb.org/t/p/w342/${show.poster_path ?? show.backdrop_path}`} */}
       {/*   srcSet={ */}
