@@ -218,7 +218,7 @@ export function SearchDialog() {
           </DialogDescription>
 
           {/* ── Header bar ── */}
-          <div className="flex items-center gap-2 border-b px-4">
+          <div className="flex items-center gap-2 border-b pl-4 pr-12">
             <Icons.search className="h-5 w-5 shrink-0 text-muted-foreground" />
 
             {mode === 'title' ? (
