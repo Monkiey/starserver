@@ -14,6 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { buttonVariants } from '@/components/ui/button';
 import { Button } from '@/components/ui/button';
 import { usePathname } from 'next/navigation';
 import { useSearchStore } from '@/stores/search';
@@ -76,14 +77,14 @@ export function MainNav({ items }: MainNavProps) {
             ) : null}
             <div className="block md:hidden">
               <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="flex items-center space-x-2 px-0 hover:bg-transparent focus:ring-0">
-                    <span className="font-heading text-base font-semibold uppercase tracking-wide">
-                      Menu
-                    </span>
-                  </Button>
+                <DropdownMenuTrigger
+                  className={cn(
+                    buttonVariants({ variant: 'ghost' }),
+                    'flex items-center space-x-2 px-0 hover:bg-transparent focus:ring-0',
+                  )}>
+                  <span className="font-heading text-base font-semibold uppercase tracking-wide">
+                    Menu
+                  </span>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="start"
@@ -97,25 +98,27 @@ export function MainNav({ items }: MainNavProps) {
                     </Link>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  {items?.map((item, index) => (
-                    <DropdownMenuItem
-                      key={index}
-                      asChild
-                      className="items-center justify-center">
-                      {item.href && (
-                        <Link href={item.href}>
-                          <span
-                            className={cn(
-                              'text-foreground/60 hover:text-foreground/80 line-clamp-1',
-                              path === item.href &&
-                                'font-semibold text-foreground',
-                            )}>
-                            {item.title}
-                          </span>
-                        </Link>
-                      )}
-                    </DropdownMenuItem>
-                  ))}
+                  {items?.map(
+                    (item, index) =>
+                      item.href && (
+                        <DropdownMenuItem
+                          key={index}
+                          className="p-0">
+                          <Link
+                            href={item.href}
+                            className="flex w-full items-center justify-center px-2 py-1.5">
+                            <span
+                              className={cn(
+                                'text-foreground/60 hover:text-foreground/80 line-clamp-1',
+                                path === item.href &&
+                                  'font-semibold text-foreground',
+                              )}>
+                              {item.title}
+                            </span>
+                          </Link>
+                        </DropdownMenuItem>
+                      ),
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>

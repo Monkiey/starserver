@@ -13,7 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
 import { Input } from '@/components/ui/input';
 import { useSearchStore } from '@/stores/search';
@@ -241,14 +241,13 @@ export function SearchDialog() {
 
             {/* Mode dropdown */}
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-8 shrink-0 gap-1 rounded-full text-xs font-medium">
-                  {mode === 'title' ? 'Title' : 'Genre'}
-                  <ChevronDown className="h-3 w-3 opacity-60" />
-                </Button>
+              <DropdownMenuTrigger
+                className={cn(
+                  buttonVariants({ variant: 'outline', size: 'sm' }),
+                  'h-8 shrink-0 gap-1 rounded-full text-xs font-medium',
+                )}>
+                {mode === 'title' ? 'Title' : 'Genre'}
+                <ChevronDown className="h-3 w-3 opacity-60" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-36">
                 <DropdownMenuItem
