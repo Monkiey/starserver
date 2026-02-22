@@ -30,6 +30,32 @@ const config = {
     ignoreDuringBuilds: true,
   },
   swcMinify: true,
+  async headers() {
+    return [
+      {
+        // Apply to all watch pages to restrict ad-related browser APIs
+        // available to cross-origin iframes without using the sandbox attribute
+        source: '/watch/:path*',
+        headers: [
+          {
+            key: 'Permissions-Policy',
+            value: [
+              'payment=()',
+              'usb=()',
+              'camera=()',
+              'microphone=()',
+              'geolocation=()',
+              'interest-cohort=()',
+              'attribution-reporting=()',
+              'browsing-topics=()',
+              'join-ad-interest-group=()',
+              'run-ad-auction=()',
+            ].join(', '),
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default config;

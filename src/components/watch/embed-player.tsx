@@ -64,7 +64,6 @@ function EmbedPlayer({ url }: EmbedPlayerProps) {
         allowFullScreen
         allow="autoplay; fullscreen; picture-in-picture"
         ref={iframeRef}
-        sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
         style={{
           opacity: isLoaded ? 1 : 0,
           transition: 'opacity 0.4s ease',
