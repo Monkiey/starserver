@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import AIService from '@/services/AIService';
+import StarSearchService from '@/services/StarSearchService';
 import MovieService from '@/services/MovieService';
 import { MediaType } from '@/types';
 
@@ -14,8 +14,8 @@ export async function POST(request: Request) {
 
     // Use AI to enhance the search query and analyze natural language intent
     const [enhancedQuery, intent] = await Promise.all([
-      AIService.enhanceSearchQuery(query),
-      AIService.analyzeSearchIntent(query),
+      StarSearchService.enhanceSearchQuery(query),
+      StarSearchService.analyzeSearchIntent(query),
     ]);
 
     // Perform the search with the enhanced query

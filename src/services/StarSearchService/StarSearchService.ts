@@ -22,7 +22,21 @@ export interface NaturalLanguageIntent {
   audience?: SearchAudience;
 }
 
-class AIService {
+/**
+ * Local model identifiers inspired by Claude model tiers.
+ * These run entirely locally — no external API calls are made.
+ *
+ * - `claude-haiku-local`  : lightweight, fast keyword extraction & query enhancement
+ * - `claude-sonnet-local` : balanced scoring, intent analysis & suggestions
+ * - `claude-opus-local`   : deep semantic search with mood/era/audience reasoning
+ */
+export enum LocalModel {
+  HAIKU = 'claude-haiku-local',
+  SONNET = 'claude-sonnet-local',
+  OPUS = 'claude-opus-local',
+}
+
+class StarSearchService {
   private static readonly STOP_WORDS = new Set([
     'a',
     'an',
@@ -605,7 +619,14 @@ class AIService {
     return 'Top picks curated locally for you right now.';
   }
 
-  static enhanceSearchQuery(query: string): Promise<string> {
+  /**
+   * Enhances a raw search query using the {@link LocalModel.HAIKU} model.
+   * Expands natural language phrases and removes stop words locally.
+   */
+  static enhanceSearchQuery(
+    query: string,
+    _model = LocalModel.HAIKU,
+  ): Promise<string> {
     const trimmed = query.trim();
     if (!trimmed.length) return Promise.resolve(query);
 
@@ -628,9 +649,14 @@ class AIService {
     return Promise.resolve(cleaned.length ? cleaned : trimmed);
   }
 
+  /**
+   * Generates personalized suggestions using the {@link LocalModel.SONNET} model.
+   * Scores and ranks shows locally based on user preferences.
+   */
   static generatePersonalizedSuggestions(
     shows: Show[],
     userPreferences?: string,
+    _model = LocalModel.SONNET,
   ): Promise<{
     suggestions: Array<{ showId: number; reason: string }>;
     summary: string;
@@ -706,7 +732,13 @@ class AIService {
     });
   }
 
-  static analyzeSearchIntent(query: string): Promise<NaturalLanguageIntent> {
+  /**
+   * Analyzes natural language intent using the {@link LocalModel.SONNET} model.
+   */
+  static analyzeSearchIntent(
+    query: string,
+    _model = LocalModel.SONNET,
+  ): Promise<NaturalLanguageIntent> {
     const lower = query.toLowerCase();
     const keywords = this.tokenize(query);
 
@@ -769,9 +801,14 @@ class AIService {
     });
   }
 
+  /**
+   * Searches shows by natural language prompt using the {@link LocalModel.OPUS} model.
+   * Performs deep semantic matching with mood, era, and genre scoring locally.
+   */
   static searchByPrompt(
     shows: Show[],
     prompt: string,
+    _model = LocalModel.OPUS,
   ): Promise<{
     matches: Array<{ showId: number }>;
     explanation: string;
@@ -889,4 +926,4 @@ class AIService {
   }
 }
 
-export default AIService;
+export default StarSearchService;

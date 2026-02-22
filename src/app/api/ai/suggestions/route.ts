@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import AIService from '@/services/AIService';
+import StarSearchService from '@/services/StarSearchService';
 import MovieService from '@/services/MovieService';
 import { RequestType } from '@/enums/request-type';
 import { MediaType, type Show } from '@/types';
@@ -66,7 +66,7 @@ export async function POST(request: Request) {
     }
 
     // Use AI to generate personalized suggestions from diverse content
-    const suggestions = await AIService.generatePersonalizedSuggestions(
+    const suggestions = await StarSearchService.generatePersonalizedSuggestions(
       shuffledShows,
       userContext,
     );
