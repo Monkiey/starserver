@@ -3,16 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import {
-  Home,
-  Tv,
-  Film,
-  Search,
-  Settings,
-  PlayCircle,
-  Menu,
-  X,
-} from 'lucide-react';
+import { Home, Tv, Film, Search, Settings, Menu, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { siteConfig } from '@/configs/site';
 import { ModeToggle as ThemeToggle } from '@/components/theme-toggle';
@@ -61,7 +52,6 @@ export function VerticalSidebar() {
       {/* Header row */}
       <div className="flex h-16 flex-shrink-0 items-center justify-between border-b border-sidebar-border px-5">
         <Link href="/" className="flex items-center gap-2">
-          <PlayCircle className="h-6 w-6 flex-shrink-0 text-primary" />
           <span className="font-heading text-base font-semibold uppercase tracking-wide">
             {siteConfig.name}
           </span>
@@ -178,7 +168,6 @@ export function VerticalSidebar() {
 
         {/* Mobile logo */}
         <Link href="/" className="flex items-center gap-2 lg:hidden">
-          <PlayCircle className="h-6 w-6 flex-shrink-0 text-primary" />
           <span className="font-heading text-base font-semibold uppercase tracking-wide">
             {siteConfig.name}
           </span>
