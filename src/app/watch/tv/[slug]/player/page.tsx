@@ -15,7 +15,7 @@ export default function Page({
   const episode = searchParams?.episode;
   const url =
     season && episode
-      ? `https://vidsrc.cc/v2/embed/tv/${id}/${season}/${episode}`
-      : `https://vidsrc.cc/v2/embed/tv/${id}`;
+      ? `https://player.videasy.net/tv/${id}/${season}/${episode}`
+      : `https://player.videasy.net/tv/${id}`;
   return <EmbedPlayer url={url} />;
 }
