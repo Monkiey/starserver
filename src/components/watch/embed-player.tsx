@@ -2,6 +2,7 @@
 import React from 'react';
 import Loading from '../ui/loading';
 import { useRouter } from 'next/navigation';
+import { ChevronLeft } from 'lucide-react';
 
 interface EmbedPlayerProps {
   url: string;
@@ -10,19 +11,11 @@ interface EmbedPlayerProps {
 function EmbedPlayer(props: EmbedPlayerProps) {
   const router = useRouter();
 
-  const loadingRef = React.useRef<HTMLDivElement>(null);
+  const [isLoaded, setIsLoaded] = React.useState(false);
   const iframeRef = React.useRef<HTMLIFrameElement>(null);
 
   const handleIframeLoaded = React.useCallback(() => {
-    if (!iframeRef.current) {
-      return;
-    }
-    const iframe: HTMLIFrameElement = iframeRef.current;
-    if (iframe) {
-      iframe.style.opacity = '1';
-      iframe.removeEventListener('load', handleIframeLoaded);
-      if (loadingRef.current) loadingRef.current.style.display = 'none';
-    }
+    setIsLoaded(true);
   }, []);
 
   React.useEffect(() => {
@@ -46,29 +39,27 @@ function EmbedPlayer(props: EmbedPlayerProps) {
         position: 'absolute',
         backgroundColor: '#000',
       }}>
-      <div className="header-top absolute left-0 right-0 top-8 z-[2] flex h-fit w-fit items-center justify-between gap-x-5 px-4 md:h-20 md:gap-x-8 md:px-10 lg:h-24">
-        <div className="flex flex-1 items-center gap-x-5 md:gap-x-8">
-          <svg
-            className="h-10 w-10 flex-shrink-0 cursor-pointer transition hover:scale-125"
-            stroke="#fff"
-            fill="#fff"
-            strokeWidth="0"
-            viewBox="0 0 16 16"
-            height="16px"
-            width="16px"
-            xmlns="http://www.w3.org/2000/svg"
-            onClick={() => router.back()}>
-            <path
-              fillRule="evenodd"
-              d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"></path>
-          </svg>
+      {/* Top gradient for header visibility */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-[3] h-28 bg-gradient-to-b from-black/70 to-transparent" />
+
+      {/* Modern glassmorphism header */}
+      <div className="absolute inset-x-0 top-0 z-[4] flex items-center px-4 py-4 md:px-6">
+        <button
+          onClick={() => router.back()}
+          className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/10 px-3 py-2 text-white backdrop-blur-md transition-all hover:scale-105 hover:bg-white/20">
+          <ChevronLeft className="h-4 w-4" />
+          <span className="hidden text-sm font-medium sm:inline">Back</span>
+        </button>
+      </div>
+
+      {/* Loading overlay */}
+      {!isLoaded && (
+        <div className="absolute inset-0 z-[1] flex items-center justify-center">
+          <Loading />
         </div>
-      </div>
-      <div
-        ref={loadingRef}
-        className="absolute z-[1] flex h-full w-full items-center justify-center">
-        <Loading />
-      </div>
+      )}
+
+      {/* Player iframe */}
       <iframe
         width="100%"
         height="100%"
@@ -76,7 +67,10 @@ function EmbedPlayer(props: EmbedPlayerProps) {
         allow="autoplay; fullscreen; picture-in-picture"
         ref={iframeRef}
         sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
-        style={{ opacity: 0 }}
+        style={{
+          opacity: isLoaded ? 1 : 0,
+          transition: 'opacity 0.4s ease',
+        }}
         referrerPolicy="no-referrer-when-downgrade"
       />
     </div>
