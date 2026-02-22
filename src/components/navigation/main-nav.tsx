@@ -48,9 +48,8 @@ export function MainNav({ items }: MainNavProps) {
       )}>
       <div className="mx-auto flex w-full items-center justify-between px-[4vw] py-4">
         <div className="flex items-center gap-6">
-          <div className="flex items-center gap-4 rounded-full border border-border/60 bg-background/80 px-4 py-2 shadow-sm backdrop-blur">
+          <div className="border-border/60 bg-background/80 flex items-center gap-4 rounded-full border px-4 py-2 shadow-sm backdrop-blur">
             <Link href="/" className="hidden items-center space-x-2 md:flex">
-              <Icons.logo className="h-6 w-6" aria-hidden="true" />
               <span className="inline-block font-heading text-lg font-semibold uppercase tracking-wide">
                 {siteConfig.name}
               </span>
@@ -65,7 +64,7 @@ export function MainNav({ items }: MainNavProps) {
                         key={index}
                         href={item.href}
                         className={cn(
-                          'flex items-center text-sm font-medium text-foreground/60 transition hover:text-foreground/90',
+                          'text-foreground/60 hover:text-foreground/90 flex items-center text-sm font-medium transition',
                           path === item.href && 'font-semibold text-foreground',
                           item.disabled && 'cursor-not-allowed opacity-80',
                         )}>
@@ -81,7 +80,6 @@ export function MainNav({ items }: MainNavProps) {
                   <Button
                     variant="ghost"
                     className="flex items-center space-x-2 px-0 hover:bg-transparent focus:ring-0">
-                    <Icons.logo className="h-6 w-6" />
                     <span className="font-heading text-base font-semibold uppercase tracking-wide">
                       Menu
                     </span>
@@ -108,7 +106,7 @@ export function MainNav({ items }: MainNavProps) {
                         <Link href={item.href}>
                           <span
                             className={cn(
-                              'line-clamp-1 text-foreground/60 hover:text-foreground/80',
+                              'text-foreground/60 hover:text-foreground/80 line-clamp-1',
                               path === item.href &&
                                 'font-semibold text-foreground',
                             )}>
@@ -123,7 +121,7 @@ export function MainNav({ items }: MainNavProps) {
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-2 rounded-full border border-border/60 bg-background/80 px-3 py-2 shadow-sm backdrop-blur">
+        <div className="border-border/60 bg-background/80 flex items-center gap-2 rounded-full border px-3 py-2 shadow-sm backdrop-blur">
           {!isDetailPage && (
             <Button
               variant="ghost"
@@ -142,7 +140,7 @@ export function MainNav({ items }: MainNavProps) {
               <Icons.settings className="h-[1.2rem] w-[1.2rem]" />
             </Button>
           </Link>
-          <div className="rounded-full border border-border/60 bg-background/70 p-1">
+          <div className="border-border/60 bg-background/70 rounded-full border p-1">
             <ThemeToggle />
           </div>
         </div>

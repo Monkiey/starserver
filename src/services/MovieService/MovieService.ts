@@ -186,6 +186,28 @@ class MovieService extends BaseService {
     return data;
   });
 
+  /**
+   * Fetches titles in a specific genre via the TMDB discover API and stamps
+   * each result with the correct {@link MediaType} so callers don't have to.
+   * Covers both movies and TV shows — call once per media type.
+   */
+  static async searchByGenre(
+    genre: Genre,
+    mediaType: MediaType,
+    page?: number,
+  ): Promise<TmdbPagingResponse> {
+    const { data } = await this.axios(baseUrl).get<TmdbPagingResponse>(
+      this.urlBuilder({
+        requestType: RequestType.GENRE,
+        mediaType,
+        genre,
+        page,
+      }),
+    );
+    data.results.forEach((r) => (r.media_type = mediaType));
+    return data;
+  }
+
   static searchMovies = cache(async (query: string, page?: number) => {
     const normalizedQuery = query.trim().toLowerCase();
     const { data } = await this.axios(baseUrl).get<TmdbPagingResponse>(

@@ -16,6 +16,15 @@ export type SearchAudience = 'kids' | 'family' | 'date' | 'mature';
 export interface NaturalLanguageIntent {
   intent: 'movie' | 'tv' | 'both';
   genre?: string;
+  /** Numeric TMDB genre IDs detected in the query. */
+  genreIds: number[];
+  /**
+   * True when every non-stop-word token in the query maps to a known
+   * genre/mood/era cue (e.g. "action", "dark thriller").  Used by the
+   * search route to switch from text-search to TMDB discover-by-genre so
+   * that both movies AND TV shows matching the genre are returned.
+   */
+  isGenreSearch: boolean;
   keywords: string[];
   mood?: SearchMood;
   era?: SearchEra;
@@ -401,6 +410,47 @@ class StarSearchService {
     return this.normalizeText(text)
       .split(/\s+/)
       .filter((token) => token && !this.STOP_WORDS.has(token));
+  }
+
+  /** Adds every individual word from a cue phrase list into the target set. */
+  private static collectCueWords(
+    cues: string[] | undefined,
+    target: Set<string>,
+  ): void {
+    if (!cues) return;
+    for (const cue of cues) {
+      for (const word of cue.split(/\s+/)) target.add(word.toLowerCase());
+    }
+  }
+
+  /**
+   * Returns true when every non-stop-word token in the query maps to a known
+   * genre, mood, era, or audience cue word — meaning the user is browsing a
+   * category (e.g. "action", "dark thriller") rather than searching for a
+   * specific title.  Used to switch the search route to the TMDB discover API
+   * so that both movies AND TV shows in that genre are returned.
+   */
+  private static isQueryGenreOnly(
+    query: string,
+    genreHints: Set<Genre>,
+  ): boolean {
+    if (genreHints.size === 0) return false;
+    // Build a flat set of individual words from every cue list
+    const cueWords = new Set<string>();
+    for (const cues of Object.values(this.GENRE_KEYWORDS)) {
+      this.collectCueWords(cues, cueWords);
+    }
+    for (const cues of Object.values(this.MOOD_KEYWORDS)) {
+      this.collectCueWords(cues, cueWords);
+    }
+    for (const cues of Object.values(this.ERA_KEYWORDS)) {
+      this.collectCueWords(cues, cueWords);
+    }
+    for (const cues of Object.values(this.AUDIENCE_KEYWORDS)) {
+      this.collectCueWords(cues, cueWords);
+    }
+    const tokens = this.tokenize(query);
+    return tokens.length > 0 && tokens.every((t) => cueWords.has(t));
   }
 
   private static deriveGenres(keywords: string[]): Set<Genre> {
@@ -791,9 +841,14 @@ class StarSearchService {
         ? this.genreName(Array.from(genreHints)[0])
         : undefined;
 
+    const genreIds = Array.from(genreHints) as number[];
+    const isGenreSearch = this.isQueryGenreOnly(query, genreHints);
+
     return Promise.resolve({
       intent,
       genre,
+      genreIds,
+      isGenreSearch,
       keywords: allKeywords.length ? allKeywords : query.split(' '),
       mood,
       era,
