@@ -86,14 +86,6 @@ class MovieService extends BaseService {
 
   static urlBuilder(req: TmdbRequest) {
     switch (req.requestType) {
-      case RequestType.ANIME_LATEST:
-        return `/discover/${req.mediaType}?with_keywords=210024%2C&language=en-US&sort_by=primary_release_date.desc&release_date.lte=2024-11-10&with_runtime.gte=1`;
-      case RequestType.ANIME_TRENDING:
-        return `/discover/${req.mediaType}?with_keywords=210024%2C&language=en-US&sort_by=popularity.desc&release_date.lte=2024-11-10&with_runtime.gte=1`;
-      case RequestType.ANIME_TOP_RATED:
-        return `/discover/${req.mediaType}?with_keywords=210024%2C&language=en-US&sort_by=vote_count.desc&air_date.lte=2024-11-10`;
-      case RequestType.ANIME_NETFLIX:
-        return `/discover/${req.mediaType}?with_keywords=210024%2C&with_networks=213&language=en-US`;
       case RequestType.TRENDING:
         return `/trending/${
           req.mediaType
