@@ -1,0 +1,33 @@
+{
+  "name": "StarServer",
+  "short_name": "StarServer",
+  "description": "Watch movies & TV shows online or stream right to your smart TV, game console, PC, Mac, mobile, tablet and more.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0d0d19",
+  "theme_color": "#0d0d19",
+  "icons": [
+    {
+      "src": "/icon-32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
