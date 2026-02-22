@@ -83,7 +83,7 @@ module.exports = {
           foreground: 'var(--info-foreground)',
         },
         sidebar: {
-          DEFAULT: 'var(--sidebar)',
+          DEFAULT: 'oklch(var(--sidebar) / <alpha-value>)',
           foreground: 'var(--sidebar-foreground)',
           primary: 'var(--sidebar-primary)',
           'primary-foreground': 'var(--sidebar-primary-foreground)',
