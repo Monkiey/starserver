@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import * as React from "react";
+import * as React from 'react';
 import {
   Menu,
   MenuButton,
@@ -9,11 +9,10 @@ import {
   MenuSection,
   MenuHeading,
   MenuSeparator,
-  Transition,
-} from "@headlessui/react";
-import { Check, ChevronRight, Circle } from "lucide-react";
+} from '@headlessui/react';
+import { Check, ChevronRight, Circle } from 'lucide-react';
 
-import { cn } from "@/lib/utils";
+import { cn } from '@/lib/utils';
 
 // ─── Root ─────────────────────────────────────────────────────────────────────
 
@@ -33,7 +32,10 @@ const DropdownMenuTrigger = React.forwardRef<
     const childClassName: string | undefined = child.props.className;
     const childChildren: React.ReactNode = child.props.children;
     return (
-      <MenuButton ref={ref} className={cn(childClassName, className)} {...props}>
+      <MenuButton
+        ref={ref}
+        className={cn(childClassName, className)}
+        {...props}>
         {childChildren}
       </MenuButton>
     );
@@ -44,41 +46,38 @@ const DropdownMenuTrigger = React.forwardRef<
     </MenuButton>
   );
 });
-DropdownMenuTrigger.displayName = "DropdownMenuTrigger";
+DropdownMenuTrigger.displayName = 'DropdownMenuTrigger';
 
 // ─── Content (panel) ──────────────────────────────────────────────────────────
 
 const DropdownMenuContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & {
-    align?: "start" | "end" | "center";
+    align?: 'start' | 'end' | 'center';
     sideOffset?: number;
   }
->(({ className, align = "end", sideOffset = 4, children }, ref) => {
-  const anchor = align === "start" ? "bottom start" : align === "end" ? "bottom end" : "bottom";
+>(({ className, align = 'end', sideOffset = 4, children }, ref) => {
+  const anchor =
+    align === 'start'
+      ? 'bottom start'
+      : align === 'end'
+      ? 'bottom end'
+      : 'bottom';
   return (
-    <Transition
-      enter="transition ease-out duration-100"
-      enterFrom="transform opacity-0 scale-95"
-      enterTo="transform opacity-100 scale-100"
-      leave="transition ease-in duration-75"
-      leaveFrom="transform opacity-100 scale-100"
-      leaveTo="transform opacity-0 scale-95"
-    >
-      <MenuItems
-        ref={ref}
-        anchor={{ to: anchor, gap: sideOffset }}
-        className={cn(
-          "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md focus:outline-none",
-          className,
-        )}
-      >
-        {children}
-      </MenuItems>
-    </Transition>
+    <MenuItems
+      ref={ref}
+      transition
+      anchor={{ to: anchor, gap: sideOffset }}
+      className={cn(
+        'z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md focus:outline-none',
+        'transition data-[closed]:scale-95 data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in',
+        className,
+      )}>
+      {children}
+    </MenuItems>
   );
 });
-DropdownMenuContent.displayName = "DropdownMenuContent";
+DropdownMenuContent.displayName = 'DropdownMenuContent';
 
 // ─── Item ─────────────────────────────────────────────────────────────────────
 
@@ -93,8 +92,8 @@ const DropdownMenuItem = React.forwardRef<
     <button
       ref={ref}
       className={cn(
-        "relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors data-[focus]:bg-accent data-[focus]:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-        inset && "pl-8",
+        'relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[focus]:bg-accent data-[focus]:text-accent-foreground data-[disabled]:opacity-50',
+        inset && 'pl-8',
         className,
       )}
       onClick={(e) => {
@@ -105,7 +104,7 @@ const DropdownMenuItem = React.forwardRef<
     />
   </MenuItem>
 ));
-DropdownMenuItem.displayName = "DropdownMenuItem";
+DropdownMenuItem.displayName = 'DropdownMenuItem';
 
 // ─── Checkbox item ────────────────────────────────────────────────────────────
 
@@ -117,11 +116,10 @@ const DropdownMenuCheckboxItem = React.forwardRef<
     <button
       ref={ref}
       className={cn(
-        "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors data-[focus]:bg-accent data-[focus]:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+        'relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[focus]:bg-accent data-[focus]:text-accent-foreground data-[disabled]:opacity-50',
         className,
       )}
-      {...props}
-    >
+      {...props}>
       <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
         {checked && <Check className="h-4 w-4" />}
       </span>
@@ -129,7 +127,7 @@ const DropdownMenuCheckboxItem = React.forwardRef<
     </button>
   </MenuItem>
 ));
-DropdownMenuCheckboxItem.displayName = "DropdownMenuCheckboxItem";
+DropdownMenuCheckboxItem.displayName = 'DropdownMenuCheckboxItem';
 
 // ─── Radio item ───────────────────────────────────────────────────────────────
 
@@ -141,11 +139,10 @@ const DropdownMenuRadioItem = React.forwardRef<
     <button
       ref={ref}
       className={cn(
-        "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors data-[focus]:bg-accent data-[focus]:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+        'relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[focus]:bg-accent data-[focus]:text-accent-foreground data-[disabled]:opacity-50',
         className,
       )}
-      {...props}
-    >
+      {...props}>
       <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
         <Circle className="h-2 w-2 fill-current" />
       </span>
@@ -153,7 +150,7 @@ const DropdownMenuRadioItem = React.forwardRef<
     </button>
   </MenuItem>
 ));
-DropdownMenuRadioItem.displayName = "DropdownMenuRadioItem";
+DropdownMenuRadioItem.displayName = 'DropdownMenuRadioItem';
 
 // ─── Label ────────────────────────────────────────────────────────────────────
 
@@ -164,11 +161,15 @@ const DropdownMenuLabel = React.forwardRef<
   <MenuHeading
     as="div"
     ref={ref}
-    className={cn("px-2 py-1.5 text-sm font-semibold", inset && "pl-8", className)}
+    className={cn(
+      'px-2 py-1.5 text-sm font-semibold',
+      inset && 'pl-8',
+      className,
+    )}
     {...props}
   />
 ));
-DropdownMenuLabel.displayName = "DropdownMenuLabel";
+DropdownMenuLabel.displayName = 'DropdownMenuLabel';
 
 // ─── Separator ────────────────────────────────────────────────────────────────
 
@@ -179,11 +180,11 @@ const DropdownMenuSeparator = React.forwardRef<
   <MenuSeparator
     as="div"
     ref={ref}
-    className={cn("-mx-1 my-1 h-px bg-muted", className)}
+    className={cn('-mx-1 my-1 h-px bg-muted', className)}
     {...props}
   />
 ));
-DropdownMenuSeparator.displayName = "DropdownMenuSeparator";
+DropdownMenuSeparator.displayName = 'DropdownMenuSeparator';
 
 // ─── Shortcut ─────────────────────────────────────────────────────────────────
 
@@ -191,9 +192,12 @@ const DropdownMenuShortcut = ({
   className,
   ...props
 }: React.HTMLAttributes<HTMLSpanElement>) => (
-  <span className={cn("ml-auto text-xs tracking-widest opacity-60", className)} {...props} />
+  <span
+    className={cn('ml-auto text-xs tracking-widest opacity-60', className)}
+    {...props}
+  />
 );
-DropdownMenuShortcut.displayName = "DropdownMenuShortcut";
+DropdownMenuShortcut.displayName = 'DropdownMenuShortcut';
 
 // ─── Group ────────────────────────────────────────────────────────────────────
 
@@ -203,15 +207,19 @@ const DropdownMenuGroup = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <MenuSection as="div" ref={ref} className={className} {...props} />
 ));
-DropdownMenuGroup.displayName = "DropdownMenuGroup";
+DropdownMenuGroup.displayName = 'DropdownMenuGroup';
 
 // ─── Sub-menu stubs (not natively supported by Headless UI Menu) ───────────────
 
-const DropdownMenuPortal = ({ children }: { children?: React.ReactNode }) => <>{children}</>;
-DropdownMenuPortal.displayName = "DropdownMenuPortal";
+const DropdownMenuPortal = ({ children }: { children?: React.ReactNode }) => (
+  <>{children}</>
+);
+DropdownMenuPortal.displayName = 'DropdownMenuPortal';
 
-const DropdownMenuSub = ({ children }: { children?: React.ReactNode }) => <>{children}</>;
-DropdownMenuSub.displayName = "DropdownMenuSub";
+const DropdownMenuSub = ({ children }: { children?: React.ReactNode }) => (
+  <>{children}</>
+);
+DropdownMenuSub.displayName = 'DropdownMenuSub';
 
 const DropdownMenuSubTrigger = React.forwardRef<
   HTMLButtonElement,
@@ -221,18 +229,17 @@ const DropdownMenuSubTrigger = React.forwardRef<
     <button
       ref={ref}
       className={cn(
-        "flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[focus]:bg-accent",
-        inset && "pl-8",
+        'flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[focus]:bg-accent',
+        inset && 'pl-8',
         className,
       )}
-      {...props}
-    >
+      {...props}>
       {children}
       <ChevronRight className="ml-auto h-4 w-4" />
     </button>
   </MenuItem>
 ));
-DropdownMenuSubTrigger.displayName = "DropdownMenuSubTrigger";
+DropdownMenuSubTrigger.displayName = 'DropdownMenuSubTrigger';
 
 const DropdownMenuSubContent = React.forwardRef<
   HTMLDivElement,
@@ -241,13 +248,13 @@ const DropdownMenuSubContent = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-lg",
+      'z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-lg',
       className,
     )}
     {...props}
   />
 ));
-DropdownMenuSubContent.displayName = "DropdownMenuSubContent";
+DropdownMenuSubContent.displayName = 'DropdownMenuSubContent';
 
 const DropdownMenuRadioGroup = React.forwardRef<
   HTMLDivElement,
@@ -255,7 +262,7 @@ const DropdownMenuRadioGroup = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <MenuSection as="div" ref={ref} className={className} {...props} />
 ));
-DropdownMenuRadioGroup.displayName = "DropdownMenuRadioGroup";
+DropdownMenuRadioGroup.displayName = 'DropdownMenuRadioGroup';
 
 export {
   DropdownMenu,
