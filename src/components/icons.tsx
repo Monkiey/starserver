@@ -16,6 +16,7 @@ import {
   Sparkles,
   RefreshCw,
   Settings,
+  Star,
 } from 'lucide-react';
 
 type IconProps = LucideProps;
@@ -237,6 +238,7 @@ export const Icons = {
   avatar: UserCircle,
   placeholder: ImageIcon,
   close: X,
+  star: Star,
   instagram: Instagram,
   youtube: Youtube,
   sparkles: Sparkles,

@@ -2,7 +2,9 @@
 
 import React from 'react';
 import CustomImage from '@/components/custom-image';
+import { Icons } from '@/components/icons';
 import { useContinueWatchingStore } from '@/stores/continue-watching';
+import { useWatchlistStore } from '@/stores/watchlist';
 import { useModalStore } from '@/stores/modal';
 import { MediaType, type Show } from '@/types';
 import { cn, getNameFromShow, getSlug } from '@/lib/utils';
@@ -41,6 +43,9 @@ const ContinueWatchingCard = ({
   show: Show;
   onRemove: () => void;
 }) => {
+  const { addItem, removeItem: removeFromWatchlist, isInWatchlist } = useWatchlistStore();
+  const starred = isInWatchlist(show.id, show.media_type);
+
   const imageOnErrorHandler = (
     event: React.SyntheticEvent<HTMLImageElement, Event>,
   ) => {
@@ -57,6 +62,25 @@ const ContinueWatchingCard = ({
           onRemove();
         }}>
         ✕
+      </button>
+      <button
+        aria-label={
+          starred
+            ? `Remove ${getNameFromShow(show)} from watchlist`
+            : `Add ${getNameFromShow(show)} to watchlist`
+        }
+        className="absolute right-11 top-2 z-10 grid h-8 w-8 place-items-center rounded-full bg-background/80 text-sm text-foreground opacity-0 shadow-sm transition group-hover:opacity-100"
+        onClick={(event) => {
+          event.stopPropagation();
+          if (starred) {
+            removeFromWatchlist(show.id, show.media_type);
+          } else {
+            addItem(show);
+          }
+        }}>
+        <Icons.star
+          className={cn('h-4 w-4', starred && 'fill-yellow-400 text-yellow-400')}
+        />
       </button>
       <CustomImage
         src={
