@@ -2,35 +2,59 @@
 
 import React from 'react';
 import CustomImage from '@/components/custom-image';
+import { Icons } from '@/components/icons';
 import { useContinueWatchingStore } from '@/stores/continue-watching';
+import { useWatchlistStore } from '@/stores/watchlist';
 import { useModalStore } from '@/stores/modal';
 import { MediaType, type Show } from '@/types';
 import { cn, getNameFromShow, getSlug } from '@/lib/utils';
 
 const ContinueWatching = () => {
   const { items, removeItem } = useContinueWatchingStore();
+  const { items: watchlistItems } = useWatchlistStore();
 
-  if (!items.length) {
+  if (!items.length && !watchlistItems.length) {
     return null;
   }
 
   return (
-    <section className="relative my-[3vw] p-0">
-      <div className="space-y-2">
-        <h2 className="m-0 px-[4%] text-lg font-semibold text-foreground/80 transition-colors hover:text-foreground sm:text-xl 2xl:px-[60px]">
-          Continue Watching
-        </h2>
-        <div className="no-scrollbar m-0 grid auto-cols-[calc(100%/2.5)] grid-flow-col gap-2 overflow-x-auto px-[4%] py-2 sm:auto-cols-[35%] md:auto-cols-[25%] lg:auto-cols-[20%] xl:auto-cols-[calc(100%/6)] 2xl:px-[60px]">
-          {items.map((show) => (
-            <ContinueWatchingCard
-              key={`${show.media_type}-${show.id}`}
-              show={show}
-              onRemove={() => removeItem(show.id, show.media_type)}
-            />
-          ))}
-        </div>
-      </div>
-    </section>
+    <>
+      {items.length > 0 && (
+        <section className="relative my-[3vw] p-0">
+          <div className="space-y-2">
+            <h2 className="m-0 px-[4%] text-lg font-semibold text-foreground/80 transition-colors hover:text-foreground sm:text-xl 2xl:px-[60px]">
+              Continue Watching
+            </h2>
+            <div className="no-scrollbar m-0 grid auto-cols-[calc(100%/2.5)] grid-flow-col gap-2 overflow-x-auto px-[4%] py-2 sm:auto-cols-[35%] md:auto-cols-[25%] lg:auto-cols-[20%] xl:auto-cols-[calc(100%/6)] 2xl:px-[60px]">
+              {items.map((show) => (
+                <ContinueWatchingCard
+                  key={`${show.media_type}-${show.id}`}
+                  show={show}
+                  onRemove={() => removeItem(show.id, show.media_type)}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+      {watchlistItems.length > 0 && (
+        <section className="relative my-[3vw] p-0">
+          <div className="space-y-2">
+            <h2 className="m-0 px-[4%] text-lg font-semibold text-foreground/80 transition-colors hover:text-foreground sm:text-xl 2xl:px-[60px]">
+              My List
+            </h2>
+            <div className="no-scrollbar m-0 grid auto-cols-[calc(100%/2.5)] grid-flow-col gap-2 overflow-x-auto px-[4%] py-2 sm:auto-cols-[35%] md:auto-cols-[25%] lg:auto-cols-[20%] xl:auto-cols-[calc(100%/6)] 2xl:px-[60px]">
+              {watchlistItems.map((show) => (
+                <ContinueWatchingCard
+                  key={`${show.media_type}-${show.id}`}
+                  show={show}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+    </>
   );
 };
 
@@ -39,8 +63,11 @@ const ContinueWatchingCard = ({
   onRemove,
 }: {
   show: Show;
-  onRemove: () => void;
+  onRemove?: () => void;
 }) => {
+  const { addItem, removeItem: removeFromWatchlist, isInWatchlist } = useWatchlistStore();
+  const starred = isInWatchlist(show.id, show.media_type);
+
   const imageOnErrorHandler = (
     event: React.SyntheticEvent<HTMLImageElement, Event>,
   ) => {
@@ -54,9 +81,28 @@ const ContinueWatchingCard = ({
         className="absolute right-2 top-2 z-10 grid h-8 w-8 place-items-center rounded-full bg-background/80 text-sm text-foreground opacity-0 shadow-sm transition group-hover:opacity-100"
         onClick={(event) => {
           event.stopPropagation();
-          onRemove();
+          onRemove?.();
         }}>
         ✕
+      </button>
+      <button
+        aria-label={
+          starred
+            ? `Remove ${getNameFromShow(show)} from watchlist`
+            : `Add ${getNameFromShow(show)} to watchlist`
+        }
+        className="absolute right-11 top-2 z-10 grid h-8 w-8 place-items-center rounded-full bg-background/80 text-sm text-foreground opacity-0 shadow-sm transition group-hover:opacity-100"
+        onClick={(event) => {
+          event.stopPropagation();
+          if (starred) {
+            removeFromWatchlist(show.id, show.media_type);
+          } else {
+            addItem(show);
+          }
+        }}>
+        <Icons.star
+          className={cn('h-4 w-4', starred && 'fill-yellow-400 text-yellow-400')}
+        />
       </button>
       <CustomImage
         src={

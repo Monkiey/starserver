@@ -25,6 +25,7 @@ import * as React from 'react';
 import Youtube from 'react-youtube';
 import CustomImage from './custom-image';
 import ShowWatchPicker from './show-watch-picker';
+import { useWatchlistStore } from '@/stores/watchlist';
 import { useContinueWatchingStore } from '@/stores/continue-watching';
 
 type YouTubePlayer = {
@@ -79,6 +80,10 @@ const ShowModal = () => {
   const youtubeRef = React.useRef(null);
   const imageRef = React.useRef<HTMLImageElement>(null);
   const continueWatchingStore = useContinueWatchingStore();
+  const watchlistStore = useWatchlistStore();
+  const isStarred = modalStore.show
+    ? watchlistStore.isInWatchlist(modalStore.show.id, modalStore.show.media_type)
+    : false;
 
   // get trailer and genres of show
   const handleGetData = React.useCallback(async () => {
@@ -265,6 +270,27 @@ const ShowModal = () => {
                     </>
                   </Button>
                 </Link>
+                <Button
+                  aria-label={
+                    isStarred
+                      ? `Remove ${modalStore.show?.title ?? modalStore.show?.name} from watchlist`
+                      : `Add ${modalStore.show?.title ?? modalStore.show?.name} to watchlist`
+                  }
+                  variant="ghost"
+                  className="h-auto rounded-full bg-neutral-800 p-1.5 opacity-50 ring-1 ring-slate-400 hover:bg-neutral-800 hover:opacity-100 hover:ring-white focus:ring-offset-0 dark:bg-neutral-800 dark:hover:bg-neutral-800"
+                  onClick={() => {
+                    if (!modalStore.show) return;
+                    if (isStarred) {
+                      watchlistStore.removeItem(modalStore.show.id, modalStore.show.media_type);
+                    } else {
+                      watchlistStore.addItem(modalStore.show);
+                    }
+                  }}>
+                  <Icons.star
+                    className={isStarred ? 'h-6 w-6 fill-yellow-400 text-yellow-400' : 'h-6 w-6'}
+                    aria-hidden="true"
+                  />
+                </Button>
               </div>
               <Button
                 aria-label={`${isMuted ? 'Unmute' : 'Mute'} video`}
