@@ -22,6 +22,14 @@ export type NavItem = {
   onClick?: () => void;
 };
 
+export type NextEpisodeToAir = {
+  air_date: string;
+  episode_number: number;
+  season_number: number;
+  name: string;
+  id: number;
+};
+
 export type Show = {
   adult: boolean;
   backdrop_path: string | null;
@@ -54,6 +62,7 @@ export type Show = {
   original_name?: string;
   keywords: KeyWordResponse;
   seasons: ISeason[];
+  next_episode_to_air: NextEpisodeToAir | null;
 };
 
 export type KeyWord = {

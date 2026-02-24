@@ -63,7 +63,7 @@ const ContinueWatchingCard = ({
   onRemove,
 }: {
   show: Show;
-  onRemove: () => void;
+  onRemove?: () => void;
 }) => {
   const { addItem, removeItem: removeFromWatchlist, isInWatchlist } = useWatchlistStore();
   const starred = isInWatchlist(show.id, show.media_type);
@@ -81,7 +81,7 @@ const ContinueWatchingCard = ({
         className="absolute right-2 top-2 z-10 grid h-8 w-8 place-items-center rounded-full bg-background/80 text-sm text-foreground opacity-0 shadow-sm transition group-hover:opacity-100"
         onClick={(event) => {
           event.stopPropagation();
-          onRemove();
+          onRemove?.();
         }}>
         ✕
       </button>

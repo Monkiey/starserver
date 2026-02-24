@@ -89,7 +89,7 @@ export default function SettingsPage() {
             <div className="border-b border-border px-5 py-4">
               <h2 className="text-sm font-semibold">Notifications</h2>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                Get notified about updates to your favorited titles.
+                Get notified about updates to your favorite titles.
               </p>
             </div>
             <div className="divide-y divide-border">
@@ -105,7 +105,7 @@ export default function SettingsPage() {
                   className="cursor-pointer space-y-0.5">
                   <span className="text-sm">New episodes</span>
                   <p className="text-xs text-muted-foreground">
-                    Notify when a favorited TV show has a new episode.
+                    Notify when a favorite TV show has a new episode.
                   </p>
                 </label>
                 <Toggle
@@ -120,7 +120,7 @@ export default function SettingsPage() {
                   className="cursor-pointer space-y-0.5">
                   <span className="text-sm">New movie releases</span>
                   <p className="text-xs text-muted-foreground">
-                    Notify when a favorited movie becomes available.
+                    Notify when a favorite movie becomes available.
                   </p>
                 </label>
                 <Toggle
