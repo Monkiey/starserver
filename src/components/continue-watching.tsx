@@ -11,28 +11,50 @@ import { cn, getNameFromShow, getSlug } from '@/lib/utils';
 
 const ContinueWatching = () => {
   const { items, removeItem } = useContinueWatchingStore();
+  const { items: watchlistItems } = useWatchlistStore();
 
-  if (!items.length) {
+  if (!items.length && !watchlistItems.length) {
     return null;
   }
 
   return (
-    <section className="relative my-[3vw] p-0">
-      <div className="space-y-2">
-        <h2 className="m-0 px-[4%] text-lg font-semibold text-foreground/80 transition-colors hover:text-foreground sm:text-xl 2xl:px-[60px]">
-          Continue Watching
-        </h2>
-        <div className="no-scrollbar m-0 grid auto-cols-[calc(100%/2.5)] grid-flow-col gap-2 overflow-x-auto px-[4%] py-2 sm:auto-cols-[35%] md:auto-cols-[25%] lg:auto-cols-[20%] xl:auto-cols-[calc(100%/6)] 2xl:px-[60px]">
-          {items.map((show) => (
-            <ContinueWatchingCard
-              key={`${show.media_type}-${show.id}`}
-              show={show}
-              onRemove={() => removeItem(show.id, show.media_type)}
-            />
-          ))}
-        </div>
-      </div>
-    </section>
+    <>
+      {items.length > 0 && (
+        <section className="relative my-[3vw] p-0">
+          <div className="space-y-2">
+            <h2 className="m-0 px-[4%] text-lg font-semibold text-foreground/80 transition-colors hover:text-foreground sm:text-xl 2xl:px-[60px]">
+              Continue Watching
+            </h2>
+            <div className="no-scrollbar m-0 grid auto-cols-[calc(100%/2.5)] grid-flow-col gap-2 overflow-x-auto px-[4%] py-2 sm:auto-cols-[35%] md:auto-cols-[25%] lg:auto-cols-[20%] xl:auto-cols-[calc(100%/6)] 2xl:px-[60px]">
+              {items.map((show) => (
+                <ContinueWatchingCard
+                  key={`${show.media_type}-${show.id}`}
+                  show={show}
+                  onRemove={() => removeItem(show.id, show.media_type)}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+      {watchlistItems.length > 0 && (
+        <section className="relative my-[3vw] p-0">
+          <div className="space-y-2">
+            <h2 className="m-0 px-[4%] text-lg font-semibold text-foreground/80 transition-colors hover:text-foreground sm:text-xl 2xl:px-[60px]">
+              My List
+            </h2>
+            <div className="no-scrollbar m-0 grid auto-cols-[calc(100%/2.5)] grid-flow-col gap-2 overflow-x-auto px-[4%] py-2 sm:auto-cols-[35%] md:auto-cols-[25%] lg:auto-cols-[20%] xl:auto-cols-[calc(100%/6)] 2xl:px-[60px]">
+              {watchlistItems.map((show) => (
+                <ContinueWatchingCard
+                  key={`${show.media_type}-${show.id}`}
+                  show={show}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+    </>
   );
 };
 
