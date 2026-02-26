@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import '@/styles/globals.css';
 // import { TrpcProvider } from '@/client/trpc-provider';
 import type { Metadata, Viewport } from 'next';
-import { Bebas_Neue, Inter } from 'next/font/google';
+import { Outfit, Inter } from 'next/font/google';
 import { Analytics } from '@/components/analytics';
 import { siteConfig } from '@/configs/site';
 import { env } from '@/env.mjs';
@@ -15,9 +15,8 @@ import SearchProvider from '@/components/search-provider';
 
 export const runtime = 'edge';
 
-// Modern, bold, cinematic font for headings and display text
-const bebasNeue = Bebas_Neue({
-  weight: '400',
+// Clean, modern geometric font for headings and display text
+const outfit = Outfit({
   subsets: ['latin'],
   variable: '--font-heading',
   display: 'swap',
@@ -90,7 +89,7 @@ export default function RootLayout({
       <body
         className={cn(
           'overlflow-y-auto min-h-screen overflow-x-hidden bg-background font-sans antialiased',
-          bebasNeue.variable,
+          outfit.variable,
           inter.variable,
         )}>
         <ThemeProvider
