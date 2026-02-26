@@ -130,7 +130,7 @@ export function MainNav({ items }: MainNavProps) {
               aria-label="Search">
               <Icons.search className="h-4 w-4" />
               <span className="hidden sm:inline-flex">Search</span>
-              <kbd className="pointer-events-none hidden select-none rounded border bg-muted px-1.5 py-0.5 font-mono text-[10px] font-medium text-muted-foreground md:inline-flex">
+              <kbd className="pointer-events-none hidden select-none rounded border bg-muted px-1.5 py-0.5 font-outfit text-[10px] font-medium text-muted-foreground md:inline-flex">
                 ⌘K
               </kbd>
             </Button>

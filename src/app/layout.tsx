@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import '@/styles/globals.css';
 // import { TrpcProvider } from '@/client/trpc-provider';
 import type { Metadata, Viewport } from 'next';
-import { Outfit, Inter } from 'next/font/google';
+import { Outfit } from 'next/font/google';
 import { Analytics } from '@/components/analytics';
 import { siteConfig } from '@/configs/site';
 import { env } from '@/env.mjs';
@@ -15,17 +15,10 @@ import SearchProvider from '@/components/search-provider';
 
 export const runtime = 'edge';
 
-// Clean, modern geometric font for headings and display text
+// Clean, modern geometric font for all text
 const outfit = Outfit({
   subsets: ['latin'],
   variable: '--font-outfit',
-  display: 'swap',
-});
-
-// Clean, modern font for body text
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-sans',
   display: 'swap',
 });
 
@@ -90,7 +83,6 @@ export default function RootLayout({
         className={cn(
           'overlflow-y-auto min-h-screen overflow-x-hidden bg-background font-sans antialiased',
           outfit.variable,
-          inter.variable,
         )}>
         <ThemeProvider
           attribute="class"

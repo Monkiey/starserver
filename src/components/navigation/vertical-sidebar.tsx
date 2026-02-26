@@ -113,7 +113,7 @@ export function VerticalSidebar() {
             className="text-sidebar-foreground/70 group flex h-11 w-full items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground">
             <Search className="text-sidebar-foreground/50 h-5 w-5 flex-shrink-0 transition-colors group-hover:text-sidebar-foreground" />
             <span>Search</span>
-            <kbd className="text-sidebar-foreground/50 ml-auto hidden select-none rounded border bg-sidebar-accent px-1.5 py-0.5 font-mono text-[10px] md:inline-flex">
+            <kbd className="text-sidebar-foreground/50 ml-auto hidden select-none rounded border bg-sidebar-accent px-1.5 py-0.5 font-outfit text-[10px] md:inline-flex">
               ⌘K
             </kbd>
           </button>
