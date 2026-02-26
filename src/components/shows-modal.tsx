@@ -27,6 +27,7 @@ import CustomImage from './custom-image';
 import ShowWatchPicker from './show-watch-picker';
 import { useWatchlistStore } from '@/stores/watchlist';
 import { useContinueWatchingStore } from '@/stores/continue-watching';
+import { useWatchHistoryStore } from '@/stores/watch-history';
 
 type YouTubePlayer = {
   mute: () => void;
@@ -80,6 +81,7 @@ const ShowModal = () => {
   const youtubeRef = React.useRef(null);
   const imageRef = React.useRef<HTMLImageElement>(null);
   const continueWatchingStore = useContinueWatchingStore();
+  const watchHistoryStore = useWatchHistoryStore();
   const watchlistStore = useWatchlistStore();
   const isStarred = modalStore.show
     ? watchlistStore.isInWatchlist(modalStore.show.id, modalStore.show.media_type)
@@ -203,6 +205,7 @@ const ShowModal = () => {
 
   const handleContinueWatching = (show: Show) => {
     continueWatchingStore.addItem(show);
+    watchHistoryStore.addItem(show);
   };
 
   return (

@@ -7,7 +7,8 @@ import CustomImage from '@/components/custom-image';
 import { Button } from '@/components/ui/button';
 import { getYear } from '@/lib/utils';
 import { useContinueWatchingStore } from '@/stores/continue-watching';
-import { MediaType, type ISeason, type ShowWithGenreAndVideo } from '@/types';
+import { useWatchHistoryStore } from '@/stores/watch-history';
+import { MediaType, type ISeason, type Show, type ShowWithGenreAndVideo } from '@/types';
 
 interface TvDetailContentProps {
   show: ShowWithGenreAndVideo;
@@ -16,6 +17,12 @@ interface TvDetailContentProps {
 
 const TvDetailContent = ({ show, seasons }: TvDetailContentProps) => {
   const continueWatchingStore = useContinueWatchingStore();
+  const watchHistoryStore = useWatchHistoryStore();
+
+  const handlePlay = (tvShow: Show) => {
+    continueWatchingStore.addItem(tvShow);
+    watchHistoryStore.addItem(tvShow);
+  };
 
   return (
     <main className="mx-auto grid w-full max-w-5xl gap-4 px-4 py-8 sm:px-6 lg:px-8">
@@ -66,7 +73,7 @@ const TvDetailContent = ({ show, seasons }: TvDetailContentProps) => {
       <ShowWatchPicker
         show={{ ...show, media_type: MediaType.TV }}
         seasons={seasons}
-        onPlay={(tvShow) => continueWatchingStore.addItem(tvShow)}
+        onPlay={handlePlay}
       />
     </main>
   );
