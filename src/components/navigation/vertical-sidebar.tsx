@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Tv, Film, Search, Settings, Menu, X } from 'lucide-react';
+import { Home, Tv, Film, Search, Settings, Menu, X, History } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { siteConfig } from '@/configs/site';
 import { useSearchStore } from '@/stores/search';
@@ -14,6 +14,7 @@ const navItems = [
   { title: 'Home', href: '/', icon: Home },
   { title: 'TV Shows', href: '/tv-shows', icon: Tv },
   { title: 'Movies', href: '/movies', icon: Film },
+  { title: 'History', href: '/history', icon: History },
 ];
 
 // ─── Component ────────────────────────────────────────────────────
