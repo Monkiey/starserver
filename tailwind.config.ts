@@ -121,7 +121,7 @@ module.exports = {
       },
       fontFamily: {
         sans: ['var(--font-sans)', ...fontFamily.sans],
-        heading: ['var(--font-heading)', ...fontFamily.sans],
+        outfit: ['var(--font-outfit)', ...fontFamily.sans],
       },
     },
   },

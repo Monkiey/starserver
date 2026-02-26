@@ -52,7 +52,7 @@ export function VerticalSidebar() {
       {/* Header row */}
       <div className="flex h-16 flex-shrink-0 items-center justify-between border-b border-sidebar-border px-5">
         <Link href="/" className="flex items-center gap-2">
-          <span className="font-heading text-base font-semibold uppercase tracking-wide">
+          <span className="font-outfit text-base font-semibold uppercase tracking-wide">
             {siteConfig.name}
           </span>
         </Link>
@@ -163,7 +163,7 @@ export function VerticalSidebar() {
 
         {/* Mobile logo */}
         <Link href="/" className="flex items-center gap-2 lg:hidden">
-          <span className="font-heading text-base font-semibold uppercase tracking-wide">
+          <span className="font-outfit text-base font-semibold uppercase tracking-wide">
             {siteConfig.name}
           </span>
         </Link>

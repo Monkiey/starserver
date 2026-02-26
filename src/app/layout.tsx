@@ -18,7 +18,7 @@ export const runtime = 'edge';
 // Clean, modern geometric font for headings and display text
 const outfit = Outfit({
   subsets: ['latin'],
-  variable: '--font-heading',
+  variable: '--font-outfit',
   display: 'swap',
 });
 
