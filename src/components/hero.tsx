@@ -83,7 +83,7 @@ const Hero = ({ randomShow }: HeroProps) => {
             />
             <div className="absolute bottom-0 left-0 right-0 top-0">
               <div className="absolute bottom-[18%] left-[4%] top-0 z-10 flex w-[90%] flex-col justify-end space-y-1.5 sm:bottom-[35%] sm:w-[36%] sm:space-y-2">
-                <h1 className="font-heading text-[7vw] font-bold uppercase tracking-wide sm:text-[3vw]">
+                <h1 className="font-outfit text-[7vw] font-bold uppercase tracking-wide sm:text-[3vw]">
                   {randomShow?.title ?? randomShow?.name}
                 </h1>
                 <div className="flex space-x-2 text-[3.5vw] font-semibold sm:text-[2vw] md:text-[1.2vw]">

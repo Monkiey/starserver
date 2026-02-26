@@ -50,7 +50,7 @@ export function MainNav({ items }: MainNavProps) {
         <div className="flex items-center gap-6">
           <div className="border-border/60 bg-background/80 flex items-center gap-4 rounded-full border px-4 py-2 shadow-sm backdrop-blur">
             <Link href="/" className="hidden items-center space-x-2 md:flex">
-              <span className="inline-block font-heading text-lg font-semibold uppercase tracking-wide">
+              <span className="inline-block font-outfit text-lg font-semibold uppercase tracking-wide">
                 {siteConfig.name}
               </span>
               <span className="sr-only">Home</span>
@@ -81,7 +81,7 @@ export function MainNav({ items }: MainNavProps) {
                     buttonVariants({ variant: 'ghost' }),
                     'flex items-center space-x-2 px-0 hover:bg-transparent focus:ring-0',
                   )}>
-                  <span className="font-heading text-base font-semibold uppercase tracking-wide">
+                  <span className="font-outfit text-base font-semibold uppercase tracking-wide">
                     Menu
                   </span>
                 </DropdownMenuTrigger>
@@ -91,7 +91,7 @@ export function MainNav({ items }: MainNavProps) {
                   className="w-52 overflow-y-auto overflow-x-hidden rounded-xl">
                   <DropdownMenuLabel>
                     <Link href="/" className="flex items-center justify-center">
-                      <span className="font-heading uppercase tracking-wide">
+                      <span className="font-outfit uppercase tracking-wide">
                         {siteConfig.name}
                       </span>
                     </Link>
@@ -130,7 +130,7 @@ export function MainNav({ items }: MainNavProps) {
               aria-label="Search">
               <Icons.search className="h-4 w-4" />
               <span className="hidden sm:inline-flex">Search</span>
-              <kbd className="pointer-events-none hidden select-none rounded border bg-muted px-1.5 py-0.5 font-mono text-[10px] font-medium text-muted-foreground md:inline-flex">
+              <kbd className="pointer-events-none hidden select-none rounded border bg-muted px-1.5 py-0.5 font-outfit text-[10px] font-medium text-muted-foreground md:inline-flex">
                 ⌘K
               </kbd>
             </Button>
