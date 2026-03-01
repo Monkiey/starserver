@@ -157,7 +157,7 @@ export function VerticalSidebar() {
       <header
         className={cn(
           'fixed right-0 top-0 z-50 flex h-16 items-center px-4 transition-colors duration-300',
-          'left-0 lg:left-[260px]',
+          'left-0 lg:left-[272px]',
           isScrolled
             ? 'border-border/60 bg-background/80 border-b backdrop-blur'
             : 'bg-transparent',
@@ -200,7 +200,7 @@ export function VerticalSidebar() {
       <aside
         role="navigation"
         aria-label="Site navigation"
-        className="metal-surface fixed left-0 top-0 z-40 hidden h-screen w-[260px] flex-col border-r border-sidebar-border text-sidebar-foreground lg:flex">
+        className="metal-surface fixed left-3 top-3 z-40 hidden h-[calc(100vh-1.5rem)] w-[260px] flex-col rounded-2xl border border-sidebar-border text-sidebar-foreground lg:flex">
         <SidebarContent />
       </aside>
 
@@ -217,7 +217,7 @@ export function VerticalSidebar() {
         role="navigation"
         aria-label="Site navigation"
         className={cn(
-          'fixed left-0 top-0 z-50 flex h-screen w-[260px] flex-col lg:hidden',
+          'fixed left-0 top-0 z-50 flex h-screen w-[260px] flex-col rounded-r-2xl lg:hidden',
           'metal-surface border-r border-sidebar-border text-sidebar-foreground backdrop-blur-md',
           'overflow-y-auto overflow-x-hidden transition-transform duration-300',
           mobileOpen ? 'translate-x-0' : '-translate-x-full',
