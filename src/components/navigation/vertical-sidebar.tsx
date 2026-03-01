@@ -200,7 +200,11 @@ export function VerticalSidebar() {
       <aside
         role="navigation"
         aria-label="Site navigation"
-        className="metal-surface fixed left-3 top-3 z-40 hidden h-[calc(100vh-1.5rem)] w-[260px] flex-col rounded-2xl border border-sidebar-border text-sidebar-foreground lg:flex">
+        className={cn(
+          'metal-surface fixed left-3 top-3 z-40 hidden h-[calc(100vh-1.5rem)] w-[260px]',
+          'flex-col overflow-hidden rounded-2xl border border-sidebar-border shadow-2xl',
+          'text-sidebar-foreground lg:flex',
+        )}>
         <SidebarContent />
       </aside>
 
