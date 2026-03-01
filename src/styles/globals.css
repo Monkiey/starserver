@@ -115,71 +115,71 @@ body,
 }
 
 @layer components {
-  /* ── Liquid-metal button styles ────────────────────────────────── */
+  /* ── Liquid-metal steel-blue button styles ─────────────────────── */
   .btn-metal {
     background: linear-gradient(
       160deg,
-      #e8e8e8 0%,
-      #c0c0c0 35%,
-      #d4d4d4 60%,
-      #a8a8a8 100%
+      #c8dff4 0%,
+      #6a9ec8 30%,
+      #4682b4 55%,
+      #2d6a9f 100%
     );
-    border: 1px solid rgba(160, 160, 160, 0.7);
+    border: 1px solid rgba(70, 130, 180, 0.8);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.65),
-      inset 0 -1px 0 rgba(0, 0, 0, 0.12),
-      0 2px 6px rgba(0, 0, 0, 0.35);
-    color: #1a1a1a;
-    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+      inset 0 1px 0 rgba(200, 230, 255, 0.6),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.18),
+      0 2px 6px rgba(0, 0, 0, 0.4);
+    color: #ffffff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
   }
 
   .btn-metal:hover:not(:disabled) {
     background: linear-gradient(
       160deg,
-      #f2f2f2 0%,
-      #d2d2d2 35%,
-      #e8e8e8 60%,
-      #bcbcbc 100%
+      #d8eaff 0%,
+      #7aaed8 30%,
+      #5592c4 55%,
+      #3a79af 100%
     );
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.8),
-      inset 0 -1px 0 rgba(0, 0, 0, 0.1),
-      0 4px 12px rgba(0, 0, 0, 0.35);
+      inset 0 1px 0 rgba(220, 240, 255, 0.8),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.15),
+      0 4px 12px rgba(70, 130, 180, 0.45);
   }
 
   .btn-metal:active:not(:disabled) {
     background: linear-gradient(
       160deg,
-      #b8b8b8 0%,
-      #d0d0d0 35%,
-      #c4c4c4 60%,
-      #dedede 100%
+      #2d6a9f 0%,
+      #4682b4 35%,
+      #5a90be 60%,
+      #7aaed8 100%
     );
     box-shadow:
-      inset 0 2px 4px rgba(0, 0, 0, 0.2),
+      inset 0 2px 4px rgba(0, 0, 0, 0.25),
       0 1px 2px rgba(0, 0, 0, 0.3);
   }
 
   .btn-metal-outline {
     background: transparent;
-    border: 1px solid rgba(160, 160, 160, 0.6);
+    border: 1px solid rgba(70, 130, 180, 0.65);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      inset 0 1px 0 rgba(200, 230, 255, 0.1),
       0 1px 4px rgba(0, 0, 0, 0.2);
     color: inherit;
   }
 
   .btn-metal-outline:hover:not(:disabled) {
-    background: rgba(180, 180, 180, 0.15);
-    border-color: rgba(210, 210, 210, 0.9);
+    background: rgba(70, 130, 180, 0.15);
+    border-color: rgba(100, 160, 210, 0.9);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.2),
-      0 2px 8px rgba(0, 0, 0, 0.25);
+      inset 0 1px 0 rgba(200, 230, 255, 0.2),
+      0 2px 8px rgba(70, 130, 180, 0.3);
   }
 
   .btn-metal-ghost:hover:not(:disabled) {
-    background: rgba(180, 180, 180, 0.18);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    background: rgba(70, 130, 180, 0.18);
+    box-shadow: inset 0 1px 0 rgba(200, 230, 255, 0.1);
   }
 }
 
