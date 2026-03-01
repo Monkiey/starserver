@@ -58,7 +58,7 @@ const ShowsCarousel = ({ title, shows }: ShowsCarouselProps) => {
       {shows.length !== 0 && (
         <div className="space-y-1 sm:space-y-2.5">
           {title && (
-            <h2 className="metal-title m-0 px-[4%] font-outfit text-lg font-semibold uppercase tracking-wide sm:text-xl 2xl:px-[60px]">
+            <h2 className="m-0 px-[4%] font-outfit text-lg font-semibold uppercase tracking-wide sm:text-xl 2xl:px-[60px]">
               {title}
             </h2>
           )}
