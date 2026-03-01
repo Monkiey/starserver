@@ -37,6 +37,27 @@ function EmbedPlayer(props: EmbedPlayerProps) {
     };
   }, [handleIframeLoaded, props.url]);
 
+  React.useEffect(() => {
+    const originalOpen = window.open.bind(window);
+
+    // Intercept any popup the iframe player spawns: open it then
+    // immediately close it so ad windows never remain visible.
+    // The original is restored when this component unmounts.
+    window.open = function (
+      url?: string | URL,
+      target?: string,
+      features?: string,
+    ): WindowProxy | null {
+      const popup = originalOpen(url, target, features);
+      popup?.close();
+      return null;
+    };
+
+    return () => {
+      window.open = originalOpen;
+    };
+  }, []);
+
   return (
     <div
       style={{
@@ -74,7 +95,7 @@ function EmbedPlayer(props: EmbedPlayerProps) {
         allowFullScreen
         allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
         ref={iframeRef}
-        sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
+        sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-popups allow-popups-to-escape-sandbox"
         style={{ opacity: 0 }}
         referrerPolicy="no-referrer-when-downgrade"
         title="Video player"
