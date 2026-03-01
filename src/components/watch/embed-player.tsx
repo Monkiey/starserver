@@ -74,7 +74,7 @@ function EmbedPlayer(props: EmbedPlayerProps) {
         allowFullScreen
         allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
         ref={iframeRef}
-        sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-popups allow-popups-to-escape-sandbox"
+        sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
         style={{ opacity: 0 }}
         referrerPolicy="no-referrer-when-downgrade"
         title="Video player"
