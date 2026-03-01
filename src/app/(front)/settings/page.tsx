@@ -140,7 +140,7 @@ export default function SettingsPage() {
             <div className="divide-y divide-border">
               <div className="flex items-center justify-between px-5 py-3">
                 <span className="text-sm text-muted-foreground">Version</span>
-                <span className="text-sm font-medium">3.0</span>
+                <span className="text-sm font-medium">4.0</span>
               </div>
               <div className="flex items-center justify-between px-5 py-3">
                 <span className="text-sm text-muted-foreground">
