@@ -3,7 +3,16 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Tv, Film, Search, Settings, Menu, X, History } from 'lucide-react';
+import {
+  Home,
+  Tv,
+  Film,
+  Search,
+  Settings,
+  Menu,
+  X,
+  History,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { siteConfig } from '@/configs/site';
 import { useSearchStore } from '@/stores/search';
@@ -82,7 +91,7 @@ export function VerticalSidebar() {
                   className={cn(
                     'group flex h-11 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors',
                     isActive
-                      ? 'bg-sidebar-accent text-primary'
+                      ? 'metal-nav-active text-primary'
                       : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground',
                   )}>
                   <Icon
@@ -124,7 +133,7 @@ export function VerticalSidebar() {
           className={cn(
             'group flex h-11 w-full items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors',
             path === '/settings'
-              ? 'bg-sidebar-accent text-primary'
+              ? 'metal-nav-active text-primary'
               : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground',
           )}>
           <Settings
@@ -148,7 +157,7 @@ export function VerticalSidebar() {
       <header
         className={cn(
           'fixed right-0 top-0 z-50 flex h-16 items-center px-4 transition-colors duration-300',
-          'left-0 lg:left-[260px]',
+          'left-0 lg:left-[272px]',
           isScrolled
             ? 'border-border/60 bg-background/80 border-b backdrop-blur'
             : 'bg-transparent',
@@ -191,7 +200,11 @@ export function VerticalSidebar() {
       <aside
         role="navigation"
         aria-label="Site navigation"
-        className="fixed left-0 top-0 z-40 hidden h-screen w-[260px] flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:flex">
+        className={cn(
+          'metal-surface fixed left-3 top-3 z-40 hidden h-[calc(100vh-1.5rem)] w-[260px]',
+          'flex-col overflow-hidden rounded-2xl border border-sidebar-border shadow-2xl',
+          'text-sidebar-foreground lg:flex',
+        )}>
         <SidebarContent />
       </aside>
 
@@ -208,8 +221,8 @@ export function VerticalSidebar() {
         role="navigation"
         aria-label="Site navigation"
         className={cn(
-          'fixed left-0 top-0 z-50 flex h-screen w-[260px] flex-col lg:hidden',
-          'bg-sidebar/95 border-r border-sidebar-border text-sidebar-foreground backdrop-blur-md',
+          'fixed left-0 top-0 z-50 flex h-screen w-[260px] flex-col rounded-r-2xl lg:hidden',
+          'metal-surface border-r border-sidebar-border text-sidebar-foreground backdrop-blur-md',
           'overflow-y-auto overflow-x-hidden transition-transform duration-300',
           mobileOpen ? 'translate-x-0' : '-translate-x-full',
         )}>

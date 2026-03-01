@@ -58,7 +58,7 @@ const ShowsCarousel = ({ title, shows }: ShowsCarouselProps) => {
       {shows.length !== 0 && (
         <div className="space-y-1 sm:space-y-2.5">
           {title && (
-            <h2 className="text-foreground/80 m-0 px-[4%] font-outfit text-lg font-semibold uppercase tracking-wide transition-colors hover:text-foreground sm:text-xl 2xl:px-[60px]">
+            <h2 className="metal-title m-0 px-[4%] font-outfit text-lg font-semibold uppercase tracking-wide sm:text-xl 2xl:px-[60px]">
               {title}
             </h2>
           )}
@@ -105,7 +105,7 @@ export const ShowCard = ({ show }: { show: Show; pathname: string }) => {
 
   return (
     // <picture className="relative aspect-[2/3] md:aspect-video">
-    <picture className="relative aspect-[2/3]">
+    <picture className="metal-card-3d relative aspect-[2/3] overflow-hidden rounded-3xl">
       <a
         className="pointer-events-none"
         aria-hidden={false}
@@ -113,17 +113,6 @@ export const ShowCard = ({ show }: { show: Show; pathname: string }) => {
         aria-label={getNameFromShow(show)}
         href={`/${show.media_type}/${getSlug(show.id, getNameFromShow(show))}`}
       />
-      {/* <source */}
-      {/*   // srcSet={`https://image.tmdb.org/t/p/w342/${show.poster_path ?? show.backdrop_path}`} */}
-      {/*   srcSet={ */}
-      {/*     show.backdrop_path ?? show.poster_path */}
-      {/*       ? `https://image.tmdb.org/t/p/w500/${ */}
-      {/*           show.backdrop_path ?? show.poster_path */}
-      {/*         }` */}
-      {/*       : '/images/grey-thumbnail.jpg' */}
-      {/*   } */}
-      {/*   media="(min-width: 780px)" */}
-      {/* /> */}
       <CustomImage
         src={
           show.poster_path ?? show.backdrop_path
@@ -133,7 +122,7 @@ export const ShowCard = ({ show }: { show: Show; pathname: string }) => {
             : '/images/grey-thumbnail.jpg'
         }
         alt={show.title ?? show.name ?? 'poster'}
-        className="h-full w-full cursor-pointer rounded-3xl px-1 transition-all md:hover:scale-110"
+        className="h-full w-full cursor-pointer rounded-3xl px-1 transition-all"
         fill
         sizes="(max-width: 768px) 50vw, (max-width: 1200px) 100vw, 33vw"
         style={{
