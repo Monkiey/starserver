@@ -114,10 +114,33 @@ module.exports = {
           from: { height: 'auto', opacity: '1' },
           to: { height: '0', opacity: '0' },
         },
+        'metal-shimmer': {
+          '0%': { backgroundPosition: '-250% center' },
+          '100%': { backgroundPosition: '250% center' },
+        },
+        'liquid-pour': {
+          '0%': {
+            opacity: '0',
+            transform: 'scaleY(0.85) scaleX(0.98)',
+            filter: 'blur(4px)',
+          },
+          '60%': {
+            opacity: '1',
+            transform: 'scaleY(1.02) scaleX(1)',
+            filter: 'blur(0)',
+          },
+          '100%': {
+            opacity: '1',
+            transform: 'scaleY(1) scaleX(1)',
+            filter: 'blur(0)',
+          },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        'metal-shimmer': 'metal-shimmer 4s linear infinite',
+        'liquid-pour': 'liquid-pour 0.5s cubic-bezier(0.34,1.56,0.64,1) both',
       },
       fontFamily: {
         sans: ['var(--font-outfit)', ...fontFamily.sans],

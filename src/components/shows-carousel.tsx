@@ -113,17 +113,6 @@ export const ShowCard = ({ show }: { show: Show; pathname: string }) => {
         aria-label={getNameFromShow(show)}
         href={`/${show.media_type}/${getSlug(show.id, getNameFromShow(show))}`}
       />
-      {/* <source */}
-      {/*   // srcSet={`https://image.tmdb.org/t/p/w342/${show.poster_path ?? show.backdrop_path}`} */}
-      {/*   srcSet={ */}
-      {/*     show.backdrop_path ?? show.poster_path */}
-      {/*       ? `https://image.tmdb.org/t/p/w500/${ */}
-      {/*           show.backdrop_path ?? show.poster_path */}
-      {/*         }` */}
-      {/*       : '/images/grey-thumbnail.jpg' */}
-      {/*   } */}
-      {/*   media="(min-width: 780px)" */}
-      {/* /> */}
       <CustomImage
         src={
           show.poster_path ?? show.backdrop_path
@@ -133,7 +122,7 @@ export const ShowCard = ({ show }: { show: Show; pathname: string }) => {
             : '/images/grey-thumbnail.jpg'
         }
         alt={show.title ?? show.name ?? 'poster'}
-        className="h-full w-full cursor-pointer rounded-3xl px-1 transition-all md:hover:scale-110"
+        className="h-full w-full cursor-pointer rounded-3xl px-1 transition-all duration-300 md:hover:scale-110 md:hover:shadow-[0_0_0_2px_oklch(0.65_0.022_225/60%),0_8px_32px_oklch(0.04_0.02_245/70%)]"
         fill
         sizes="(max-width: 768px) 50vw, (max-width: 1200px) 100vw, 33vw"
         style={{

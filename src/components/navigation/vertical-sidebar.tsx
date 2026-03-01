@@ -3,7 +3,16 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Tv, Film, Search, Settings, Menu, X, History } from 'lucide-react';
+import {
+  Home,
+  Tv,
+  Film,
+  Search,
+  Settings,
+  Menu,
+  X,
+  History,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { siteConfig } from '@/configs/site';
 import { useSearchStore } from '@/stores/search';
@@ -50,9 +59,9 @@ export function VerticalSidebar() {
   const SidebarContent = ({ onClose }: { onClose?: () => void }) => (
     <>
       {/* Header row */}
-      <div className="flex h-16 flex-shrink-0 items-center justify-between border-b border-sidebar-border px-5">
+      <div className="metal-panel metal-shimmer relative flex h-16 flex-shrink-0 items-center justify-between border-b border-sidebar-border px-5">
         <Link href="/" className="flex items-center gap-2">
-          <span className="font-outfit text-base font-semibold uppercase tracking-wide">
+          <span className="text-foreground/90 font-outfit text-base font-semibold uppercase tracking-wide">
             {siteConfig.name}
           </span>
         </Link>
@@ -80,9 +89,9 @@ export function VerticalSidebar() {
                 <Link
                   href={item.href}
                   className={cn(
-                    'group flex h-11 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors',
+                    'group flex h-11 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-all',
                     isActive
-                      ? 'bg-sidebar-accent text-primary'
+                      ? 'metal-active text-foreground'
                       : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground',
                   )}>
                   <Icon
@@ -122,9 +131,9 @@ export function VerticalSidebar() {
         <Link
           href="/settings"
           className={cn(
-            'group flex h-11 w-full items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors',
+            'group flex h-11 w-full items-center gap-3 rounded-lg px-3 text-sm font-medium transition-all',
             path === '/settings'
-              ? 'bg-sidebar-accent text-primary'
+              ? 'metal-active text-foreground'
               : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground',
           )}>
           <Settings
@@ -191,7 +200,7 @@ export function VerticalSidebar() {
       <aside
         role="navigation"
         aria-label="Site navigation"
-        className="fixed left-0 top-0 z-40 hidden h-screen w-[260px] flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:flex">
+        className="metal-border-sidebar fixed left-0 top-0 z-40 hidden h-screen w-[260px] flex-col bg-sidebar text-sidebar-foreground lg:flex">
         <SidebarContent />
       </aside>
 

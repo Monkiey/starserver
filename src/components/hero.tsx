@@ -101,6 +101,7 @@ const Hero = ({ randomShow }: HeroProps) => {
                   <Link prefetch={false} href={handleHref()}>
                     <Button
                       aria-label="Play video"
+                      variant="metal"
                       className="h-auto flex-shrink-0 gap-2 rounded-xl"
                       onClick={() => {
                         if (randomShow) {
@@ -114,7 +115,7 @@ const Hero = ({ randomShow }: HeroProps) => {
                   <Button
                     aria-label="Open show's details modal"
                     variant="outline"
-                    className="h-auto flex-shrink-0 gap-2 rounded-xl"
+                    className="h-auto flex-shrink-0 gap-2 rounded-xl border-white/20 bg-black/30 backdrop-blur-sm hover:border-white/40 hover:bg-black/50"
                     onClick={() => {
                       const name = getNameFromShow(randomShow);
                       const path: string =
@@ -139,7 +140,7 @@ const Hero = ({ randomShow }: HeroProps) => {
               </div>
             </div>{' '}
             <div className="opacity-71 absolute inset-0 right-[26.09%] z-[8] bg-gradient-to-r from-secondary to-85%"></div>
-            <div className="absolute bottom-[-1px] left-0 right-0 z-[8] h-[14.7vw] bg-gradient-to-b from-background/0 from-30% via-background/30 via-50% to-background to-80%"></div>
+            <div className="from-background/0 via-background/30 absolute bottom-[-1px] left-0 right-0 z-[8] h-[14.7vw] bg-gradient-to-b from-30% via-50% to-background to-80%"></div>
           </div>
           <div className="relative inset-0 -z-50 mb-5 pb-[72%] sm:pb-[40%]"></div>
         </>
