@@ -26,15 +26,14 @@ function EmbedPlayer(props: EmbedPlayerProps) {
   }, []);
 
   React.useEffect(() => {
-    if (iframeRef.current) {
-      iframeRef.current.src = props.url;
-    }
+    const iframe = iframeRef.current;
+    if (!iframe) return;
 
-    const { current } = iframeRef;
-    const iframe: HTMLIFrameElement | null = current;
-    iframe?.addEventListener('load', handleIframeLoaded);
+    iframe.addEventListener('load', handleIframeLoaded);
+    iframe.src = props.url;
+
     return () => {
-      iframe?.removeEventListener('load', handleIframeLoaded);
+      iframe.removeEventListener('load', handleIframeLoaded);
     };
   }, [handleIframeLoaded, props.url]);
 
@@ -73,11 +72,12 @@ function EmbedPlayer(props: EmbedPlayerProps) {
         width="100%"
         height="100%"
         allowFullScreen
-        allow="autoplay; fullscreen; picture-in-picture"
+        allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
         ref={iframeRef}
-        sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
+        sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-popups allow-popups-to-escape-sandbox"
         style={{ opacity: 0 }}
         referrerPolicy="no-referrer-when-downgrade"
+        title="Video player"
       />
     </div>
   );
