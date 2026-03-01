@@ -133,7 +133,7 @@ export const ShowCard = ({ show }: { show: Show; pathname: string }) => {
             : '/images/grey-thumbnail.jpg'
         }
         alt={show.title ?? show.name ?? 'poster'}
-        className="h-full w-full cursor-pointer rounded-lg px-1 transition-all md:hover:scale-110"
+        className="h-full w-full cursor-pointer rounded-3xl px-1 transition-all md:hover:scale-110"
         fill
         sizes="(max-width: 768px) 50vw, (max-width: 1200px) 100vw, 33vw"
         style={{
