@@ -7,13 +7,8 @@ export enum RequestType {
   NETFLIX = 'netflix',
   POPULAR = 'popular',
   GENRE = 'genre',
-  ANIME_GENRE = 'anime_genre',
   KOREAN = 'korean',
   DEFAULT = 'default',
-  ANIME_LATEST = 'anime_latest',
-  ANIME_TRENDING = 'anime_trending',
-  ANIME_TOP_RATED = 'anime_top_rated',
-  ANIME_NETFLIX = 'anime_netflix',
 }
 
 export type TmdbPagingResponse = {

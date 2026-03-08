@@ -106,7 +106,7 @@ class StarSearchService {
       'explore',
       'treasure',
     ],
-    [Genre.ANIMATION]: ['animated', 'animation', 'cartoon', 'anime', 'pixar'],
+    [Genre.ANIMATION]: ['animated', 'animation', 'cartoon', 'pixar'],
     [Genre.COMEDY]: [
       'comedy',
       'funny',
