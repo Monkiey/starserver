@@ -10,6 +10,9 @@ import { cn, getNameFromShow, getSlug } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
 import CustomImage from './custom-image';
 
+/** Shows released within this window are flagged as "New" in MovieASAP template */
+const NEW_RELEASE_THRESHOLD_MS = 180 * 24 * 60 * 60 * 1000;
+
 interface ShowsCarouselProps {
   /** Optional title for the carousel. When omitted, the carousel renders without a title header. */
   title?: string;
@@ -58,7 +61,7 @@ const ShowsCarousel = ({ title, shows }: ShowsCarouselProps) => {
       {shows.length !== 0 && (
         <div className="space-y-1 sm:space-y-2.5">
           {title && (
-            <h2 className="m-0 px-[4%] font-outfit text-lg font-semibold uppercase tracking-wide sm:text-xl 2xl:px-[60px]">
+            <h2 className="movieasap-section-title m-0 px-[4%] font-outfit text-lg font-semibold uppercase tracking-wide sm:text-xl 2xl:px-[60px]">
               {title}
             </h2>
           )}
@@ -103,6 +106,19 @@ export const ShowCard = ({ show }: { show: Show; pathname: string }) => {
     event.currentTarget.src = '/images/grey-thumbnail.jpg';
   };
 
+  // Determine if the show is "new" (released within the last 180 days)
+  const releaseDate = show.release_date ?? show.first_air_date;
+  const isNew = React.useMemo(() => {
+    if (!releaseDate) return false;
+    const diff = Date.now() - new Date(releaseDate).getTime();
+    return diff >= 0 && diff < NEW_RELEASE_THRESHOLD_MS;
+  }, [releaseDate]);
+
+  const rating =
+    show.vote_average > 0 ? show.vote_average.toFixed(1) : null;
+
+  const typeLabel = show.media_type === MediaType.TV ? 'TV' : 'Movie';
+
   return (
     // <picture className="relative aspect-[2/3] md:aspect-video">
     <picture className="metal-card-3d relative aspect-[2/3] overflow-hidden rounded-3xl">
@@ -145,6 +161,30 @@ export const ShowCard = ({ show }: { show: Show; pathname: string }) => {
         }}
         onError={imageOnErrorHandler}
       />
+
+      {/* MovieASAP-style: NEW badge (top-left) */}
+      {isNew && (
+        <span className="movieasap-new-badge" aria-label="New release">
+          New
+        </span>
+      )}
+
+      {/* MovieASAP-style: media type badge (top-right) */}
+      <span className="movieasap-type-badge" aria-label={typeLabel}>
+        {typeLabel}
+      </span>
+
+      {/* MovieASAP-style: rating badge (bottom-left, visible on hover) */}
+      {rating && (
+        <span className="movieasap-rating-badge" aria-label={`Rating: ${rating}`}>
+          <Icons.star
+            fill="currentColor"
+            aria-hidden="true"
+            className="h-2.5 w-2.5 text-yellow-400"
+          />
+          {rating}
+        </span>
+      )}
     </picture>
   );
 };
