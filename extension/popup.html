@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Open in StarServer</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <header class="header">
+        <img src="icons/icon48.png" alt="StarServer" class="logo" />
+        <div class="header-text">
+          <h1 class="title">StarServer</h1>
+          <p class="subtitle">Open movies &amp; shows instantly</p>
+        </div>
+      </header>
+
+      <!-- Server URL config -->
+      <section class="config-section" id="config-section">
+        <div class="input-row">
+          <input
+            type="url"
+            id="server-url"
+            class="input"
+            placeholder="https://your-starserver.com"
+            aria-label="StarServer URL"
+            spellcheck="false"
+          />
+          <button id="save-url" class="btn btn-primary btn-sm" aria-label="Save URL">
+            Save
+          </button>
+        </div>
+        <p class="hint" id="url-hint">Enter your StarServer URL to get started.</p>
+      </section>
+
+      <!-- Search -->
+      <section class="search-section">
+        <div class="input-row">
+          <div class="search-icon" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </div>
+          <input
+            type="text"
+            id="search-input"
+            class="input search-input"
+            placeholder="Search movies &amp; TV shows…"
+            aria-label="Search movies and TV shows"
+            maxlength="100"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button id="clear-btn" class="btn btn-ghost btn-sm icon-btn" aria-label="Clear search" hidden>
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Clipboard banner -->
+        <div id="clipboard-banner" class="clipboard-banner" hidden>
+          <span id="clipboard-text" class="clipboard-label"></span>
+          <button id="use-clipboard" class="btn btn-ghost btn-xs">Use</button>
+        </div>
+      </section>
+
+      <!-- Results -->
+      <div id="results-area" class="results-area" aria-live="polite" aria-label="Search results">
+        <div id="empty-state" class="state-view">
+          <svg class="state-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+          <p>Copy a title or type to search</p>
+        </div>
+
+        <div id="loading-state" class="state-view" hidden>
+          <div class="spinner" aria-label="Loading"></div>
+          <p>Searching…</p>
+        </div>
+
+        <div id="no-results-state" class="state-view" hidden>
+          <svg class="state-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <p id="no-results-msg">No results found</p>
+        </div>
+
+        <ul id="results-list" class="results-list" role="list" hidden></ul>
+      </div>
+
+      <!-- Footer -->
+      <footer class="footer">
+        <button id="open-settings" class="btn btn-ghost btn-xs" aria-label="Settings">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
+            <path d="M12 2v2M12 20v2M2 12h2M20 12h2"/>
+          </svg>
+          Settings
+        </button>
+        <span class="footer-sep">·</span>
+        <a id="open-starserver" class="btn btn-ghost btn-xs" href="#" target="_blank" rel="noopener noreferrer">
+          Open StarServer
+        </a>
+      </footer>
+    </div>
+    <script src="popup.js"></script>
+  </body>
+</html>
