@@ -546,3 +546,141 @@ body {
     inset 0 -1px 0 oklch(0 0 0 / 0.25);
 }
 
+/* ═══════════════════════════════════════════════════════
+   VODI TEMPLATE STYLES
+   Cinematic dark theme inspired by the Vodi WP theme
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Vodi card ────────────────────────────────────────── */
+.vodi-card {
+  @apply cursor-pointer;
+}
+
+.vodi-card-poster {
+  @apply relative overflow-hidden rounded-lg;
+  aspect-ratio: 2 / 3;
+  background: #1a1a1a;
+}
+
+.vodi-card-overlay {
+  @apply absolute inset-0 flex flex-col items-center justify-center gap-2 opacity-0 transition-opacity duration-300;
+  background: linear-gradient(
+    to top,
+    rgba(10, 10, 10, 0.85) 0%,
+    rgba(10, 10, 10, 0.3) 100%
+  );
+}
+
+.vodi-card:hover .vodi-card-overlay {
+  @apply opacity-100;
+}
+
+.vodi-play-btn {
+  @apply flex h-10 w-10 items-center justify-center rounded-full bg-[#e63946] text-white shadow-lg transition-transform duration-200;
+  box-shadow: 0 0 20px rgba(230, 57, 70, 0.5);
+}
+
+.vodi-play-btn:hover {
+  @apply scale-110;
+}
+
+.vodi-info-btn {
+  @apply flex h-7 w-7 items-center justify-center rounded-full border border-white/40 bg-black/40 text-white/80 transition-colors hover:border-white hover:text-white;
+}
+
+.vodi-rating-badge {
+  @apply absolute bottom-2 left-2 flex items-center gap-1 rounded bg-[#f5c518] px-1.5 py-0.5 text-[10px] font-bold text-black;
+}
+
+.vodi-type-badge {
+  @apply absolute right-2 top-2 rounded bg-[#e63946] px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white;
+}
+
+.vodi-rank-badge {
+  @apply absolute -left-2 -top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-[#e63946] text-xs font-bold text-white shadow-md;
+}
+
+.vodi-card-info {
+  @apply mt-2 space-y-0.5;
+}
+
+.vodi-card-title {
+  @apply truncate text-sm font-semibold text-white transition-colors group-hover:text-[#e63946];
+}
+
+.vodi-card-meta {
+  @apply flex items-center gap-1.5 text-xs text-white/50;
+}
+
+.vodi-dot {
+  @apply h-1 w-1 rounded-full bg-white/30;
+  display: inline-block;
+}
+
+/* ── Vodi section ─────────────────────────────────────── */
+.vodi-section {
+  @apply py-4;
+}
+
+.vodi-section-accent {
+  @apply block h-5 w-1 rounded-sm bg-[#e63946];
+}
+
+/* ── Vodi scroll buttons ──────────────────────────────── */
+.vodi-scroll-btn {
+  @apply absolute top-0 z-10 hidden h-full w-12 items-center justify-center text-white/70 transition-colors hover:text-white md:flex;
+  background: linear-gradient(to right, #0a0a0a 0%, transparent 100%);
+}
+
+.vodi-scroll-btn.right-0 {
+  background: linear-gradient(to left, #0a0a0a 0%, transparent 100%);
+}
+
+/* ── Vodi hero ────────────────────────────────────────── */
+.vodi-hero {
+  min-height: 60vh;
+}
+
+.vodi-hero-badge {
+  @apply inline-block rounded bg-[#e63946] px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider text-white;
+}
+
+/* ── Vodi CTA buttons ─────────────────────────────────── */
+.vodi-btn-primary {
+  @apply inline-flex items-center gap-2 rounded bg-[#e63946] px-5 py-2.5 text-sm font-bold uppercase tracking-wider text-white shadow-lg transition-all duration-200 hover:bg-[#c1121f] hover:shadow-[#e63946]/40;
+  box-shadow: 0 4px 15px rgba(230, 57, 70, 0.35);
+}
+
+.vodi-btn-primary:hover {
+  box-shadow: 0 6px 20px rgba(230, 57, 70, 0.5);
+}
+
+.vodi-btn-secondary {
+  @apply inline-flex items-center gap-2 rounded border border-white/30 bg-white/10 px-5 py-2.5 text-sm font-bold uppercase tracking-wider text-white backdrop-blur-sm transition-all duration-200 hover:border-white/60 hover:bg-white/20;
+}
+
+.vodi-btn-ghost {
+  @apply inline-flex items-center gap-2 rounded px-5 py-2.5 text-sm font-medium text-white/70 transition-all duration-200 hover:text-white;
+}
+
+/* ── Vodi header ──────────────────────────────────────── */
+.vodi-header {
+  @apply z-50;
+}
+
+.vodi-logo {
+  @apply transition-opacity hover:opacity-90;
+}
+
+.vodi-nav-link {
+  @apply relative py-1 after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-[#e63946] after:transition-all after:duration-200 hover:after:w-full;
+}
+
+/* ── Vodi featured card ───────────────────────────────── */
+.vodi-featured-card {
+  background: #111;
+}
+
+.vodi-featured-card:hover h3 {
+  color: #e63946;
+}
