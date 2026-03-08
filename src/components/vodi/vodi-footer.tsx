@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
 import { Play, Facebook, Instagram, Twitter, Youtube } from 'lucide-react';
@@ -34,10 +36,29 @@ const footerLinks = [
 ];
 
 const socialIcons = [
-  { icon: Facebook, title: 'Facebook', href: siteConfig.links.twitter },
-  { icon: Instagram, title: 'Instagram', href: siteConfig.links.twitter },
-  { icon: Twitter, title: 'Twitter', href: siteConfig.links.twitter },
-  { icon: Youtube, title: 'YouTube', href: siteConfig.links.twitter },
+  {
+    icon: Facebook,
+    title: 'Facebook',
+    href:
+      siteConfig.socialLinks.find((l) => l.title === 'Facebook')?.href ?? '/',
+  },
+  {
+    icon: Instagram,
+    title: 'Instagram',
+    href:
+      siteConfig.socialLinks.find((l) => l.title === 'Instagram')?.href ?? '/',
+  },
+  {
+    icon: Twitter,
+    title: 'Twitter',
+    href: siteConfig.links.twitter,
+  },
+  {
+    icon: Youtube,
+    title: 'YouTube',
+    href:
+      siteConfig.socialLinks.find((l) => l.title === 'Youtube')?.href ?? '/',
+  },
 ];
 
 export function VodiFooter() {

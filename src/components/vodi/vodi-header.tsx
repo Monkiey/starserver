@@ -74,7 +74,7 @@ export function VodiHeader() {
               aria-label="Search"
               onClick={() => searchStore.setQuery(' ')}
               className="flex h-9 w-9 items-center justify-center rounded-full text-white/70 transition-colors hover:bg-white/10 hover:text-white">
-              <Search className="h-4.5 w-4.5 h-[18px] w-[18px]" />
+              <Search className="h-[18px] w-[18px]" />
             </button>
 
             <Link
