@@ -1,0 +1,31 @@
+{
+  "manifest_version": 2,
+  "name": "Open in StarServer",
+  "version": "1.0.0",
+  "description": "Instantly open any movie or TV show in StarServer. Copy a title, right-click selected text, or use the popup to search and watch.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "browser_action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    },
+    "default_title": "Open in StarServer"
+  },
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  },
+  "permissions": [
+    "clipboardRead",
+    "contextMenus",
+    "storage",
+    "tabs"
+  ],
+  "content_security_policy": "script-src 'self'; object-src 'self'"
+}

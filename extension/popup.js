@@ -6,12 +6,19 @@
  *  - Reading the clipboard and pre-filling the search input
  *  - Debounced search via the StarServer /api/ai/search endpoint
  *  - Rendering results and opening the correct StarServer page in a new tab
+ *
+ * Compatible with Chrome/Edge/Brave (Manifest V3) and Safari (Manifest V2).
  */
 
 'use strict';
 
+// ── Cross-browser API shim ────────────────────────────────────────────────────
+// Safari exposes the WebExtension API as `browser`; Chrome exposes `chrome`.
+const api = typeof browser !== 'undefined' ? browser : chrome;
+
 // ── Storage keys ─────────────────────────────────────────────────────────────
 const KEY_SERVER_URL = 'serverUrl';
+const KEY_PENDING    = 'pendingSearch';
 
 // ── Debounce helper ───────────────────────────────────────────────────────────
 function debounce(fn, delay) {
@@ -60,7 +67,7 @@ const configSection  = document.getElementById('config-section');
 
 // ── Load saved server URL ─────────────────────────────────────────────────────
 async function loadServerUrl() {
-  const result = await chrome.storage.local.get(KEY_SERVER_URL);
+  const result = await api.storage.local.get(KEY_SERVER_URL);
   const saved  = result[KEY_SERVER_URL] ?? '';
   currentServerUrl = saved;
   serverUrlInput.value = saved;
@@ -90,13 +97,13 @@ async function saveServerUrl() {
   }
   try {
     const parsed = new URL(raw);
-    const normalised = parsed.origin;   // strip trailing path
-    await chrome.storage.local.set({ [KEY_SERVER_URL]: normalised });
-    currentServerUrl = normalised;
-    serverUrlInput.value = normalised;
+    const normalized = parsed.origin;   // strip trailing path
+    await api.storage.local.set({ [KEY_SERVER_URL]: normalized });
+    currentServerUrl = normalized;
+    serverUrlInput.value = normalized;
     urlHint.textContent  = `Saved! Connected to ${parsed.hostname}`;
     urlHint.className    = 'hint success';
-    openStarserverLink.href = normalised;
+    openStarserverLink.href = normalized;
     configSection.hidden = true;
     searchInput.disabled = false;
     searchInput.placeholder = 'Search movies & TV shows…';
@@ -201,7 +208,7 @@ function renderResult(show) {
   // Click → open tab
   btn.addEventListener('click', () => {
     const url = buildShowUrl(currentServerUrl, show);
-    chrome.tabs.create({ url });
+    api.tabs.create({ url });
     window.close();
   });
 
@@ -305,19 +312,19 @@ openSettingsBtn.addEventListener('click', toggleSettings);
   await loadServerUrl();
   showState('empty');
 
-  // Check if there's a pending search query from the context menu
-  const sessionStore = chrome.storage.session;
-  if (sessionStore) {
-    const result = await sessionStore.get('pendingSearch');
-    const pending = result.pendingSearch;
-    if (pending) {
-      await sessionStore.remove('pendingSearch');
-      searchInput.value = pending;
-      clearBtn.hidden   = false;
-      await performSearch(pending);
-      searchInput.focus();
-      return;
-    }
+  // Check if there's a pending search query from the context menu.
+  // Use storage.session when available (Chrome MV3); fall back to storage.local
+  // for Safari, which does not support storage.session.
+  const pendingStore = api.storage.session ?? api.storage.local;
+  const result = await pendingStore.get(KEY_PENDING);
+  const pending = result[KEY_PENDING];
+  if (pending) {
+    await pendingStore.remove(KEY_PENDING);
+    searchInput.value = pending;
+    clearBtn.hidden   = false;
+    await performSearch(pending);
+    searchInput.focus();
+    return;
   }
 
   await tryReadClipboard();

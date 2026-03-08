@@ -1,6 +1,6 @@
 # Open in StarServer — Browser Extension
 
-A Chrome / Edge / Brave (Manifest V3) browser extension that lets you instantly search for movies and TV shows on your StarServer instance — directly from the browser.
+A Chrome / Edge / Brave / **Safari** browser extension that lets you instantly search for movies and TV shows on your StarServer instance — directly from the browser.
 
 ## Features
 
@@ -13,7 +13,7 @@ A Chrome / Edge / Brave (Manifest V3) browser extension that lets you instantly 
 
 ## Installation
 
-> The extension is a plain folder — no build step needed.
+> The extension is a plain folder — no build step needed for Chrome/Edge/Brave.
 
 ### Chrome / Edge / Brave
 
@@ -22,9 +22,35 @@ A Chrome / Edge / Brave (Manifest V3) browser extension that lets you instantly 
 3. Click **Load unpacked**.
 4. Select this `extension/` folder.
 
+### Safari (macOS)
+
+Safari requires the extension to be wrapped in a native macOS app.  
+The included `build-safari.sh` script does this automatically using Apple's `xcrun safari-web-extension-converter` tool.
+
+**Prerequisites:** macOS · Xcode 14+ (`xcode-select --install`)
+
+```bash
+cd extension/
+chmod +x build-safari.sh
+./build-safari.sh
+```
+
+This will:
+1. Assemble a clean copy of the extension using the Safari-compatible **Manifest V2** (`manifest.safari.json`).
+2. Run `xcrun safari-web-extension-converter` to generate a ready-to-build Xcode project at `../StarServerSafariExtension/`.
+
+**After the script finishes:**
+1. Open `../StarServerSafariExtension/*.xcodeproj` in Xcode.
+2. Select your **Team** in *Signing & Capabilities* for both the App and Extension targets.
+3. **Build & Run** (⌘R) on the macOS destination.
+4. Enable the extension in **Safari → Settings → Extensions**.
+
 ### Firefox
 
-Firefox requires Manifest V2 — a separate package would be needed for native support. As a workaround you can use [Firefox's temporary extension loading](https://extensionworkshop.com/documentation/develop/temporary-installation-in-firefox/) via `about:debugging`.
+The extension uses `browser.*` WebExtension APIs and should load in Firefox without changes:
+
+1. Navigate to `about:debugging#/runtime/this-firefox`.
+2. Click **Load Temporary Add-on…** and select any file inside the `extension/` folder.
 
 ## First-time setup
 
@@ -55,13 +81,16 @@ No data is ever sent to third-party servers — all searches go directly to **yo
 
 ```
 extension/
-├── manifest.json     # Extension manifest (Manifest V3)
-├── background.js     # Service worker — context menu handler
-├── popup.html        # Extension popup markup
-├── popup.css         # Popup styles
-├── popup.js          # Popup logic (clipboard, search, render)
+├── manifest.json          # Manifest V3 — Chrome / Edge / Brave
+├── manifest.safari.json   # Manifest V2 — used by build-safari.sh for Safari
+├── build-safari.sh        # Converts extension → Safari Xcode project (macOS only)
+├── background.js          # Service worker / background page — context menu handler
+├── popup.html             # Extension popup markup
+├── popup.css              # Popup styles
+├── popup.js               # Popup logic (clipboard, search, render)
 └── icons/
     ├── icon16.png
     ├── icon48.png
     └── icon128.png
 ```
+
