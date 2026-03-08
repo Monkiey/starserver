@@ -12,7 +12,6 @@ import { getMobileDetect, getYear } from '@/lib/utils';
 import MovieService from '@/services/MovieService';
 import { useModalStore } from '@/stores/modal';
 import {
-  type KeyWord,
   type ISeason,
   MediaType,
   type Genre,
@@ -70,7 +69,6 @@ const ShowModal = () => {
   const [trailer, setTrailer] = React.useState('');
   const isPlaying = true;
   const [genres, setGenres] = React.useState<Genre[]>([]);
-  const [isAnime, setIsAnime] = React.useState<boolean>(false);
   const [seasons, setSeasons] = React.useState<ISeason[]>([]);
   const [isMuted, setIsMuted] = React.useState<boolean>(
     modalStore.firstLoad || IS_MOBILE,
@@ -84,7 +82,10 @@ const ShowModal = () => {
   const watchHistoryStore = useWatchHistoryStore();
   const watchlistStore = useWatchlistStore();
   const isStarred = modalStore.show
-    ? watchlistStore.isInWatchlist(modalStore.show.id, modalStore.show.media_type)
+    ? watchlistStore.isInWatchlist(
+        modalStore.show.id,
+        modalStore.show.media_type,
+      )
     : false;
 
   // get trailer and genres of show
@@ -99,15 +100,6 @@ const ShowModal = () => {
       id,
       type,
     );
-
-    const keywords: KeyWord[] =
-      data?.keywords?.results || data?.keywords?.keywords;
-
-    if (keywords?.length) {
-      setIsAnime(
-        !!keywords.find((keyword: KeyWord) => keyword.name === 'anime'),
-      );
-    }
 
     if (data?.genres) {
       setGenres(data.genres);
@@ -144,10 +136,6 @@ const ShowModal = () => {
     }
     void handleGetData();
   }, [IS_MOBILE, handleGetData, modalStore.firstLoad]);
-
-  React.useEffect(() => {
-    setIsAnime(false);
-  }, [modalStore]);
 
   const handleCloseModal = () => {
     modalStore.reset();
@@ -189,17 +177,9 @@ const ShowModal = () => {
   };
 
   const handleHref = (): string => {
-    const type = isAnime
-      ? 'anime'
-      : modalStore.show?.media_type === MediaType.MOVIE
-      ? 'movie'
-      : 'tv';
-    let id = `${modalStore.show?.id}`;
-    if (isAnime) {
-      const prefix: string =
-        modalStore.show?.media_type === MediaType.MOVIE ? 'm' : 't';
-      id = `${prefix}-${id}`;
-    }
+    const type =
+      modalStore.show?.media_type === MediaType.MOVIE ? 'movie' : 'tv';
+    const id = `${modalStore.show?.id}`;
     return `/watch/${type}/${id}`;
   };
 
@@ -222,7 +202,7 @@ const ShowModal = () => {
           Details and playback options for the selected title.
         </DialogDescription>
         <div className="mx-auto grid w-full max-w-5xl gap-4 px-4 py-8 sm:px-6 lg:px-8">
-          <div className="video-wrapper relative aspect-video overflow-hidden rounded-2xl border border-border/60">
+          <div className="video-wrapper border-border/60 relative aspect-video overflow-hidden rounded-2xl border">
             <CustomImage
               fill
               priority
@@ -276,21 +256,32 @@ const ShowModal = () => {
                 <Button
                   aria-label={
                     isStarred
-                      ? `Remove ${modalStore.show?.title ?? modalStore.show?.name} from watchlist`
-                      : `Add ${modalStore.show?.title ?? modalStore.show?.name} to watchlist`
+                      ? `Remove ${
+                          modalStore.show?.title ?? modalStore.show?.name
+                        } from watchlist`
+                      : `Add ${
+                          modalStore.show?.title ?? modalStore.show?.name
+                        } to watchlist`
                   }
                   variant="ghost"
                   className="h-auto rounded-full bg-neutral-800 p-1.5 opacity-50 ring-1 ring-slate-400 hover:bg-neutral-800 hover:opacity-100 hover:ring-white focus:ring-offset-0 dark:bg-neutral-800 dark:hover:bg-neutral-800"
                   onClick={() => {
                     if (!modalStore.show) return;
                     if (isStarred) {
-                      watchlistStore.removeItem(modalStore.show.id, modalStore.show.media_type);
+                      watchlistStore.removeItem(
+                        modalStore.show.id,
+                        modalStore.show.media_type,
+                      );
                     } else {
                       watchlistStore.addItem(modalStore.show);
                     }
                   }}>
                   <Icons.star
-                    className={isStarred ? 'h-6 w-6 fill-yellow-400 text-yellow-400' : 'h-6 w-6'}
+                    className={
+                      isStarred
+                        ? 'h-6 w-6 fill-yellow-400 text-yellow-400'
+                        : 'h-6 w-6'
+                    }
                     aria-hidden="true"
                   />
                 </Button>
@@ -308,7 +299,7 @@ const ShowModal = () => {
               </Button>
             </div>
           </div>
-          <div className="rounded-2xl border border-border/60 bg-background/70 p-4 text-sm text-foreground/80">
+          <div className="border-border/60 bg-background/70 text-foreground/80 rounded-2xl border p-4 text-sm">
             <div className="grid gap-3">
               <div className="flex items-center justify-between gap-3">
                 <DialogTitle className="text-base font-semibold text-foreground sm:text-lg">
@@ -335,13 +326,13 @@ const ShowModal = () => {
                   <span>{getYear(modalStore.show?.first_air_date)}</span>
                 ) : null}
                 {modalStore.show?.original_language && (
-                  <span className="rounded-full border border-border/60 px-2 py-0.5 text-xs font-medium uppercase">
+                  <span className="border-border/60 rounded-full border px-2 py-0.5 text-xs font-medium uppercase">
                     {modalStore.show.original_language}
                   </span>
                 )}
               </div>
               <DialogDescription
-                className="max-w-3xl text-xs text-foreground/80 sm:text-sm"
+                className="text-foreground/80 max-w-3xl text-xs sm:text-sm"
                 id={undefined}>
                 {modalStore.show?.overview ?? '-'}
               </DialogDescription>
@@ -350,7 +341,7 @@ const ShowModal = () => {
                   {genres.map((genre) => (
                     <span
                       key={genre.id}
-                      className="rounded-full border border-border/60 px-3 py-1 text-xs font-medium text-muted-foreground">
+                      className="border-border/60 rounded-full border px-3 py-1 text-xs font-medium text-muted-foreground">
                       {genre.name}
                     </span>
                   ))}
