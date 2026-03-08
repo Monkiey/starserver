@@ -86,8 +86,7 @@ export default function RootLayout({
         )}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="dark"
-          forcedTheme="dark"
+          forcedTheme="movieasap"
           disableTransitionOnChange>
           {/* <TrpcProvider> */}
           <SearchProvider>{children}</SearchProvider>

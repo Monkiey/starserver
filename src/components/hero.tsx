@@ -86,12 +86,23 @@ const Hero = ({ randomShow }: HeroProps) => {
                 <h1 className="font-outfit text-[7vw] font-bold uppercase tracking-wide sm:text-[3vw]">
                   {randomShow?.title ?? randomShow?.name}
                 </h1>
-                <div className="flex space-x-2 text-[3.5vw] font-semibold sm:text-[2vw] md:text-[1.2vw]">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[3.5vw] font-semibold sm:text-[2vw] md:text-[1.2vw]">
                   <p className="text-green-600">
                     {Math.round(randomShow?.vote_average * 10) ?? '-'}% Match
                   </p>
                   {/* <p className="text-gray-300">{randomShow?.release_date ?? "-"}</p> */}
                   <p>{randomShow?.release_date ?? '-'}</p>
+                  {/* MovieASAP-style rating pill */}
+                  {randomShow?.vote_average > 0 && (
+                    <span className="movieasap-hero-rating text-[0.7rem] sm:text-[0.75rem]">
+                      <Icons.star
+                        fill="currentColor"
+                        aria-hidden="true"
+                        className="h-3 w-3"
+                      />
+                      {randomShow.vote_average.toFixed(1)}
+                    </span>
+                  )}
                 </div>
                 {/* <p className="line-clamp-4 text-sm text-gray-300 md:text-base"> */}
                 <p className="hidden text-[1.2vw] sm:line-clamp-3">

@@ -546,3 +546,245 @@ body {
     inset 0 -1px 0 oklch(0 0 0 / 0.25);
 }
 
+/* ══════════════════════════════════════════════════════
+   MOVIEASAP TEMPLATE – Deep Black + Red Accent Theme
+   Inspired by: https://github.com/ThemeLuxury/movieasap-wordpress-movie-theme
+   ══════════════════════════════════════════════════════ */
+
+.movieasap {
+  --radius: 0.5rem;
+  --background: oklch(0.06 0 0);
+  --foreground: oklch(0.95 0 0);
+  --card: oklch(0.10 0 0);
+  --card-foreground: oklch(0.95 0 0);
+  --popover: oklch(0.10 0 0);
+  --popover-foreground: oklch(0.95 0 0);
+  --primary: oklch(0.55 0.22 25);
+  --primary-foreground: oklch(0.98 0 0);
+  --secondary: oklch(0.14 0 0);
+  --secondary-foreground: oklch(0.95 0 0);
+  --muted: oklch(0.12 0 0);
+  --muted-foreground: oklch(0.65 0 0);
+  --accent: oklch(0.16 0 0);
+  --accent-foreground: oklch(0.95 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(0.95 0 0 / 10%);
+  --input: oklch(0.95 0 0 / 14%);
+  --ring: oklch(0.55 0.22 25 / 60%);
+  --sidebar: oklch(0.08 0 0);
+  --sidebar-foreground: oklch(0.95 0 0);
+  --sidebar-primary: oklch(0.55 0.22 25);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent: oklch(0.14 0 0);
+  --sidebar-accent-foreground: oklch(0.95 0 0);
+  --sidebar-border: oklch(0.95 0 0 / 8%);
+  --sidebar-ring: oklch(0.55 0.22 25 / 60%);
+  --success: hsl(142.1 70.6% 45.3%);
+  --success-foreground: hsl(144.9 80.4% 10%);
+  --warning: hsl(47.9 95.8% 53.1%);
+  --warning-foreground: hsl(26 83.3% 14.1%);
+  --info: hsl(217.2 91.2% 59.8%);
+  --info-foreground: hsl(222.2 47.4% 11.2%);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.5);
+  --shadow: 0 2px 6px 0 rgb(0 0 0 / 0.6), 0 1px 2px -1px rgb(0 0 0 / 0.5);
+  --shadow-md: 0 6px 16px -2px rgb(0 0 0 / 0.7),
+    0 3px 6px -3px rgb(0 0 0 / 0.6);
+  --shadow-lg: 0 14px 28px -4px rgb(0 0 0 / 0.8),
+    0 6px 10px -5px rgb(0 0 0 / 0.6);
+  --shadow-xl: 0 24px 40px -6px rgb(0 0 0 / 0.9),
+    0 10px 16px -8px rgb(0 0 0 / 0.7);
+}
+
+/* Pure black atmosphere – override the liquid-metal radial gradients */
+.movieasap body {
+  background-image: none;
+}
+
+/* ── MovieASAP sidebar surface ───────────────────── */
+.movieasap .metal-surface {
+  background: oklch(0.08 0 0);
+  animation: none;
+  box-shadow: none;
+}
+
+/* ── MovieASAP active nav item – crimson left bar ── */
+.movieasap .metal-nav-active {
+  background: linear-gradient(
+    90deg,
+    oklch(0.55 0.22 25 / 0.28) 0%,
+    oklch(0.55 0.22 25 / 0.1) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 oklch(0.9 0.1 25 / 0.08),
+    inset 2px 0 0 oklch(0.55 0.22 25);
+}
+
+/* ── MovieASAP primary button – crimson red ───────── */
+.movieasap .metal-btn {
+  background: oklch(0.55 0.22 25);
+  background-size: initial;
+  animation: none;
+  box-shadow:
+    0 4px 14px oklch(0.55 0.22 25 / 0.45),
+    inset 0 1px 0 oklch(1 0 0 / 0.15),
+    inset 0 -1px 0 oklch(0 0 0 / 0.2);
+}
+
+.movieasap .metal-btn:hover {
+  filter: brightness(1.12);
+  box-shadow:
+    0 6px 20px oklch(0.55 0.22 25 / 0.6),
+    inset 0 1px 0 oklch(1 0 0 / 0.2),
+    inset 0 -1px 0 oklch(0 0 0 / 0.25);
+}
+
+/* ── MovieASAP card – flat scale + red border glow ── */
+.movieasap .metal-card-3d:hover {
+  transform: scale(1.04);
+  box-shadow:
+    0 8px 32px rgb(0 0 0 / 0.8),
+    0 0 0 2px oklch(0.55 0.22 25 / 0.8);
+  filter: brightness(1.06) contrast(1.02);
+}
+
+/* Dark gradient overlay on card hover */
+.movieasap .metal-card-3d::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    0deg,
+    rgb(0 0 0 / 0.82) 0%,
+    rgb(0 0 0 / 0.3) 45%,
+    transparent 100%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.movieasap .metal-card-3d:hover::before {
+  opacity: 1;
+}
+
+/* Replace shimmer ::after with inert layer in movieasap */
+.movieasap .metal-card-3d::after {
+  animation: none;
+  opacity: 0 !important;
+}
+
+/* ── Section carousel title – red accent bar ─────── */
+.movieasap-section-title {
+  position: relative;
+  padding-left: 0.875rem !important;
+}
+
+.movieasap .movieasap-section-title::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 75%;
+  min-height: 14px;
+  background: oklch(0.55 0.22 25);
+  border-radius: 2px;
+}
+
+/* ── Rating badge (shown on card hover) ──────────── */
+.movieasap-rating-badge {
+  position: absolute;
+  bottom: 0.5rem;
+  left: 0.5rem;
+  z-index: 10;
+  display: none;
+  align-items: center;
+  gap: 0.2rem;
+  background: rgb(0 0 0 / 0.85);
+  color: #fbbf24;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.2rem 0.45rem;
+  border-radius: 0.3rem;
+  line-height: 1;
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  transform: translateY(4px);
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+}
+
+.movieasap .movieasap-rating-badge {
+  display: flex;
+}
+
+.movieasap .metal-card-3d:hover .movieasap-rating-badge {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── NEW badge for recent releases ───────────────── */
+.movieasap-new-badge {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 10;
+  display: none;
+  background: oklch(0.55 0.22 25);
+  color: white;
+  font-size: 0.58rem;
+  font-weight: 800;
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.3rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  line-height: 1.4;
+}
+
+.movieasap .movieasap-new-badge {
+  display: block;
+}
+
+/* ── Quality / type badge ─────────────────────────── */
+.movieasap-type-badge {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 10;
+  display: none;
+  background: rgb(0 0 0 / 0.72);
+  color: rgb(255 255 255 / 0.85);
+  font-size: 0.55rem;
+  font-weight: 700;
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.25rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.4;
+  backdrop-filter: blur(4px);
+}
+
+.movieasap .movieasap-type-badge {
+  display: block;
+}
+
+/* ── Hero rating pill ─────────────────────────────── */
+.movieasap-hero-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgb(0 0 0 / 0.6);
+  border: 1px solid rgb(255 255 255 / 0.15);
+  backdrop-filter: blur(6px);
+  padding: 0.3rem 0.7rem;
+  border-radius: 0.375rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fbbf24;
+}
+
