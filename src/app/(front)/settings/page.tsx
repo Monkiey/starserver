@@ -1,4 +1,5 @@
 import PageHeader from '@/components/page-header';
+import { InstallExtensionCard } from '@/components/install-extension-card';
 
 export default function SettingsPage() {
   return (
@@ -9,6 +10,9 @@ export default function SettingsPage() {
       />
       <div className="px-4 py-6 sm:px-6">
         <div className="mx-auto max-w-2xl space-y-4">
+          {/* Install Extension card */}
+          <InstallExtensionCard />
+
           {/* About card */}
           <div className="rounded-lg border border-border bg-card">
             <div className="border-b border-border px-5 py-4">

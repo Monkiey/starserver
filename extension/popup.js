@@ -18,7 +18,13 @@ const api = typeof browser !== 'undefined' ? browser : chrome;
 
 // ── Storage keys ─────────────────────────────────────────────────────────────
 const KEY_SERVER_URL = 'serverUrl';
-const KEY_PENDING    = 'pendingSearch';
+const KEY_PENDING = 'pendingSearch';
+
+// ── UI constants ──────────────────────────────────────────────────────────────
+/** Maximum characters shown in the clipboard preview banner. */
+const MAX_CLIPBOARD_PREVIEW_LENGTH = 80;
+/** Maximum number of search result cards shown at once. */
+const MAX_VISIBLE_RESULTS = 15;
 
 // ── Debounce helper ───────────────────────────────────────────────────────────
 function debounce(fn, delay) {
@@ -38,48 +44,53 @@ function buildSlug(id, name) {
 // ── Build the full StarServer URL for a show ──────────────────────────────────
 function buildShowUrl(serverUrl, show) {
   const base = serverUrl.replace(/\/$/, '');
-  const name = show.title ?? show.name ?? show.original_title ?? show.original_name ?? '';
+  const name =
+    show.title ?? show.name ?? show.original_title ?? show.original_name ?? '';
   const section = show.media_type === 'tv' ? 'tv-shows' : 'movies';
   return `${base}/${section}/${buildSlug(show.id, name)}`;
 }
 
 // ── DOM refs ─────────────────────────────────────────────────────────────────
-const serverUrlInput   = document.getElementById('server-url');
-const saveUrlBtn       = document.getElementById('save-url');
-const urlHint          = document.getElementById('url-hint');
-const searchInput      = document.getElementById('search-input');
-const clearBtn         = document.getElementById('clear-btn');
-const clipboardBanner  = document.getElementById('clipboard-banner');
-const clipboardText    = document.getElementById('clipboard-text');
-const useClipboardBtn  = document.getElementById('use-clipboard');
-const resultsList      = document.getElementById('results-list');
-const emptyState       = document.getElementById('empty-state');
-const loadingState     = document.getElementById('loading-state');
-const noResultsState   = document.getElementById('no-results-state');
-const noResultsMsg     = document.getElementById('no-results-msg');
+const serverUrlInput = document.getElementById('server-url');
+const saveUrlBtn = document.getElementById('save-url');
+const urlHint = document.getElementById('url-hint');
+const searchInput = document.getElementById('search-input');
+const clearBtn = document.getElementById('clear-btn');
+const clipboardBanner = document.getElementById('clipboard-banner');
+const clipboardText = document.getElementById('clipboard-text');
+const useClipboardBtn = document.getElementById('use-clipboard');
+const resultsList = document.getElementById('results-list');
+const emptyState = document.getElementById('empty-state');
+const loadingState = document.getElementById('loading-state');
+const noResultsState = document.getElementById('no-results-state');
+const noResultsMsg = document.getElementById('no-results-msg');
 const openStarserverLink = document.getElementById('open-starserver');
-const openSettingsBtn  = document.getElementById('open-settings');
+const openSettingsBtn = document.getElementById('open-settings');
 
 // ── State ─────────────────────────────────────────────────────────────────────
 let currentServerUrl = '';
-let settingsVisible  = false;
-const configSection  = document.getElementById('config-section');
+let settingsVisible = false;
+const configSection = document.getElementById('config-section');
 
 // ── Load saved server URL ─────────────────────────────────────────────────────
 async function loadServerUrl() {
   const result = await api.storage.local.get(KEY_SERVER_URL);
-  const saved  = result[KEY_SERVER_URL] ?? '';
+  const saved = result[KEY_SERVER_URL] ?? '';
   currentServerUrl = saved;
   serverUrlInput.value = saved;
 
   if (saved) {
-    urlHint.textContent  = `Connected to ${new URL(saved).hostname}`;
-    urlHint.className    = 'hint success';
+    try {
+      urlHint.textContent = `Connected to ${new URL(saved).hostname}`;
+    } catch {
+      urlHint.textContent = 'Connected to your server';
+    }
+    urlHint.className = 'hint success';
     openStarserverLink.href = saved;
-    configSection.hidden = true;   // collapse when configured
+    configSection.hidden = true; // collapse when configured
   } else {
-    urlHint.textContent  = 'Enter your StarServer URL to get started.';
-    urlHint.className    = 'hint';
+    urlHint.textContent = 'Enter your StarServer URL to get started.';
+    urlHint.className = 'hint';
     openStarserverLink.href = '#';
     configSection.hidden = false;
     searchInput.disabled = true;
@@ -92,24 +103,24 @@ async function saveServerUrl() {
   const raw = serverUrlInput.value.trim();
   if (!raw) {
     urlHint.textContent = 'Please enter a URL.';
-    urlHint.className   = 'hint error';
+    urlHint.className = 'hint error';
     return;
   }
   try {
     const parsed = new URL(raw);
-    const normalized = parsed.origin;   // strip trailing path
+    const normalized = parsed.origin; // strip trailing path
     await api.storage.local.set({ [KEY_SERVER_URL]: normalized });
     currentServerUrl = normalized;
     serverUrlInput.value = normalized;
-    urlHint.textContent  = `Saved! Connected to ${parsed.hostname}`;
-    urlHint.className    = 'hint success';
+    urlHint.textContent = `Saved! Connected to ${parsed.hostname}`;
+    urlHint.className = 'hint success';
     openStarserverLink.href = normalized;
     configSection.hidden = true;
     searchInput.disabled = false;
     searchInput.placeholder = 'Search movies & TV shows…';
   } catch {
     urlHint.textContent = 'Invalid URL — include https://';
-    urlHint.className   = 'hint error';
+    urlHint.className = 'hint error';
   }
 }
 
@@ -123,14 +134,17 @@ function toggleSettings() {
 async function tryReadClipboard() {
   try {
     const text = await navigator.clipboard.readText();
-    const trimmed = text.trim().replace(/\s+/g, ' ').slice(0, 80);
+    const trimmed = text
+      .trim()
+      .replace(/\s+/g, ' ')
+      .slice(0, MAX_CLIPBOARD_PREVIEW_LENGTH);
     if (!trimmed || trimmed.length < 2) return;
     clipboardText.textContent = `"${trimmed}"`;
-    clipboardBanner.hidden    = false;
+    clipboardBanner.hidden = false;
     // Auto-search when popup opens if the input is still empty
     if (!searchInput.value.trim()) {
       searchInput.value = trimmed;
-      clearBtn.hidden   = false;
+      clearBtn.hidden = false;
       await performSearch(trimmed);
     }
   } catch {
@@ -140,30 +154,38 @@ async function tryReadClipboard() {
 
 // ── Show / hide states ────────────────────────────────────────────────────────
 function showState(state) {
-  emptyState.hidden      = state !== 'empty';
-  loadingState.hidden    = state !== 'loading';
-  noResultsState.hidden  = state !== 'no-results';
-  resultsList.hidden     = state !== 'results';
+  emptyState.hidden = state !== 'empty';
+  loadingState.hidden = state !== 'loading';
+  noResultsState.hidden = state !== 'no-results';
+  resultsList.hidden = state !== 'results';
 }
 
 // ── Render a single result card ───────────────────────────────────────────────
 function renderResult(show) {
-  const name = show.title ?? show.name ?? show.original_title ?? show.original_name ?? 'Unknown';
+  const name =
+    show.title ??
+    show.name ??
+    show.original_title ??
+    show.original_name ??
+    'Unknown';
   const year = (show.release_date ?? show.first_air_date ?? '').slice(0, 4);
   const isTV = show.media_type === 'tv';
 
-  const li  = document.createElement('li');
+  const li = document.createElement('li');
   li.setAttribute('role', 'listitem');
 
   const btn = document.createElement('button');
   btn.className = 'result-item';
-  btn.setAttribute('aria-label', `Open ${name}${year ? ` (${year})` : ''} in StarServer`);
+  btn.setAttribute(
+    'aria-label',
+    `Open ${name}${year ? ` (${year})` : ''} in StarServer`,
+  );
 
   // Poster
   if (show.poster_path) {
     const img = document.createElement('img');
-    img.src     = `https://image.tmdb.org/t/p/w92${show.poster_path}`;
-    img.alt     = name;
+    img.src = `https://image.tmdb.org/t/p/w92${show.poster_path}`;
+    img.alt = name;
     img.className = 'result-poster';
     img.loading = 'lazy';
     img.onerror = () => img.replaceWith(placeholder());
@@ -177,7 +199,7 @@ function renderResult(show) {
   info.className = 'result-info';
 
   const nameEl = document.createElement('div');
-  nameEl.className   = 'result-name';
+  nameEl.className = 'result-name';
   nameEl.textContent = name;
   info.appendChild(nameEl);
 
@@ -185,13 +207,13 @@ function renderResult(show) {
   meta.className = 'result-meta';
 
   const badge = document.createElement('span');
-  badge.className   = `badge ${isTV ? 'badge-tv' : 'badge-movie'}`;
+  badge.className = `badge ${isTV ? 'badge-tv' : 'badge-movie'}`;
   badge.textContent = isTV ? 'TV' : 'Movie';
   meta.appendChild(badge);
 
   if (year) {
     const yearEl = document.createElement('span');
-    yearEl.className   = 'result-year';
+    yearEl.className = 'result-year';
     yearEl.textContent = year;
     meta.appendChild(yearEl);
   }
@@ -200,7 +222,7 @@ function renderResult(show) {
 
   // Arrow
   const arrow = document.createElement('span');
-  arrow.className   = 'result-arrow';
+  arrow.className = 'result-arrow';
   arrow.setAttribute('aria-hidden', 'true');
   arrow.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;
   btn.appendChild(arrow);
@@ -227,16 +249,22 @@ function placeholder() {
 // ── Perform search ────────────────────────────────────────────────────────────
 async function performSearch(query) {
   const trimmed = query.trim();
-  if (!trimmed) { showState('empty'); return; }
-  if (!currentServerUrl) { showState('empty'); return; }
+  if (!trimmed) {
+    showState('empty');
+    return;
+  }
+  if (!currentServerUrl) {
+    showState('empty');
+    return;
+  }
 
   showState('loading');
 
   try {
     const response = await fetch(`${currentServerUrl}/api/ai/search`, {
-      method:  'POST',
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ query: trimmed, mode: 'title' }),
+      body: JSON.stringify({ query: trimmed, mode: 'title' }),
     });
 
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -251,12 +279,13 @@ async function performSearch(query) {
     }
 
     resultsList.innerHTML = '';
-    results.slice(0, 15).forEach((show) => {
+    results.slice(0, MAX_VISIBLE_RESULTS).forEach((show) => {
       resultsList.appendChild(renderResult(show));
     });
     showState('results');
   } catch (err) {
-    noResultsMsg.textContent = 'Could not reach StarServer. Check the URL in Settings.';
+    noResultsMsg.textContent =
+      'Could not reach StarServer. Check the URL in Settings.';
     showState('no-results');
     console.error('[StarServer ext]', err);
   }
@@ -284,14 +313,14 @@ searchInput.addEventListener('keydown', (e) => {
   }
   if (e.key === 'Escape') {
     searchInput.value = '';
-    clearBtn.hidden   = true;
+    clearBtn.hidden = true;
     showState('empty');
   }
 });
 
 clearBtn.addEventListener('click', () => {
   searchInput.value = '';
-  clearBtn.hidden   = true;
+  clearBtn.hidden = true;
   showState('empty');
   searchInput.focus();
 });
@@ -299,7 +328,7 @@ clearBtn.addEventListener('click', () => {
 useClipboardBtn.addEventListener('click', async () => {
   const text = clipboardText.textContent.replace(/^"|"$/g, '');
   searchInput.value = text;
-  clearBtn.hidden   = false;
+  clearBtn.hidden = false;
   clipboardBanner.hidden = true;
   await performSearch(text);
   searchInput.focus();
@@ -321,7 +350,7 @@ openSettingsBtn.addEventListener('click', toggleSettings);
   if (pending) {
     await pendingStore.remove(KEY_PENDING);
     searchInput.value = pending;
-    clearBtn.hidden   = false;
+    clearBtn.hidden = false;
     await performSearch(pending);
     searchInput.focus();
     return;
