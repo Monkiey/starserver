@@ -201,6 +201,7 @@ export function SearchDialog() {
     modalStore.setShow(show);
     modalStore.setOpen(true);
     modalStore.setPlay(true);
+    searchStore.reset();
     searchStore.setOpen(false);
   };
 
