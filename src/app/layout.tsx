@@ -69,7 +69,12 @@ export const metadata: Metadata = {
     shortcut: '/favicon.ico',
   },
   manifest: '/manifest.json',
-  other: { referrer: 'no-referrer-when-downgrade' },
+  other: {
+    referrer: 'no-referrer-when-downgrade',
+    'mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-status-bar-style': 'black-translucent',
+  },
 };
 
 export default function RootLayout({
