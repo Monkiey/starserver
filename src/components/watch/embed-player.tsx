@@ -2,16 +2,43 @@
 import React from 'react';
 import Loading from '../ui/loading';
 import { useRouter } from 'next/navigation';
+import { useContinueWatchingStore } from '@/stores/continue-watching';
+import type { MediaType } from '@/types';
 
 interface EmbedPlayerProps {
   url: string;
+  showId?: number;
+  mediaType?: MediaType;
 }
 
-function EmbedPlayer(props: EmbedPlayerProps) {
+function EmbedPlayer({ url, showId, mediaType }: EmbedPlayerProps) {
   const router = useRouter();
 
   const loadingRef = React.useRef<HTMLDivElement>(null);
   const iframeRef = React.useRef<HTMLIFrameElement>(null);
+
+  React.useEffect(() => {
+    if (!showId || !Number.isFinite(showId) || !mediaType) return;
+
+    const saveProgress = () => {
+      useContinueWatchingStore.getState().refreshItem(showId, mediaType);
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        saveProgress();
+      }
+    };
+
+    window.addEventListener('beforeunload', saveProgress);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      saveProgress();
+      window.removeEventListener('beforeunload', saveProgress);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [showId, mediaType]);
 
   const handleIframeLoaded = React.useCallback(() => {
     if (!iframeRef.current) {
@@ -27,7 +54,7 @@ function EmbedPlayer(props: EmbedPlayerProps) {
 
   React.useEffect(() => {
     if (iframeRef.current) {
-      iframeRef.current.src = props.url;
+      iframeRef.current.src = url;
     }
 
     const { current } = iframeRef;
@@ -36,7 +63,7 @@ function EmbedPlayer(props: EmbedPlayerProps) {
     return () => {
       iframe?.removeEventListener('load', handleIframeLoaded);
     };
-  }, [handleIframeLoaded, props.url]);
+  }, [handleIframeLoaded, url]);
 
   return (
     <div
