@@ -1,5 +1,6 @@
 import React from 'react';
 import EmbedPlayer from '@/components/watch/embed-player';
+import { MediaType } from '@/types';
 
 export const revalidate = 3600;
 
@@ -11,11 +12,12 @@ export default function Page({
   searchParams: { season?: string; episode?: string };
 }) {
   const id = params.slug.split('-').pop();
+  const showId = id ? Number(id) : undefined;
   const season = searchParams?.season;
   const episode = searchParams?.episode;
   const url =
     season && episode
       ? `https://vidsrc.cc/v2/embed/tv/${id}/${season}/${episode}`
       : `https://vidsrc.cc/v2/embed/tv/${id}`;
-  return <EmbedPlayer url={url} />;
+  return <EmbedPlayer url={url} showId={showId} mediaType={MediaType.TV} />;
 }
