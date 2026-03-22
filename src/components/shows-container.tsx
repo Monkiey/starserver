@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import type { CategorizedShows } from '@/types';
 
 import { getIdFromSlug } from '@/lib/utils';
+import ShowModal from '@/components/shows-modal';
 import ShowsCarousel from '@/components/shows-carousel';
 import { useModalStore } from '@/stores/modal';
 import React from 'react';
@@ -60,6 +61,7 @@ const ShowsContainer = ({ shows }: ShowsContainerProps) => {
 
   return (
     <>
+      {modalStore.open && <ShowModal />}
       {shows.map(
         (item) =>
           item.visible && (
