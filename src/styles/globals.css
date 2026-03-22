@@ -555,9 +555,9 @@ body {
   --radius: 0.5rem;
   --background: oklch(0.06 0 0);
   --foreground: oklch(0.95 0 0);
-  --card: oklch(0.10 0 0);
+  --card: oklch(0.1 0 0);
   --card-foreground: oklch(0.95 0 0);
-  --popover: oklch(0.10 0 0);
+  --popover: oklch(0.1 0 0);
   --popover-foreground: oklch(0.95 0 0);
   --primary: oklch(0.55 0.22 25);
   --primary-foreground: oklch(0.98 0 0);
@@ -588,8 +588,7 @@ body {
   --info-foreground: hsl(222.2 47.4% 11.2%);
   --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.5);
   --shadow: 0 2px 6px 0 rgb(0 0 0 / 0.6), 0 1px 2px -1px rgb(0 0 0 / 0.5);
-  --shadow-md: 0 6px 16px -2px rgb(0 0 0 / 0.7),
-    0 3px 6px -3px rgb(0 0 0 / 0.6);
+  --shadow-md: 0 6px 16px -2px rgb(0 0 0 / 0.7), 0 3px 6px -3px rgb(0 0 0 / 0.6);
   --shadow-lg: 0 14px 28px -4px rgb(0 0 0 / 0.8),
     0 6px 10px -5px rgb(0 0 0 / 0.6);
   --shadow-xl: 0 24px 40px -6px rgb(0 0 0 / 0.9),
@@ -598,7 +597,22 @@ body {
 
 /* Pure black atmosphere – override the liquid-metal radial gradients */
 .movieasap body {
-  background-image: none;
+  background-image: radial-gradient(
+      ellipse 75% 45% at 15% 15%,
+      oklch(0.3 0.09 25 / 0.14),
+      transparent
+    ),
+    radial-gradient(
+      ellipse 65% 45% at 85% 85%,
+      oklch(0.25 0.08 280 / 0.11),
+      transparent
+    ),
+    radial-gradient(
+      ellipse 55% 40% at 50% 60%,
+      oklch(0.22 0.06 180 / 0.08),
+      transparent
+    );
+  background-attachment: fixed;
 }
 
 /* ── MovieASAP sidebar surface ───────────────────── */
@@ -644,8 +658,9 @@ body {
   transform: scale(1.04);
   box-shadow:
     0 8px 32px rgb(0 0 0 / 0.8),
-    0 0 0 2px oklch(0.55 0.22 25 / 0.8);
-  filter: brightness(1.06) contrast(1.02);
+    0 0 0 2px oklch(0.55 0.22 25 / 0.8),
+    0 0 30px oklch(0.55 0.22 25 / 0.25);
+  filter: brightness(1.08) contrast(1.02) saturate(1.15);
 }
 
 /* Dark gradient overlay on card hover */
@@ -670,10 +685,26 @@ body {
   opacity: 1;
 }
 
-/* Replace shimmer ::after with inert layer in movieasap */
+/* Replace shimmer ::after with a colorful iridescent overlay on hover */
 .movieasap .metal-card-3d::after {
   animation: none;
+  background: linear-gradient(
+    125deg,
+    transparent 0%,
+    oklch(0.7 0.18 25 / 0) 20%,
+    oklch(0.72 0.18 25 / 0.14) 42%,
+    oklch(0.68 0.12 60 / 0.09) 55%,
+    transparent 72%,
+    transparent 100%
+  );
+  background-size: 220% 220%;
   opacity: 0 !important;
+  transition: opacity 0.35s ease;
+}
+
+.movieasap .metal-card-3d:hover::after {
+  animation: liquid-shimmer 2.2s ease-in-out infinite;
+  opacity: 1 !important;
 }
 
 /* ── Section carousel title – red accent bar ─────── */
@@ -788,3 +819,32 @@ body {
   color: #fbbf24;
 }
 
+/* ══════════════════════════════════════════════════════
+   COVER ART AMBIENT GLOW
+   Poster colors bleed behind each card on hover,
+   creating a colorful halo that shifts with the art.
+   ══════════════════════════════════════════════════════ */
+
+/* Wrapper that holds both the glow layer and the card */
+.show-card-wrapper {
+  isolation: isolate;
+}
+
+/* The blurred, saturated copy of the poster image */
+.cover-art-ambient-glow {
+  position: absolute;
+  inset: -18px;
+  z-index: -1;
+  background-size: cover;
+  background-position: center;
+  filter: blur(28px) saturate(3.5) brightness(0.6);
+  transform: scale(1.1);
+  border-radius: 2rem;
+  opacity: 0;
+  transition: opacity 0.45s ease;
+  pointer-events: none;
+}
+
+.show-card-wrapper:hover .cover-art-ambient-glow {
+  opacity: 0.72;
+}

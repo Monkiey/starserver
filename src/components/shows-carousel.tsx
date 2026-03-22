@@ -114,77 +114,89 @@ export const ShowCard = ({ show }: { show: Show; pathname: string }) => {
     return diff >= 0 && diff < NEW_RELEASE_THRESHOLD_MS;
   }, [releaseDate]);
 
-  const rating =
-    show.vote_average > 0 ? show.vote_average.toFixed(1) : null;
+  const rating = show.vote_average > 0 ? show.vote_average.toFixed(1) : null;
 
   const typeLabel = show.media_type === MediaType.TV ? 'TV' : 'Movie';
 
-  return (
-    // <picture className="relative aspect-[2/3] md:aspect-video">
-    <picture className="metal-card-3d relative aspect-[2/3] overflow-hidden rounded-3xl">
-      <a
-        className="pointer-events-none"
-        aria-hidden={false}
-        role="link"
-        aria-label={getNameFromShow(show)}
-        href={`/${show.media_type}/${getSlug(show.id, getNameFromShow(show))}`}
-      />
-      <CustomImage
-        src={
+  const posterUrl =
+    show.poster_path ?? show.backdrop_path
+      ? `https://image.tmdb.org/t/p/w500${
           show.poster_path ?? show.backdrop_path
-            ? `https://image.tmdb.org/t/p/w500${
-                show.poster_path ?? show.backdrop_path
-              }`
-            : '/images/grey-thumbnail.jpg'
-        }
-        alt={show.title ?? show.name ?? 'poster'}
-        className="h-full w-full cursor-pointer rounded-3xl px-1 transition-all"
-        fill
-        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 100vw, 33vw"
-        style={{
-          objectFit: 'cover',
-        }}
-        onClick={() => {
-          const name = getNameFromShow(show);
-          const path: string =
-            show.media_type === MediaType.TV ? 'tv-shows' : 'movies';
-          window.history.pushState(
-            null,
-            '',
-            `${path}/${getSlug(show.id, name)}`,
-          );
-          useModalStore.setState({
-            show: show,
-            open: true,
-            play: true,
-          });
-        }}
-        onError={imageOnErrorHandler}
+        }`
+      : '/images/grey-thumbnail.jpg';
+
+  return (
+    <div className="show-card-wrapper relative aspect-[2/3]">
+      {/* Ambient glow sourced from cover art – poster colors bleed behind the card on hover */}
+      <div
+        aria-hidden="true"
+        className="cover-art-ambient-glow"
+        style={{ backgroundImage: `url(${posterUrl})` }}
       />
+      <picture className="metal-card-3d absolute inset-0 overflow-hidden rounded-3xl">
+        <a
+          className="pointer-events-none"
+          aria-hidden={false}
+          role="link"
+          aria-label={getNameFromShow(show)}
+          href={`/${show.media_type}/${getSlug(
+            show.id,
+            getNameFromShow(show),
+          )}`}
+        />
+        <CustomImage
+          src={posterUrl}
+          alt={show.title ?? show.name ?? 'poster'}
+          className="h-full w-full cursor-pointer rounded-3xl px-1 transition-all"
+          fill
+          sizes="(max-width: 768px) 50vw, (max-width: 1200px) 100vw, 33vw"
+          style={{
+            objectFit: 'cover',
+          }}
+          onClick={() => {
+            const name = getNameFromShow(show);
+            const path: string =
+              show.media_type === MediaType.TV ? 'tv-shows' : 'movies';
+            window.history.pushState(
+              null,
+              '',
+              `${path}/${getSlug(show.id, name)}`,
+            );
+            useModalStore.setState({
+              show: show,
+              open: true,
+              play: true,
+            });
+          }}
+          onError={imageOnErrorHandler}
+        />
 
-      {/* MovieASAP-style: NEW badge (top-left) */}
-      {isNew && (
-        <span className="movieasap-new-badge" aria-label="New release">
-          New
+        {/* MovieASAP-style: NEW badge (top-left) */}
+        {isNew && (
+          <span className="movieasap-new-badge" aria-label="New release">
+            New
+          </span>
+        )}
+
+        {/* MovieASAP-style: media type badge (top-right) */}
+        <span className="movieasap-type-badge" aria-label={typeLabel}>
+          {typeLabel}
         </span>
-      )}
 
-      {/* MovieASAP-style: media type badge (top-right) */}
-      <span className="movieasap-type-badge" aria-label={typeLabel}>
-        {typeLabel}
-      </span>
-
-      {/* MovieASAP-style: rating badge (bottom-left, visible on hover) */}
-      {rating && (
-        <span className="movieasap-rating-badge" aria-label={`Rating: ${rating}`}>
-          <Icons.star
-            fill="currentColor"
-            aria-hidden="true"
-            className="h-2.5 w-2.5 text-yellow-400"
-          />
-          {rating}
-        </span>
-      )}
-    </picture>
+        {/* MovieASAP-style: rating badge (bottom-left, visible on hover) */}
+        {rating && (
+          <span
+            className="movieasap-rating-badge"
+            aria-label={`Rating: ${rating}`}>
+            <Icons.star
+              fill="currentColor"
+              aria-hidden="true"
+              className="h-2.5 w-2.5 text-yellow-400"
+            />
+            {rating}
+          </span>
+        )}
+      </picture>
+    </div>
   );
 };
