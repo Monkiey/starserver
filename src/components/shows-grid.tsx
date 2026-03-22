@@ -1,8 +1,6 @@
 'use client';
 
-import { useModalStore } from '@/stores/modal';
 import type { Show } from '@/types';
-import ShowModal from './shows-modal';
 import { ShowCard } from './shows-carousel';
 import { usePathname } from 'next/navigation';
 import { useSearchStore } from '@/stores/search';
@@ -16,13 +14,10 @@ interface SearchedShowsProps {
 
 const ShowsGrid = ({ shows, query }: SearchedShowsProps) => {
   const pathname = usePathname();
-  // modal store
-  const modalStore = useModalStore();
   const searchStore = useSearchStore();
 
   return (
     <section aria-label="Grid of shows" className="container w-full max-w-none">
-      {modalStore.open && <ShowModal />}
       <div className="main-view mt-4 min-h-[800px] pt-[5%]" id="main-view">
         {query && searchStore.loading ? (
           <ShowsSkeleton classname="pl-0" />
