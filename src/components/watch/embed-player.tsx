@@ -4,6 +4,7 @@ import Loading from '../ui/loading';
 import { useRouter } from 'next/navigation';
 import { useContinueWatchingStore } from '@/stores/continue-watching';
 import type { MediaType } from '@/types';
+import { PlayerStrategyService } from '@/services/PlayerStrategyService/PlayerStrategyService';
 
 interface EmbedPlayerProps {
   url: string;
@@ -11,11 +12,44 @@ interface EmbedPlayerProps {
   mediaType?: MediaType;
 }
 
+const buildEmbedPlayerUrl = (rawUrl: string): string => {
+  try {
+    const parsed = new URL(rawUrl);
+
+    const playbackFlags: Record<string, string> = {
+      autoplay: '1',
+      playsinline: '1',
+      controls: '1',
+      mute: '0',
+      ds_lang: 'en',
+      ds_player: '1',
+    };
+
+    Object.entries(playbackFlags).forEach(([key, value]) => {
+      if (!parsed.searchParams.has(key)) {
+        parsed.searchParams.set(key, value);
+      }
+    });
+
+    if (!parsed.searchParams.has('origin') && typeof window !== 'undefined') {
+      parsed.searchParams.set('origin', window.location.origin);
+    }
+
+    return parsed.toString();
+  } catch {
+    return rawUrl;
+  }
+};
+
 function EmbedPlayer({ url, showId, mediaType }: EmbedPlayerProps) {
   const router = useRouter();
 
   const loadingRef = React.useRef<HTMLDivElement>(null);
   const iframeRef = React.useRef<HTMLIFrameElement>(null);
+  const [interactionUnlocked, setInteractionUnlocked] = React.useState(false);
+  const relockTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
 
   React.useEffect(() => {
     if (!showId || !Number.isFinite(showId) || !mediaType) return;
@@ -52,9 +86,49 @@ function EmbedPlayer({ url, showId, mediaType }: EmbedPlayerProps) {
     }
   }, []);
 
+  const playerStrategy = React.useMemo(
+    () => PlayerStrategyService.resolve(url),
+    [url],
+  );
+  const embedUrl = React.useMemo(
+    () => buildEmbedPlayerUrl(playerStrategy.url),
+    [playerStrategy.url],
+  );
+
+  React.useEffect(() => {
+    setInteractionUnlocked(false);
+    if (relockTimerRef.current) {
+      clearTimeout(relockTimerRef.current);
+      relockTimerRef.current = null;
+    }
+  }, [embedUrl]);
+
+  const unlockTemporarily = React.useCallback(() => {
+    setInteractionUnlocked(true);
+    if (relockTimerRef.current) {
+      clearTimeout(relockTimerRef.current);
+    }
+    relockTimerRef.current = setTimeout(() => {
+      setInteractionUnlocked(false);
+      relockTimerRef.current = null;
+    }, 8000);
+  }, []);
+
+  const handleGuardInteraction = React.useCallback(() => {
+    unlockTemporarily();
+  }, [unlockTemporarily]);
+
+  React.useEffect(() => {
+    return () => {
+      if (relockTimerRef.current) {
+        clearTimeout(relockTimerRef.current);
+      }
+    };
+  }, []);
+
   React.useEffect(() => {
     if (iframeRef.current) {
-      iframeRef.current.src = url;
+      iframeRef.current.src = embedUrl;
     }
 
     const { current } = iframeRef;
@@ -63,7 +137,7 @@ function EmbedPlayer({ url, showId, mediaType }: EmbedPlayerProps) {
     return () => {
       iframe?.removeEventListener('load', handleIframeLoaded);
     };
-  }, [handleIframeLoaded, url]);
+  }, [embedUrl, handleIframeLoaded]);
 
   return (
     <div
@@ -100,12 +174,22 @@ function EmbedPlayer({ url, showId, mediaType }: EmbedPlayerProps) {
         width="100%"
         height="100%"
         allowFullScreen
-        allow="autoplay; fullscreen; picture-in-picture"
+        allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
         ref={iframeRef}
-        sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
-        style={{ opacity: 0 }}
-        referrerPolicy="no-referrer-when-downgrade"
+        style={{
+          opacity: 0,
+          pointerEvents: interactionUnlocked ? 'auto' : 'none',
+        }}
+        referrerPolicy="origin"
       />
+      {!interactionUnlocked && (
+        <div
+          className="absolute inset-0 z-[3]"
+          onPointerDown={handleGuardInteraction}
+          onClick={handleGuardInteraction}
+          aria-hidden="true"
+        />
+      )}
     </div>
   );
 }
