@@ -11,6 +11,35 @@ interface EmbedPlayerProps {
   mediaType?: MediaType;
 }
 
+const buildEmbedPlayerUrl = (rawUrl: string): string => {
+  try {
+    const parsed = new URL(rawUrl);
+
+    const playbackFlags: Record<string, string> = {
+      autoplay: '1',
+      playsinline: '1',
+      controls: '1',
+      mute: '0',
+      ds_lang: 'en',
+      ds_player: '1',
+    };
+
+    Object.entries(playbackFlags).forEach(([key, value]) => {
+      if (!parsed.searchParams.has(key)) {
+        parsed.searchParams.set(key, value);
+      }
+    });
+
+    if (!parsed.searchParams.has('origin') && typeof window !== 'undefined') {
+      parsed.searchParams.set('origin', window.location.origin);
+    }
+
+    return parsed.toString();
+  } catch {
+    return rawUrl;
+  }
+};
+
 function EmbedPlayer({ url, showId, mediaType }: EmbedPlayerProps) {
   const router = useRouter();
 
@@ -52,9 +81,11 @@ function EmbedPlayer({ url, showId, mediaType }: EmbedPlayerProps) {
     }
   }, []);
 
+  const embedUrl = React.useMemo(() => buildEmbedPlayerUrl(url), [url]);
+
   React.useEffect(() => {
     if (iframeRef.current) {
-      iframeRef.current.src = url;
+      iframeRef.current.src = embedUrl;
     }
 
     const { current } = iframeRef;
@@ -63,7 +94,7 @@ function EmbedPlayer({ url, showId, mediaType }: EmbedPlayerProps) {
     return () => {
       iframe?.removeEventListener('load', handleIframeLoaded);
     };
-  }, [handleIframeLoaded, url]);
+  }, [embedUrl, handleIframeLoaded]);
 
   return (
     <div
@@ -100,11 +131,10 @@ function EmbedPlayer({ url, showId, mediaType }: EmbedPlayerProps) {
         width="100%"
         height="100%"
         allowFullScreen
-        allow="autoplay; fullscreen; picture-in-picture"
+        allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
         ref={iframeRef}
-        sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
         style={{ opacity: 0 }}
-        referrerPolicy="no-referrer-when-downgrade"
+        referrerPolicy="origin"
       />
     </div>
   );
