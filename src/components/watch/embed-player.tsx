@@ -41,6 +41,7 @@ function EmbedPlayer({ url, showId, mediaType }: EmbedPlayerProps) {
 
   const loadingRef = React.useRef<HTMLDivElement>(null);
   const iframeRef = React.useRef<HTMLIFrameElement>(null);
+  const [interactionUnlocked, setInteractionUnlocked] = React.useState(false);
 
   React.useEffect(() => {
     if (!showId || !Number.isFinite(showId) || !mediaType) return;
@@ -132,6 +133,16 @@ function EmbedPlayer({ url, showId, mediaType }: EmbedPlayerProps) {
         style={{ opacity: 0 }}
         referrerPolicy="origin"
       />
+      {!interactionUnlocked && (
+        <div className="bg-black/45 absolute inset-0 z-[3] flex items-center justify-center px-4">
+          <button
+            type="button"
+            onClick={() => setInteractionUnlocked(true)}
+            className="rounded-md bg-white/95 px-4 py-2 text-sm font-semibold text-black hover:bg-white">
+            Tap to enable player (helps block popup ads on first click)
+          </button>
+        </div>
+      )}
     </div>
   );
 }
