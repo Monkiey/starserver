@@ -1,5 +1,5 @@
 import React from 'react';
-import EmbedPlayer from '@/components/watch/embed-player';
+import NativePlayer from '@/components/watch/native-player';
 import { MediaType } from '@/types';
 
 export const revalidate = 3600;
@@ -19,5 +19,5 @@ export default function Page({
     season && episode
       ? `https://vidsrc.cc/v2/embed/tv/${id}/${season}/${episode}`
       : `https://vidsrc.cc/v2/embed/tv/${id}`;
-  return <EmbedPlayer url={url} showId={showId} mediaType={MediaType.TV} />;
+  return <NativePlayer src={url} showId={showId} mediaType={MediaType.TV} />;
 }
