@@ -11,11 +11,47 @@ interface EmbedPlayerProps {
   mediaType?: MediaType;
 }
 
+const buildEmbedPlayerUrl = (rawUrl: string): string => {
+  try {
+    const parsed = new URL(rawUrl);
+
+    const playbackFlags: Record<string, string> = {
+      autoplay: '1',
+      playsinline: '1',
+      controls: '1',
+      mute: '0',
+      ds_lang: 'en',
+      ds_player: '1',
+    };
+
+    Object.entries(playbackFlags).forEach(([key, value]) => {
+      if (!parsed.searchParams.has(key)) {
+        parsed.searchParams.set(key, value);
+      }
+    });
+
+    if (!parsed.searchParams.has('origin') && typeof window !== 'undefined') {
+      parsed.searchParams.set('origin', window.location.origin);
+    }
+
+    return parsed.toString();
+  } catch {
+    return rawUrl;
+  }
+};
+
+const LIGHTWEIGHT_SANDBOX_POLICY =
+  'allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation allow-top-navigation-by-user-activation';
+
 function EmbedPlayer({ url, showId, mediaType }: EmbedPlayerProps) {
   const router = useRouter();
 
   const loadingRef = React.useRef<HTMLDivElement>(null);
   const iframeRef = React.useRef<HTMLIFrameElement>(null);
+  const [interactionUnlocked, setInteractionUnlocked] = React.useState(false);
+  const relockTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
 
   React.useEffect(() => {
     if (!showId || !Number.isFinite(showId) || !mediaType) return;
@@ -52,9 +88,38 @@ function EmbedPlayer({ url, showId, mediaType }: EmbedPlayerProps) {
     }
   }, []);
 
+  const embedUrl = React.useMemo(() => buildEmbedPlayerUrl(url), [url]);
+
+  React.useEffect(() => {
+    setInteractionUnlocked(false);
+    if (relockTimerRef.current) {
+      clearTimeout(relockTimerRef.current);
+      relockTimerRef.current = null;
+    }
+  }, [embedUrl]);
+
+  const unlockTemporarily = React.useCallback(() => {
+    setInteractionUnlocked(true);
+    if (relockTimerRef.current) {
+      clearTimeout(relockTimerRef.current);
+    }
+    relockTimerRef.current = setTimeout(() => {
+      setInteractionUnlocked(false);
+      relockTimerRef.current = null;
+    }, 8000);
+  }, []);
+
+  React.useEffect(() => {
+    return () => {
+      if (relockTimerRef.current) {
+        clearTimeout(relockTimerRef.current);
+      }
+    };
+  }, []);
+
   React.useEffect(() => {
     if (iframeRef.current) {
-      iframeRef.current.src = url;
+      iframeRef.current.src = embedUrl;
     }
 
     const { current } = iframeRef;
@@ -63,7 +128,7 @@ function EmbedPlayer({ url, showId, mediaType }: EmbedPlayerProps) {
     return () => {
       iframe?.removeEventListener('load', handleIframeLoaded);
     };
-  }, [handleIframeLoaded, url]);
+  }, [embedUrl, handleIframeLoaded]);
 
   return (
     <div
@@ -100,12 +165,25 @@ function EmbedPlayer({ url, showId, mediaType }: EmbedPlayerProps) {
         width="100%"
         height="100%"
         allowFullScreen
-        allow="autoplay; fullscreen; picture-in-picture"
+        allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
+        sandbox={LIGHTWEIGHT_SANDBOX_POLICY}
         ref={iframeRef}
-        sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
-        style={{ opacity: 0 }}
-        referrerPolicy="no-referrer-when-downgrade"
+        style={{
+          opacity: 0,
+          pointerEvents: interactionUnlocked ? 'auto' : 'none',
+        }}
+        referrerPolicy="origin"
       />
+      {!interactionUnlocked && (
+        <div className="bg-black/45 absolute inset-0 z-[3] flex items-center justify-center px-4">
+          <button
+            type="button"
+            onClick={unlockTemporarily}
+            className="rounded-md bg-white/95 px-4 py-2 text-sm font-semibold text-black hover:bg-white">
+            Enable player for 8 seconds
+          </button>
+        </div>
+      )}
     </div>
   );
 }
