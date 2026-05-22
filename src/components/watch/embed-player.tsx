@@ -4,6 +4,7 @@ import Loading from '../ui/loading';
 import { useRouter } from 'next/navigation';
 import { useContinueWatchingStore } from '@/stores/continue-watching';
 import type { MediaType } from '@/types';
+import { PlayerStrategyService } from '@/services/PlayerStrategyService/PlayerStrategyService';
 
 interface EmbedPlayerProps {
   url: string;
@@ -41,6 +42,10 @@ function EmbedPlayer({ url, showId, mediaType }: EmbedPlayerProps) {
 
   const loadingRef = React.useRef<HTMLDivElement>(null);
   const iframeRef = React.useRef<HTMLIFrameElement>(null);
+  const [interactionUnlocked, setInteractionUnlocked] = React.useState(false);
+  const relockTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
 
   React.useEffect(() => {
     if (!showId || !Number.isFinite(showId) || !mediaType) return;
@@ -132,6 +137,14 @@ function EmbedPlayer({ url, showId, mediaType }: EmbedPlayerProps) {
         style={{ opacity: 0 }}
         referrerPolicy="origin"
       />
+      {!interactionUnlocked && (
+        <div
+          className="absolute inset-0 z-[3]"
+          onPointerDown={handleGuardInteraction}
+          onClick={handleGuardInteraction}
+          aria-hidden="true"
+        />
+      )}
     </div>
   );
 }
