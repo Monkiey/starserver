@@ -11,28 +11,24 @@ interface EmbedPlayerProps {
   mediaType?: MediaType;
 }
 
-const buildEmbedPlayerUrl = (rawUrl: string): string => {
+const buildAdReducedEmbedUrl = (rawUrl: string): string => {
   try {
     const parsed = new URL(rawUrl);
 
-    const playbackFlags: Record<string, string> = {
+    const adReductionFlags: Record<string, string> = {
       autoplay: '1',
+      rel: '0',
+      modestbranding: '1',
       playsinline: '1',
+      iv_load_policy: '3',
       controls: '1',
-      mute: '0',
-      ds_lang: 'en',
-      ds_player: '1',
     };
 
-    Object.entries(playbackFlags).forEach(([key, value]) => {
+    Object.entries(adReductionFlags).forEach(([key, value]) => {
       if (!parsed.searchParams.has(key)) {
         parsed.searchParams.set(key, value);
       }
     });
-
-    if (!parsed.searchParams.has('origin') && typeof window !== 'undefined') {
-      parsed.searchParams.set('origin', window.location.origin);
-    }
 
     return parsed.toString();
   } catch {
@@ -82,11 +78,7 @@ function EmbedPlayer({ url, showId, mediaType }: EmbedPlayerProps) {
     }
   }, []);
 
-  const embedUrl = React.useMemo(() => buildEmbedPlayerUrl(url), [url]);
-
-  React.useEffect(() => {
-    setInteractionUnlocked(false);
-  }, [embedUrl]);
+  const embedUrl = React.useMemo(() => buildAdReducedEmbedUrl(url), [url]);
 
   React.useEffect(() => {
     if (iframeRef.current) {
@@ -138,10 +130,7 @@ function EmbedPlayer({ url, showId, mediaType }: EmbedPlayerProps) {
         allowFullScreen
         allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
         ref={iframeRef}
-        style={{
-          opacity: 0,
-          pointerEvents: interactionUnlocked ? 'auto' : 'none',
-        }}
+        style={{ opacity: 0 }}
         referrerPolicy="origin"
       />
       {!interactionUnlocked && (
