@@ -128,6 +128,7 @@ function EmbedPlayer({ url, showId, mediaType }: EmbedPlayerProps) {
         height="100%"
         allowFullScreen
         allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
+        sandbox="allow-forms allow-same-origin allow-pointer-lock allow-presentation"
         ref={iframeRef}
         style={{ opacity: 0 }}
         referrerPolicy="origin"
