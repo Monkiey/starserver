@@ -38,8 +38,8 @@ class MovieService extends BaseService {
       .map(
         (item: PromiseFulfilledResult<AxiosResponse<Show>>) => item.value?.data,
       )
-      .filter((item: Show) => {
-        return pathname.includes(getSlug(item.id, getNameFromShow(item)));
+      .filter((item: Show | undefined): item is Show => {
+        return !!item && pathname.includes(getSlug(item.id, getNameFromShow(item)));
       });
     if (!response?.length) {
       return Promise.reject('not found');
@@ -149,13 +149,13 @@ class MovieService extends BaseService {
           requestTypesNeedUpdateMediaType.indexOf(requests[i].req.requestType) >
           -1
         ) {
-          res.value.data.results.forEach(
+          res.value.data.results?.forEach(
             (f) => (f.media_type = requests[i].req.mediaType),
           );
         }
         shows.push({
           title: requests[i].title,
-          shows: res.value.data.results,
+          shows: res.value.data.results || [],
           visible: requests[i].visible,
         });
       } else {
@@ -190,7 +190,7 @@ class MovieService extends BaseService {
         page,
       }),
     );
-    data.results.forEach((r) => (r.media_type = mediaType));
+    data.results?.forEach((r) => (r.media_type = mediaType));
     return data;
   }
 
@@ -203,7 +203,7 @@ class MovieService extends BaseService {
     );
 
     const queryWords = normalizedQuery.split(/\s+/).filter(Boolean);
-    data.results = data.results
+    data.results = (data.results || [])
       .filter(
         (result) =>
           result.media_type === MediaType.MOVIE ||
