@@ -51,26 +51,30 @@ const ShowWatchPicker = ({ show, seasons, onPlay }: ShowWatchPickerProps) => {
         </div>
       </div>
       <div className="grid gap-2">
-        {activeSeason.episodes?.map((episode: IEpisode) => (
-          <Link
-            key={episode.id}
-            href={`/watch/tv/${show.id}/player?season=${episode.season_number}&episode=${episode.episode_number}`}
-            prefetch={false}
-            className="group flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-background/60 px-3 py-2 transition hover:border-primary/40"
-            onClick={() => onPlay?.(show)}>
-            <div>
-              <p className="text-sm font-medium text-foreground">
-                {`Episode ${episode.episode_number}: ${episode.name}`}
-              </p>
-              <p className="line-clamp-1 text-xs text-muted-foreground">
-                {episode.overview || `Continue ${getNameFromShow(show)}`}
-              </p>
-            </div>
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary group-hover:bg-primary/20">
-              <Icons.play className="h-4 w-4 fill-current" aria-hidden="true" />
-            </span>
-          </Link>
-        ))}
+        {activeSeason?.episodes && activeSeason.episodes.length > 0 ? (
+          activeSeason.episodes.map((episode: IEpisode) => (
+            <Link
+              key={episode.id}
+              href={`/watch/tv/${show.id}/player?season=${episode.season_number}&episode=${episode.episode_number}`}
+              prefetch={false}
+              className="group flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-background/60 px-3 py-2 transition hover:border-primary/40"
+              onClick={() => onPlay?.(show)}>
+              <div>
+                <p className="text-sm font-medium text-foreground">
+                  {`Episode ${episode.episode_number}: ${episode.name}`}
+                </p>
+                <p className="line-clamp-1 text-xs text-muted-foreground">
+                  {episode.overview || `Continue ${getNameFromShow(show)}`}
+                </p>
+              </div>
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary group-hover:bg-primary/20">
+                <Icons.play className="h-4 w-4 fill-current" aria-hidden="true" />
+              </span>
+            </Link>
+          ))
+        ) : (
+          <p className="text-xs text-muted-foreground">No episodes available</p>
+        )}
       </div>
     </div>
   );
