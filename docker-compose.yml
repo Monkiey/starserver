@@ -1,0 +1,13 @@
+services:
+  app:
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_APP_URL: https://starservers.dpdns.org
+        NEXT_PUBLIC_TMDB_TOKEN: "[REDACTED]"
+        NEXT_PUBLIC_SITE_NAME: StarServer
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+    restart: unless-stopped
