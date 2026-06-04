@@ -131,7 +131,7 @@ export function SearchDialog() {
         if (!response.ok) throw new Error('Search failed');
 
         const data = (await response.json()) as SearchResult;
-        searchStore.setShows(data.results || []);
+        searchStore.setShows(data.results);
       } catch (error) {
         console.error('Search error:', error);
         searchStore.setShows([]);
@@ -174,7 +174,7 @@ export function SearchDialog() {
         if (!response.ok) throw new Error('Genre search failed');
 
         const data = (await response.json()) as SearchResult;
-        searchStore.setShows(data.results || []);
+        searchStore.setShows(data.results);
       } catch (error) {
         console.error('Genre search error:', error);
         searchStore.setShows([]);
@@ -206,8 +206,6 @@ export function SearchDialog() {
   };
 
   if (isDetailPage) return null;
-
-  const shows = searchStore.shows || [];
 
   return (
     <>
@@ -301,9 +299,9 @@ export function SearchDialog() {
                   <div className="mt-4">
                     <SearchSkeleton />
                   </div>
-                ) : shows && shows.length > 0 ? (
+                ) : searchStore.shows?.length ? (
                   <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
-                    {shows.map((show: Show) => (
+                    {searchStore.shows.map((show: Show) => (
                       <SearchResultCard
                         key={show.id}
                         show={show}
@@ -322,7 +320,7 @@ export function SearchDialog() {
             ) : /* Title search mode */
             searchStore.loading ? (
               <SearchSkeleton />
-            ) : searchStore.query && (!shows || shows.length === 0) ? (
+            ) : searchStore.query && !searchStore.shows?.length ? (
               <div className="py-12 text-center">
                 <Icons.search className="text-muted-foreground/50 mx-auto mb-4 h-10 w-10" />
                 <p className="text-sm text-muted-foreground">
@@ -333,9 +331,9 @@ export function SearchDialog() {
                   browse
                 </p>
               </div>
-            ) : shows && shows.length > 0 ? (
+            ) : searchStore.shows?.length ? (
               <div className="grid grid-cols-3 gap-2 p-2 sm:grid-cols-4 md:grid-cols-5">
-                {shows.map((show: Show) => (
+                {searchStore.shows.map((show: Show) => (
                   <SearchResultCard
                     key={show.id}
                     show={show}
