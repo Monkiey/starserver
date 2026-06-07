@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { cn } from "@/lib/utils";
+import * as React from 'react';
+import { cn } from '@/lib/utils';
 
 // ─── Context ──────────────────────────────────────────────────────────────────
 
@@ -14,7 +14,7 @@ const TooltipContext = React.createContext<TooltipContextValue | null>(null);
 
 function useTooltipContext() {
   const ctx = React.useContext(TooltipContext);
-  if (!ctx) throw new Error("Tooltip components must be used within <Tooltip>");
+  if (!ctx) throw new Error('Tooltip components must be used within <Tooltip>');
   return ctx;
 }
 
@@ -39,7 +39,7 @@ const Tooltip = ({ children }: { children: React.ReactNode }) => {
 
 const TooltipTrigger = React.forwardRef<
   HTMLElement,
-  { children: React.ReactElement<React.HTMLAttributes<HTMLElement>> }
+  { children: React.ReactElement }
 >(({ children }, ref) => {
   const { setOpen } = useTooltipContext();
 
@@ -48,10 +48,10 @@ const TooltipTrigger = React.forwardRef<
     onMouseLeave: () => setOpen(false),
     onFocus: () => setOpen(true),
     onBlur: () => setOpen(false),
-    ref: ref as React.Ref<HTMLElement>,
-  });
+    ref,
+  } as React.HTMLAttributes<HTMLElement> & { ref: React.Ref<HTMLElement> });
 });
-TooltipTrigger.displayName = "TooltipTrigger";
+TooltipTrigger.displayName = 'TooltipTrigger';
 
 // ─── Content ─────────────────────────────────────────────────────────────────
 
@@ -67,16 +67,15 @@ const TooltipContent = React.forwardRef<
       ref={ref}
       role="tooltip"
       className={cn(
-        "absolute bottom-full left-1/2 z-50 -translate-x-1/2 overflow-hidden rounded-md border bg-popover px-3 py-1.5 text-sm text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95",
+        'absolute bottom-full left-1/2 z-50 -translate-x-1/2 overflow-hidden rounded-md border bg-popover px-3 py-1.5 text-sm text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95',
         className,
       )}
       style={{ marginBottom: sideOffset }}
-      {...props}
-    >
+      {...props}>
       {children}
     </div>
   );
 });
-TooltipContent.displayName = "TooltipContent";
+TooltipContent.displayName = 'TooltipContent';
 
 export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider };
