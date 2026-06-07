@@ -1,5 +1,5 @@
 import React from 'react';
-import EmbedPlayer from '@/components/watch/embed-player';
+import OmssPlayer from '@/components/watch/omss-player';
 import { MediaType } from '@/types';
 
 export const revalidate = 3600;
@@ -7,11 +7,6 @@ export const revalidate = 3600;
 export default function Page({ params }: { params: { slug: string } }) {
   const id = params.slug.split('-').pop();
   const showId = id ? Number(id) : undefined;
-  return (
-    <EmbedPlayer
-      url={`https://vidsrc.cc/v2/embed/movie/${id}`}
-      showId={showId}
-      mediaType={MediaType.MOVIE}
-    />
-  );
+
+  return <OmssPlayer tmdbId={id} showId={showId} mediaType={MediaType.MOVIE} />;
 }
