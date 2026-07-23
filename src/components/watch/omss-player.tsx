@@ -56,16 +56,23 @@ function OmssPlayerContent({
   if (!valid) {
     return (
       <div className="relative flex min-h-screen items-center justify-center bg-black text-white">
-        <div className="max-w-md space-y-4 rounded-xl border border-zinc-800 bg-zinc-900 p-6 text-center">
+        <div className="max-w-md space-y-4 rounded-xl border border-zinc-800 bg-zinc-900 p-6 text-center shadow-xl">
           <p className="text-zinc-300">
             Your OMSS server is unreachable or offline.
           </p>
-          <Button
-            onClick={() => router.push('/')}
-            variant="outline"
-            className="border-zinc-700 text-white">
-            Return Home
-          </Button>
+          <div className="flex justify-center gap-3">
+            <Button
+              onClick={() => router.push('/settings')}
+              className="hover:bg-primary/90 bg-primary text-primary-foreground">
+              Go to Settings
+            </Button>
+            <Button
+              onClick={() => router.push('/')}
+              variant="outline"
+              className="border-zinc-700 text-white hover:bg-zinc-800">
+              Return Home
+            </Button>
+          </div>
         </div>
         <div className="absolute left-4 top-4 z-50">
           <Button
@@ -82,12 +89,18 @@ function OmssPlayerContent({
   if (error) {
     return (
       <div className="relative min-h-screen bg-black">
-        <div className="absolute left-4 top-4 z-50">
+        <div className="absolute left-4 top-4 z-50 flex gap-2">
           <Button
             variant="ghost"
             className="border border-zinc-800 text-white hover:bg-zinc-800"
             onClick={() => router.back()}>
             <ChevronLeft className="mr-1 h-5 w-5" /> Back
+          </Button>
+          <Button
+            variant="outline"
+            className="border-zinc-800 text-white hover:bg-zinc-800"
+            onClick={() => router.push('/settings')}>
+            Settings
           </Button>
         </div>
         <ErrorState error={error} onRetry={() => window.location.reload()} />

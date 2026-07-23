@@ -12,7 +12,7 @@ export function useMediaSources(
   season?: number,
   episode?: number,
 ) {
-  const { client } = useOmss();
+  const { client, baseUrl } = useOmss();
   const [sources, setSources] = useState<SourceResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>();
@@ -21,6 +21,7 @@ export function useMediaSources(
     async function fetchSources() {
       if (!id) return;
       setIsLoading(true);
+      setError(undefined);
       try {
         if (type === 'movie') {
           const res = await omssService.getMovieSources(client, id);
@@ -35,14 +36,25 @@ export function useMediaSources(
           setSources(res);
         }
       } catch (e) {
-        setError(e instanceof Error ? e.message : String(e));
+        const msg = e instanceof Error ? e.message : String(e);
+        if (
+          msg.includes('Failed to fetch') ||
+          msg.includes('Network error') ||
+          msg.includes('fetch')
+        ) {
+          setError(
+            `Unable to connect to OMSS backend server at ${baseUrl}. Please verify your streaming backend URL in Settings.`,
+          );
+        } else {
+          setError(msg);
+        }
       } finally {
         setIsLoading(false);
       }
     }
 
     void fetchSources();
-  }, [id, type, season, episode, client]);
+  }, [id, type, season, episode, client, baseUrl]);
 
   return { sources, isLoading, error };
 }
