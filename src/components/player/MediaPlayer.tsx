@@ -77,7 +77,7 @@ export function MediaPlayer() {
 
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
           if (isPlayingRef.current) {
-            void video.play().catch(() => setIsPlaying(false));
+            void video.play().catch(() => undefined);
           }
           const levels = hls.levels.map((level, index) => ({
             index,
@@ -91,7 +91,27 @@ export function MediaPlayer() {
 
         hls.on(Hls.Events.ERROR, (_, data) => {
           if (data.fatal) {
-            setError(`HLS Fatal Error: ${data.type}`);
+            switch (data.type) {
+              case Hls.ErrorTypes.NETWORK_ERROR:
+                console.log(
+                  'Fatal network error encountered, attempting recovery...',
+                );
+                hls.startLoad();
+                break;
+              case Hls.ErrorTypes.MEDIA_ERROR:
+                console.log(
+                  'Fatal media error encountered, attempting recovery...',
+                );
+                hls.recoverMediaError();
+                break;
+              default:
+                if (hlsRef.current) {
+                  hlsRef.current.destroy();
+                  hlsRef.current = null;
+                }
+                setError(`HLS Fatal Error: ${data.type}`);
+                break;
+            }
           }
         });
       } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
@@ -264,6 +284,8 @@ export function MediaPlayer() {
         onEnded={handleEnded}
         onWaiting={() => setIsLoading(true)}
         onPlaying={() => setIsLoading(false)}
+        onCanPlay={() => setIsLoading(false)}
+        onCanPlayThrough={() => setIsLoading(false)}
         onClick={togglePlay}
         preload="auto"
         crossOrigin="anonymous"
