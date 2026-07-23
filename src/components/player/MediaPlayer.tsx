@@ -53,6 +53,11 @@ export function MediaPlayer() {
 
   const selectedSource = media?.playback.selectedSource;
 
+  const isPlayingRef = useRef(isPlaying);
+  useEffect(() => {
+    isPlayingRef.current = isPlaying;
+  }, [isPlaying]);
+
   // Initialize HLS or Native Video
   useEffect(() => {
     const video = videoRef.current;
@@ -71,7 +76,7 @@ export function MediaPlayer() {
         hlsRef.current = hls;
 
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          if (isPlaying) {
+          if (isPlayingRef.current) {
             void video.play().catch(() => setIsPlaying(false));
           }
           const levels = hls.levels.map((level, index) => ({
@@ -102,7 +107,7 @@ export function MediaPlayer() {
         hlsRef.current = null;
       }
     };
-  }, [selectedSource, setError, setIsLoading, setIsPlaying, isPlaying]);
+  }, [selectedSource, setError, setIsLoading, setIsPlaying]);
 
   useEffect(() => {
     if (videoRef.current) {
