@@ -36,6 +36,13 @@
     "superjson": "^1.13.3",
     "tailwind-merge": "^1.14.0",
     "tailwindcss-animate": "^1.0.7",
+    "@lorenzopant/tmdb": "^1.15.1",
+    "@omss/sdk": "^1.0.4",
+    "@radix-ui/react-popover": "^1.0.7",
+    "@radix-ui/react-scroll-area": "^1.0.5",
+    "@radix-ui/react-slider": "^1.1.2",
+    "@radix-ui/react-tabs": "^1.0.4",
+    "hls.js": "^1.6.15",
     "zod": "^3.22.3",
     "zustand": "^4.4.6"
   },

@@ -9,7 +9,6 @@ import { Analytics } from '@/components/analytics';
 import { siteConfig } from '@/configs/site';
 import { env } from '@/env.mjs';
 import { SpeedInsights } from '@vercel/speed-insights/next';
-import { GoogleAnalytics } from '@next/third-parties/google';
 import Script from 'next/script';
 import SearchProvider from '@/components/search-provider';
 
@@ -72,6 +71,8 @@ export const metadata: Metadata = {
   other: { referrer: 'no-referrer-when-downgrade' },
 };
 
+import { OmssProvider } from '@/providers/omss-provider';
+
 export default function RootLayout({
   children,
 }: {
@@ -88,12 +89,12 @@ export default function RootLayout({
           attribute="class"
           forcedTheme="movieasap"
           disableTransitionOnChange>
-          {/* <TrpcProvider> */}
-          <SearchProvider>{children}</SearchProvider>
-          <TailwindIndicator />
-          <Analytics />
-          <SpeedInsights />
-          {/* </TrpcProvider> */}
+          <OmssProvider>
+            <SearchProvider>{children}</SearchProvider>
+            <TailwindIndicator />
+            <Analytics />
+            <SpeedInsights />
+          </OmssProvider>
           {env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID && (
             <>
               <Script
