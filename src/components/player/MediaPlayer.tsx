@@ -52,6 +52,10 @@ export function MediaPlayer() {
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const selectedSource = media?.playback.selectedSource;
+  // Use the URL string as the stable dependency for HLS initialization,
+  // not the object reference which changes on every setMedia call
+  const sourceUrl = selectedSource?.url;
+  const sourceType = selectedSource?.type;
 
   const isPlayingRef = useRef(isPlaying);
   useEffect(() => {
@@ -61,17 +65,17 @@ export function MediaPlayer() {
   // Initialize HLS or Native Video
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || !selectedSource) return;
+    if (!video || !sourceUrl) return;
 
     setIsLoading(true);
 
-    if (selectedSource.type === 'hls' || selectedSource.url.includes('.m3u8')) {
+    if (sourceType === 'hls' || sourceUrl.includes('.m3u8')) {
       if (Hls.isSupported()) {
         const hls = new Hls({
           enableWorker: true,
           lowLatencyMode: false,
         });
-        hls.loadSource(selectedSource.url);
+        hls.loadSource(sourceUrl);
         hls.attachMedia(video);
         hlsRef.current = hls;
 
@@ -115,10 +119,10 @@ export function MediaPlayer() {
           }
         });
       } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        video.src = selectedSource.url;
+        video.src = sourceUrl;
       }
     } else {
-      video.src = selectedSource.url;
+      video.src = sourceUrl;
     }
 
     return () => {
@@ -127,7 +131,10 @@ export function MediaPlayer() {
         hlsRef.current = null;
       }
     };
-  }, [selectedSource, setError, setIsLoading, setIsPlaying]);
+    // IMPORTANT: depend on sourceUrl (string) not selectedSource (object)
+    // to prevent HLS re-init when the same URL is in a new object reference
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sourceUrl, sourceType, setError, setIsLoading]);
 
   useEffect(() => {
     if (videoRef.current) {

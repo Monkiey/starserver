@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import type { MediaType } from '@/types/media.types';
 import { useMediaDetails } from './useMediaDetails';
 import { useMediaSources } from './useMediaSources';
@@ -29,13 +29,28 @@ export function useMediaWatch(
     error: sourcesError,
   } = useMediaSources(id, type, season, episode);
 
+  // Track whether we've already set media to prevent re-setting
+  // the same data and causing re-renders
+  const hasSetMediaRef = useRef(false);
+  const lastSourceUrlRef = useRef<string | undefined>();
+
   useEffect(() => {
     if (detailsError ?? sourcesError) {
       setError(detailsError ?? sourcesError);
+      hasSetMediaRef.current = false;
       return;
     }
 
     if (!detailsLoading && !sourcesLoading && sources) {
+      // Check if the source URL has actually changed
+      const firstSourceUrl = sources.sources?.[0]?.url;
+      if (
+        hasSetMediaRef.current &&
+        lastSourceUrlRef.current === firstSourceUrl
+      ) {
+        return;
+      }
+
       const playback = mapPlaybackResponse(sources);
 
       let unified;
@@ -64,6 +79,8 @@ export function useMediaWatch(
       if (unified) {
         setMedia(unified);
         setIsLoading(false);
+        hasSetMediaRef.current = true;
+        lastSourceUrlRef.current = firstSourceUrl;
       } else {
         setError('An error occurred while loading media playback sources.');
       }
