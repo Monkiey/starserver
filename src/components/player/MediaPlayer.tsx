@@ -120,7 +120,7 @@ export function MediaPlayer() {
     if (!video) return;
 
     if (isPlaying) {
-      void video.play().catch(() => setIsPlaying(false));
+      void video.play().catch(() => undefined);
     } else {
       video.pause();
     }

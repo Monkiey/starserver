@@ -69,9 +69,13 @@ export function buildMovieUrl(show: Show): string {
 }
 
 export function getIdFromSlug(slug: string): number {
-  // get id from slug
-  const id: string | undefined = slug.split('-').pop();
-  return id ? parseInt(id) : 0;
+  if (!slug) return 0;
+  if (/^\d+$/.test(slug)) return parseInt(slug, 10);
+  const lastPart = slug.split('-').pop();
+  if (lastPart && /^\d+$/.test(lastPart)) {
+    return parseInt(lastPart, 10);
+  }
+  return 0;
 }
 
 export function clearSearch(): void {
